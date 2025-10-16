@@ -28,6 +28,19 @@ ul {
 a {
   color: #003366;
 }
+    .publication-details {
+        font-size: 0.9em;
+        color: #424242;
+        margin-top: 8px;
+        padding-left: 15px;
+        border-left: 2px solid #e0e0e0;
+    }
+    .publication-details p {
+        margin: 5px 0;
+    }
+    .publication-details strong {
+        color: #303f9f;
+    }
   .jmp-hero {
     background: #fffbea; border: 1px solid #fcd34d; border-radius: 8px;
     padding: 16px; margin: 16px 0;
