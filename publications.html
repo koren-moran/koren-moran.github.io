@@ -12,93 +12,129 @@
     gtag('config', 'G-2VTLVLV9QM');
   </script>
   <style>
-    :root {
-      --bg: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --brand: #303f9f;
+    /* ==== Global screen-optimized defaults ==== */
+    :root{
+      --bg: #ffffff;            /* pure white, per request */
+      --text: #111827;          /* near-black for contrast */
+      --muted: #4b5563;         /* secondary text */
+      --border: #e5e7eb;        /* light, unobtrusive borders */
+      --brand: #303f9f;         /* link color */
+      --accent: #f59e0b;        /* JMP / highlight */
+      --panel: #ffffff;
       --tab-bg: #f9fafb;
-      --tab-active: #111827;
-      --tab-inactive: #6b7280;
-      --accent: #f59e0b;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0b0f17;
-        --text: #e5e7eb;
-        --muted: #9aa3af;
-        --border: #1f2937;
-        --tab-bg: #111827;
-        --tab-active: #f3f4f6;
-        --tab-inactive: #9aa3af;
-        --brand: #8ea3ff;
-      }
-      img, svg, video { filter: none; }
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
     }
 
-    html, body { background: var(--bg); color: var(--text); }
-    body { margin: 0; font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    html { /* responsive base size, ~18–20px */
+      font-size: clamp(18px, 1.05vw + 8px, 20px);
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-    header, main, footer { max-width: 900px; margin: 0 auto; padding: 16px; }
-    header h1 { margin: 0 0 6px 0; font-weight: 800; letter-spacing: -0.02em; }
-    header p a { color: var(--brand); text-decoration: none; }
-    header p a:hover { text-decoration: underline; }
+    header, main, footer {
+      /* limit line length for readability (≈ 60–72ch) */
+      max-width: min(72ch, 92vw);
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
 
-    /* Tabs */
+    header h1 {
+      margin: 0 0 4px 0;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+    }
+    header p { margin: 0; }
+    header p a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ==== Tabs (bigger, airy) ==== */
     .tabs {
       position: sticky; top: 0; z-index: 5;
-      background: var(--bg); border-bottom: 1px solid var(--border);
-      padding-top: 6px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
     }
     .tablist {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      background: var(--tab-bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 6px;
+      display: flex; gap: 8px; flex-wrap: wrap;
+      background: var(--tab-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      max-width: min(72ch, 92vw);
+      margin: 0 auto;
     }
-    [role="tab"] {
-      -webkit-tap-highlight-color: transparent;
+    [role="tab"]{
       appearance: none;
       background: transparent;
       border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--tab-inactive);
-      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 14px;        /* bigger hit area */
+      color: #6b7280;
+      font-weight: 700;
       cursor: pointer;
+      line-height: 1.3;
     }
-    [role="tab"][aria-selected="true"] {
-      color: var(--tab-active);
-      background: var(--bg);
+    [role="tab"][aria-selected="true"]{
+      color: var(--text);
+      background: var(--panel);
       border-color: var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+      box-shadow: var(--shadow);
     }
-    .tab-badge {
-      font-size: 0.75em; font-weight: 700;
-      background: var(--accent); color: #111; padding: 2px 6px;
-      border-radius: 999px; margin-left: 8px;
+    .tab-badge{
+      font-size: .75em; font-weight: 800;
+      background: var(--accent); color: #111;
+      padding: 2px 8px; border-radius: 999px; margin-left: 10px;
     }
-    [role="tabpanel"] { padding: 18px 6px 6px; }
-    [role="tabpanel"][hidden] { display: none; }
+    [role="tabpanel"]{ padding: 20px 6px 6px; }
+    [role="tabpanel"][hidden]{ display: none; }
 
-    /* Publication entry styling (kept from your page, lightly refined) */
-    ul { list-style: none; padding-left: 0; margin: 0; }
-    li { margin: 14px 0; padding: 12px 12px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
-    li.jmp { background: #fffbeb; border-left: 4px solid var(--accent); }
-    a { color: var(--brand); }
-    a:hover { text-decoration: underline; }
+    /* ==== Lists & entries (roomier) ==== */
+    ul{ list-style: none; padding: 0; margin: 0; }
+    li{
+      margin: 18px 0;                 /* more space between items */
+      padding: 18px 16px;             /* air inside items */
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    li.jmp{ background: #fffbeb; border-left: 5px solid var(--accent); }
 
-    .publication-details {
-      font-size: 0.92em;
+    a{ color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover{ text-decoration-thickness: 2px; }
+
+    .publication-details{
+      font-size: .95rem;              /* slightly larger than before */
       color: var(--muted);
-      margin-top: 10px;
-      padding-left: 15px;
-      border-left: 2px solid var(--border);
+      margin-top: 12px;
+      padding-left: 16px;
+      border-left: 3px solid var(--border);
     }
-    .publication-details p { margin: 5px 0; }
-    .publication-details strong { color: var(--brand); }
+    .publication-details p{ margin: 7px 0; }
+    .publication-details strong{ color: var(--brand); }
 
-    footer { color: var(--muted); border-top: 1px solid var(--border); margin-top: 24px; }
+    /* ==== Footer ==== */
+    footer{
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 28px;
+      padding-bottom: 32px;
+    }
+
+    /* ==== Small screens: keep spacing generous ==== */
+    @media (max-width: 640px){
+      .tablist { gap: 6px; padding: 8px; }
+      [role="tab"]{ padding: 9px 12px; }
+      li{ padding: 16px 14px; }
+    }
   </style>
 </head>
 <body>
@@ -287,48 +323,43 @@
   </footer>
 
   <script>
-    // Accessible Tabs (WAI-ARIA APG compliant interactions)
+    // Accessible Tabs (manual activation + counts)
     (function () {
       const tablist = document.querySelector('.tablist');
       const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
       const panels = tabs.map(t => document.getElementById(t.getAttribute('aria-controls')));
-      const keyCodes = { left: 37, right: 39, home: 36, end: 35 };
+      const keys = { left: 37, right: 39, home: 36, end: 35 };
 
-      // Persist and restore current tab using hash or localStorage
       const saved = localStorage.getItem('pubsActiveTab') || (location.hash && location.hash.slice(1));
       if (saved) {
-        const savedTab = document.getElementById(saved.replace('panel', 'tab'));
-        if (savedTab) activateTab(savedTab, false);
-      } else {
-        activateTab(tabs[0], false);
-      }
+        const t = document.getElementById(saved.replace('panel', 'tab'));
+        if (t) activate(t, false); else activate(tabs[0], false);
+      } else activate(tabs[0], false);
 
-      // Count badges
-      document.querySelectorAll('.tab-badge').forEach(badge => {
-        const group = badge.getAttribute('data-count');
+      // badge counts
+      document.querySelectorAll('.tab-badge').forEach(b => {
+        const group = b.getAttribute('data-count');
         const list = document.querySelector(`[data-group="${group}"]`);
-        if (list) badge.textContent = list.querySelectorAll(':scope > li').length;
+        if (list) b.textContent = list.querySelectorAll(':scope > li').length;
       });
 
       tabs.forEach(tab => {
-        tab.addEventListener('click', () => activateTab(tab, true));
-        tab.addEventListener('keydown', (e) => {
-          switch (e.keyCode) {
-            case keyCodes.left: e.preventDefault(); focusPrev(tab); break;
-            case keyCodes.right: e.preventDefault(); focusNext(tab); break;
-            case keyCodes.home: e.preventDefault(); tabs[0].focus(); break;
-            case keyCodes.end: e.preventDefault(); tabs[tabs.length - 1].focus(); break;
-          }
+        tab.addEventListener('click', () => activate(tab, true));
+        tab.addEventListener('keydown', e => {
+          if (e.keyCode === keys.left) { e.preventDefault(); focusPrev(tab); }
+          if (e.keyCode === keys.right){ e.preventDefault(); focusNext(tab); }
+          if (e.keyCode === keys.home){ e.preventDefault(); tabs[0].focus(); }
+          if (e.keyCode === keys.end) { e.preventDefault(); tabs[tabs.length-1].focus(); }
         });
       });
 
-      function activateTab(selected, pushHash) {
+      function activate(selected, pushHash){
         tabs.forEach((t, i) => {
-          const isSelected = t === selected;
-          t.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-          t.tabIndex = isSelected ? 0 : -1;
-          panels[i].hidden = !isSelected;
-          if (isSelected) {
+          const on = t === selected;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          panels[i].hidden = !on;
+          if (on){
             panels[i].setAttribute('tabindex', '0');
             if (pushHash) history.replaceState(null, '', '#' + panels[i].id);
             localStorage.setItem('pubsActiveTab', t.id.replace('tab', 'panel'));
@@ -336,18 +367,8 @@
         });
         selected.focus();
       }
-      function focusPrev(current) {
-        const idx = tabs.indexOf(current);
-        const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
-        prev.focus();
-        activateTab(prev, true);
-      }
-      function focusNext(current) {
-        const idx = tabs.indexOf(current);
-        const next = tabs[(idx + 1) % tabs.length];
-        next.focus();
-        activateTab(next, true);
-      }
+      function focusPrev(cur){ const i = tabs.indexOf(cur); const p = tabs[(i-1+tabs.length)%tabs.length]; p.focus(); activate(p, true); }
+      function focusNext(cur){ const i = tabs.indexOf(cur); const n = tabs[(i+1)%tabs.length]; n.focus(); activate(n, true); }
     })();
   </script>
 </body>
