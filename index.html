@@ -1,70 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-2VTLVLV9QM');
-</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2VTLVLV9QM');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Moran Koren – Academic Website</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* ==== Global screen-optimized defaults ==== */
+    :root{
+      --bg: #ffffff;            /* pure white */
+      --text: #111827;          /* near-black for contrast */
+      --muted: #4b5563;         /* secondary text */
+      --border: #e5e7eb;        /* subtle borders */
+      --brand: #303f9f;         /* link color */
+      --accent: #f59e0b;        /* highlight (JMP) */
+      --panel: #ffffff;
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+
+    html { /* responsive base size, ~18–20px */
+      font-size: clamp(18px, 1.05vw + 8px, 20px);
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    header, main, footer {
+      /* keep text line length in the 50–75 char sweet spot */
+      max-width: min(72ch, 92vw);
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    header h1 { margin: 0 0 8px 0; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; }
+    header p { margin: 6px 0; }
+    header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Simple top nav */
+    nav {
+      max-width: min(72ch, 92vw);
+      margin: 0 auto;
+      padding: 10px 16px 0;
+      display: flex; flex-wrap: wrap; gap: 14px;
+      border-top: 1px solid var(--border);
+    }
+    nav a {
+      color: var(--brand);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    nav a:hover { background: #f9fafb; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Section spacing */
+    main section { margin: 26px 0; }
+    h2 { margin: 0 0 10px; line-height: 1.25; }
+
+    /* Featured JMP block */
+    .jmp-hero {
+      background: #fffbea;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      margin: 24px 0;
+    }
+    .jmp-hero h3 { margin: 0 0 8px; }
+    .jmp-hero p { margin: 8px 0; }
+    .jmp-links a {
+      display: inline-block;
+      margin-right: 10px;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--brand);
+    }
+    .jmp-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Body copy */
+    a { color: var(--brand); }
+    p { margin: 12px 0; }
+
+    /* Footer */
+    footer {
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 28px;
+      padding-bottom: 32px;
+    }
+
+    /* Small screens: keep generous spacing */
+    @media (max-width: 640px){
+      nav { gap: 10px; padding-top: 8px; }
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Moran Koren</h1>
     <p>Assistant Professor (Tenure Track), Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev</p>
-    <p>Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a> · ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank">0000-0003-0012-0208</a></p>
+    <p>Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a> · ORCID:
+      <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a>
+    </p>
   </header>
 
-  <nav>
+  <nav aria-label="Primary">
     <a href="index.html">Home</a>
     <a href="cv.html">CV</a>
     <a href="publications.html">Publications</a>
-    <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage">My Substack on AI Economics</a>
+    <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">My Substack on AI Economics</a>
   </nav>
 
   <main>
-    <section>
-      <h2>Research Profile</h2>
-      <p>
-        <div>
-    <p>
-        I am an <strong>Assistant Professor</strong> in the Department of Industrial Engineering and Management at Ben-Gurion University of the Negev, where I head the <strong>Game Theory and Agentic Design Lab</strong>.
-    </p>
-    <p>
-        My research program is built at the intersection of <strong>microeconomic theory, operations, and information/data science</strong>. I use the rigorous tools of game theory and mechanism design to address concrete operational challenges in markets and platforms. My work develops and analyzes models that incorporate information frictions, learning, and strategic incentives to design more efficient and robust systems. This interdisciplinary approach builds upon my foundation in theoretical economics to address the applied, problem-driven challenges central to modern operations and data-driven market design.
-    </p>
-    <p>
-        The core goal of my lab is to create a research engine where fundamental theory is developed and rigorously tested through experiments and computational methods, using synthetic or real-world data, to generate practical insights. We tackle multifaceted problems in areas like <strong>hiring and screening processes, organ allocation, and online platforms</strong>. This philosophy extends to my teaching, where I apply the same principles of mechanism and system design to create innovative and resilient pedagogical solutions.
-    </p>
-    <p>
-        The interdisciplinary nature of my research is reflected in my publications, which appear in leading journals across economics (<em>Theoretical Economics</em>, <em>Games and Economic Behavior</em>), operations (<em>Management Science</em>), and top-tier computer science and machine learning conferences (<strong>NeurIPS</strong>,<strong>ACM EC</strong>, <strong>ICML</strong>).
-    </p>
-     <p>
-        My research has been supported by several prestigious awards, including a personal grant from the <strong>Israel Science Foundation (ISF)</strong>, the <strong>Shamir Fellowship</strong> for returning scientists, and the <strong>Fulbright Postdoctoral Fellowship</strong>.
-    </p>
-    <p>
-        Prior to joining BGU, I held postdoctoral fellowships at <strong>Tel Aviv University</strong>, <strong>Harvard University</strong>, and <strong>Stanford University</strong>. I hold a Ph.D. in Economics from the Technion.
-    </p>
-</div>
-      </p>
-    </section>
-
-    <section>
-      <h2>Contact</h2>
-      <p>Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a><br>
-         Phone: +972-52-6534005<br>
-         Address: Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev, Beer-Sheva, Israel</p>
-    </section>
-
-
-  </main>
     <!-- Featured JMP block -->
     <section class="jmp-hero" aria-labelledby="jmp-title">
       <h3 id="jmp-title">Featured: Job Market Paper</h3>
@@ -75,9 +138,34 @@
       </div>
     </section>
 
-          <section>
-          <h2><a href="https://tinyurl.com/gtg2025">Click here for news and students' Updates go to the BGU's Game Theory and Agentic Design Research Group's Linkedin</h2>
-        </section>
+    <section aria-labelledby="research-profile">
+      <h2 id="research-profile">Research Profile</h2>
+      <p>I am an <strong>Assistant Professor</strong> in the Department of Industrial Engineering and Management at Ben-Gurion University of the Negev, where I head the <strong>Game Theory and Agentic Design Lab</strong>.</p>
+      <p>My research program is built at the intersection of <strong>microeconomic theory, operations, and information/data science</strong>. I use the rigorous tools of game theory and mechanism design to address concrete operational challenges in markets and platforms. My work develops and analyzes models that incorporate information frictions, learning, and strategic incentives to design more efficient and robust systems. This interdisciplinary approach builds upon my foundation in theoretical economics to address the applied, problem-driven challenges central to modern operations and data-driven market design.</p>
+      <p>The core goal of my lab is to create a research engine where fundamental theory is developed and rigorously tested through experiments and computational methods, using synthetic or real-world data, to generate practical insights. We tackle multifaceted problems in areas like <strong>hiring and screening processes, organ allocation, and online platforms</strong>. This philosophy extends to my teaching, where I apply the same principles of mechanism and system design to create innovative and resilient pedagogical solutions.</p>
+      <p>The interdisciplinary nature of my research is reflected in my publications, which appear in leading journals across economics (<em>Theoretical Economics</em>, <em>Games and Economic Behavior</em>), operations (<em>Management Science</em>), and top-tier computer science and machine learning conferences (<strong>NeurIPS</strong>, <strong>ACM EC</strong>, <strong>ICML</strong>).</p>
+      <p>My research has been supported by several prestigious awards, including a personal grant from the <strong>Israel Science Foundation (ISF)</strong>, the <strong>Shamir Fellowship</strong> for returning scientists, and the <strong>Fulbright Postdoctoral Fellowship</strong>.</p>
+      <p>Prior to joining BGU, I held postdoctoral fellowships at <strong>Tel Aviv University</strong>, <strong>Harvard University</strong>, and <strong>Stanford University</strong>. I hold a Ph.D. in Economics from the Technion.</p>
+    </section>
+
+    <section aria-labelledby="contact">
+      <h2 id="contact">Contact</h2>
+      <p>
+        Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a><br>
+        Phone: +972-52-6534005<br>
+        Address: Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev, Beer-Sheva, Israel
+      </p>
+    </section>
+
+    <section aria-labelledby="news-updates">
+      <h2 id="news-updates">
+        <a href="https://tinyurl.com/gtg2025" target="_blank" rel="noopener">
+          News & Student Updates — BGU Game Theory & Agentic Design Research Group (LinkedIn)
+        </a>
+      </h2>
+    </section>
+  </main>
+
   <footer>
     <p>&copy; 2025 Moran Koren</p>
   </footer>
