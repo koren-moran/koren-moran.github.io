@@ -28,3 +28,18 @@ ul {
 a {
   color: #003366;
 }
+  .jmp-hero {
+    background: #fffbea; border: 1px solid #fcd34d; border-radius: 8px;
+    padding: 16px; margin: 16px 0;
+  }
+  .jmp-hero h3 { margin: 0 0 6px; }
+  .jmp-hero .jmp-links a {
+    display: inline-block; margin-right: 10px; text-decoration: none;
+    padding: 6px 10px; border-radius: 999px; border: 1px solid #d1d5db;
+  }
+  /* In-list highlight */
+  li.jmp { background: #fffbeb; border-left: 4px solid #f59e0b; padding-left: 10px; }
+  .jmp-badge {
+    display: inline-block; font-size: 0.75em; font-weight: 700;
+    background: #f59e0b; color: #111; padding: 2px 6px; border-radius: 6px; margin-left: 6px;
+  }
