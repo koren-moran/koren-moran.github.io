@@ -258,7 +258,7 @@
           w += track.children[i].getBoundingClientRect().width;
         }
         if (w > 0) {
-          const pxPerSec = 80; // lower = slower
+          const pxPerSec = 120; // lower = slower
           const duration = Math.max(14, Math.round(w / pxPerSec));
           // Update via CSS variable so the baseline animation keeps running
           track.style.setProperty('--ticker-speed', duration + 's');
