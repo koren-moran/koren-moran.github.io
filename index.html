@@ -18,34 +18,30 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    /* ==== Global screen-optimized defaults ==== */
     :root{
-      --bg: #ffffff;            /* pure white */
-      --text: #111827;          /* near-black for contrast */
-      --muted: #4b5563;         /* secondary text */
-      --border: #e5e7eb;        /* subtle borders */
-      --brand: #303f9f;         /* link color */
-      --accent: #f59e0b;        /* highlight (JMP) */
+      --bg: #ffffff;
+      --text: #111827;
+      --muted: #4b5563;
+      --border: #e5e7eb;
+      --brand: #303f9f;
+      --accent: #f59e0b;
       --panel: #ffffff;
       --shadow: 0 2px 12px rgba(0,0,0,.06);
-      --ticker-speed: 24s;      /* default/fallback; JS overwrites duration directly */
     }
 
-    html { /* responsive base size, ~18–20px */
-      font-size: clamp(18px, 1.05vw + 8px, 20px);
-    }
+    html { font-size: clamp(18px, 1.05vw + 8px, 20px); }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      min-height: 100svh;
+      display: flex; flex-direction: column;
     }
 
-    /* Full width layout with comfortable padding */
     header, main, footer {
       width: 100%;
       margin: 0;
@@ -53,47 +49,26 @@
       box-sizing: border-box;
     }
 
-    header h1 { 
-      margin: 0 0 8px 0; 
-      font-weight: 800; 
-      letter-spacing: -0.015em; 
-      line-height: 1.2; 
-    }
+    header h1 { margin: 0 0 8px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; }
     header p { margin: 6px 0; }
-    header a { 
-      color: var(--brand); 
-      text-decoration: underline; 
-      text-underline-offset: 3px; 
-    }
+    header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
 
-    /* Simple top nav - full width */
     nav {
-      width: 100%;
-      margin: 0;
+      width: 100%; margin: 0;
       padding: 10px clamp(24px, 5vw, 80px) 0;
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 14px;
+      display: flex; flex-wrap: wrap; gap: 14px;
       border-top: 1px solid var(--border);
       box-sizing: border-box;
     }
     nav a {
-      color: var(--brand);
-      text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 10px;
+      color: var(--brand); text-decoration: none;
+      padding: 8px 10px; border-radius: 10px;
     }
-    nav a:hover { 
-      background: #f9fafb; 
-      text-decoration: underline; 
-      text-underline-offset: 3px; 
-    }
+    nav a:hover { background: #f9fafb; text-decoration: underline; text-underline-offset: 3px; }
 
-    /* Section spacing */
     main section { margin: 26px 0; }
     h2 { margin: 0 0 10px; line-height: 1.25; }
 
-    /* Featured JMP block */
     .jmp-hero {
       background: #fffbea;
       border: 1px solid #fcd34d;
@@ -101,103 +76,77 @@
       padding: 18px 16px;
       box-shadow: var(--shadow);
       margin: 24px 0;
-      max-width: none; /* Ensure no width restrictions */
+      max-width: none;
     }
     .jmp-hero h3 { margin: 0 0 8px; }
     .jmp-hero p { margin: 8px 0; }
     .jmp-links a {
-      display: inline-block;
-      margin-right: 10px;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
+      display: inline-block; margin-right: 10px;
+      text-decoration: none; padding: 8px 12px;
+      border-radius: 999px; border: 1px solid var(--border);
       color: var(--brand);
     }
-    .jmp-links a:hover { 
-      text-decoration: underline; 
-      text-underline-offset: 3px; 
-    }
+    .jmp-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-    /* Body copy */
     a { color: var(--brand); }
     p { margin: 12px 0; }
 
-    /* ======== News reel styles (ticker) ======== */
+    /* ======== News reel styles ======== */
     .news-reel {
       background: #f9fafb;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      margin: 0; /* full-bleed band */
+      margin: 0;
     }
     .news-reel .inner {
       padding: 10px clamp(24px, 5vw, 80px);
-      display: grid;
-      gap: 8px;
+      display: grid; gap: 8px;
     }
     .news-reel .label {
-      font-weight: 700;
-      letter-spacing: .02em;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      font-weight: 700; letter-spacing: .02em;
+      display: inline-flex; align-items: center; gap: 8px;
     }
     .badge-new {
-      font-size: .8em;
-      font-weight: 700;
-      background: var(--accent);
-      color: #111;
-      border: 1px solid #fcd34d;
-      padding: 2px 8px;
-      border-radius: 999px;
+      font-size: .8em; font-weight: 700; background: var(--accent);
+      color: #111; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 999px;
     }
 
-    /* The horizontal ticker */
     .news-ticker {
-      overflow: hidden;
+      overflow: hidden; position: relative;
+      min-height: 2.2em;
       white-space: nowrap;
-      position: relative;
-      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      min-height: 2.2em; /* visible immediately */
     }
+
+    /* Optional fade edges (enabled only if supported) */
+    @supports (mask-image: linear-gradient(to right, black, black)) or (-webkit-mask-image: linear-gradient(to right, black, black)) {
+      .news-ticker {
+        mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+      }
+    }
+
     .news-track {
-      display: inline-flex;
-      align-items: center;
+      display: inline-flex; gap: 28px; align-items: center;
       will-change: transform;
-      animation: ticker 24s linear infinite; /* JS overrides duration */
+      /* We’ll set the full animation via JS to avoid external overrides */
     }
-    .news-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding-right: 28px; /* spacing between items */
-    }
-    .news-item time {
-      font-size: .9em;
-      color: var(--muted);
-    }
-    .news-item a {
-      color: var(--brand);
-      text-decoration: none;
-      border-bottom: 1px dashed var(--brand);
-    }
+    .news-item { display: inline-flex; align-items: center; gap: 10px; }
+    .news-item time { font-size: .9em; color: var(--muted); }
+    .news-item a { color: var(--brand); text-decoration: none; border-bottom: 1px dashed var(--brand); }
     .news-item a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-    @keyframes ticker {
-      from { transform: translateX(100%); }
-      to   { transform: translateX(-100%); }
+    /* Unique keyframes name to avoid collisions */
+    @keyframes mkTicker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); } /* we duplicate content once, so -50% loops seamlessly */
     }
 
-    /* Pause on hover */
     .news-ticker:hover .news-track { animation-play-state: paused; }
 
-    /* Reduced motion: stop the animation, show static line */
     @media (prefers-reduced-motion: reduce) {
-      .news-track { animation: none !important; }
+      .news-track { animation: none !important; transform: none !important; }
     }
 
-    /* Visually hidden utility for a11y */
     .sr-only {
       position: absolute !important;
       width: 1px; height: 1px;
@@ -205,7 +154,6 @@
       clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
 
-    /* Footer */
     footer {
       color: var(--muted);
       border-top: 1px solid var(--border);
@@ -213,78 +161,29 @@
       padding-bottom: 32px;
     }
 
-    /* Small screens: adjust padding */
     @media (max-width: 640px){
-      nav { 
-        gap: 10px; 
-        padding: 8px clamp(16px, 4vw, 24px) 0; 
-      }
-      header, main, footer {
-        padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px);
-      }
-      .news-reel .inner {
-        padding: 10px clamp(16px, 4vw, 24px);
-      }
+      nav { gap: 10px; padding: 8px clamp(16px, 4vw, 24px) 0; }
+      header, main, footer { padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px); }
+      .news-reel .inner { padding: 10px clamp(16px, 4vw, 24px); }
     }
-
-    /* Medium screens: balanced layout */
     @media (min-width: 641px) and (max-width: 1024px) {
-      header, main, footer {
-        padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px);
-      }
-      nav {
-        padding: 10px clamp(32px, 6vw, 64px) 0;
-      }
-      .news-reel .inner {
-        padding: 10px clamp(32px, 6vw, 64px);
-      }
+      header, main, footer { padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px); }
+      nav { padding: 10px clamp(32px, 6vw, 64px) 0; }
+      .news-reel .inner { padding: 10px clamp(32px, 6vw, 64px); }
     }
-
-    /* Large screens: maximum comfortable width with generous padding */
     @media (min-width: 1400px) {
-      header, main, footer {
-        padding: 32px 120px;
-      }
-      nav {
-        padding: 10px 120px 0;
-      }
-      .news-reel .inner {
-        padding: 10px 120px;
-      }
+      header, main, footer { padding: 32px 120px; }
+      nav { padding: 10px 120px 0; }
+      .news-reel .inner { padding: 10px 120px; }
     }
 
-    /* === Overrides to force full-bleed width + full viewport height === */
-    html, body { height: 100%; }
-    body {
-      min-height: 100vh;   /* fallback */
-      min-height: 100svh;  /* correct on mobile safe areas */
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Remove side gutters so sections span edge-to-edge */
     header, nav, main, footer {
-      padding-inline: 0 !important;  /* kill left/right padding from above or from style.css */
-      width: 100%;
-      margin: 0;
-      box-sizing: border-box;
+      padding-inline: 0 !important; width: 100%; margin: 0; box-sizing: border-box;
     }
-
-    /* Let the content area expand so footer sticks to bottom */
     main { flex: 1 1 auto; }
-
-    /* Make the hero full-bleed to match the new layout */
-    .jmp-hero {
-      border-radius: 0;
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    /* If style.css defines a constraining wrapper, neutralize it */
+    .jmp-hero { border-radius: 0; margin-left: 0; margin-right: 0; }
     .container, .wrapper, .content, .page, .site, .main {
-      max-width: none !important;
-      margin: 0 !important;
-      padding-inline: 0 !important;
+      max-width: none !important; margin: 0 !important; padding-inline: 0 !important;
     }
   </style>
 </head>
@@ -313,7 +212,6 @@
 
       <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
         <div class="news-track">
-          <!-- ✏️ Add/edit items: duplicate a <span class="news-item">…</span> -->
           <span class="news-item">
             <time datetime="2025-10-17">Oct 17, 2025</time>
             Next week at the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, I’ll present
@@ -341,72 +239,87 @@
     </div>
   </section>
 
-  <!-- Single, robust ticker script -->
+  <!-- Single, resilient ticker script -->
   <script>
     (function () {
-      function initTicker() {
-        const ticker = document.querySelector('.news-ticker');
-        if (!ticker) return;
-        const track = ticker.querySelector('.news-track');
-        if (!track) return;
+      const TICKER_SEL = '.news-ticker';
+      const TRACK_SEL  = '.news-track';
 
-        // Respect reduced motion (shows a static line)
+      function calcOriginalWidth(track, childrenSnapshot) {
+        // Sum widths of the original set (not the clones)
+        return childrenSnapshot.reduce((w, el) => w + el.getBoundingClientRect().width, 0);
+      }
+
+      function initTicker() {
+        const ticker = document.querySelector(TICKER_SEL);
+        const track  = ticker && ticker.querySelector(TRACK_SEL);
+        if (!ticker || !track) return;
+
+        // Respect reduced motion
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          track.style.animation = 'none';
+          track.style.setProperty('animation', 'none', 'important');
+          track.style.transform = 'none';
           return;
         }
 
-        // Clone children once for seamless loop
-        if (!track.dataset.cloned) {
-          const kids = Array.from(track.children);
-          kids.forEach(node => track.appendChild(node.cloneNode(true)));
-          track.dataset.cloned = '1';
+        // Take a snapshot of current children (original items only)
+        const originalChildren = Array.from(track.children);
+
+        // If we haven't duplicated yet, duplicate once to allow seamless -50% scroll
+        if (!track.dataset.mkCloned) {
+          const frag = document.createDocumentFragment();
+          originalChildren.forEach(node => frag.appendChild(node.cloneNode(true)));
+          track.appendChild(frag);
+          track.dataset.mkCloned = '1';
         }
 
-        // Measure total width and set animation duration
-        function measureAndSet() {
-          const width = Array.from(track.children)
-            .reduce((w, el) => w + el.getBoundingClientRect().width, 0);
+        // Measure width after fonts/layout settle
+        requestAnimationFrame(() => {
+          const originalWidth = calcOriginalWidth(track, originalChildren);
 
-          if (!width) {
-            requestAnimationFrame(measureAndSet);
+          // Guard: if hidden/0-width (e.g., in a hidden tab/iframe), try again soon
+          if (!originalWidth) {
+            setTimeout(initTicker, 60);
             return;
           }
 
-          const pxPerSec = 80; // lower = slower
-          const duration = Math.max(14, Math.round(width / pxPerSec));
-          track.style.animationDuration = duration + 's';
-        }
+          // Duration so that distance (originalWidth px) moves at ~80 px/sec
+          const pxPerSec = 80;
+          const duration = Math.max(14, Math.round(originalWidth / pxPerSec));
 
-        requestAnimationFrame(measureAndSet);
+          // Force the full animation declaration (beats external `animation: none`)
+          track.style.setProperty('animation', `mkTicker ${duration}s linear infinite`, 'important');
+        });
       }
 
-      function ready(fn) {
+      function onReady(fn) {
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', fn);
+          document.addEventListener('DOMContentLoaded', fn, { once: true });
         } else {
           fn();
         }
       }
 
-      ready(() => {
+      // Init after DOM and fonts
+      onReady(() => {
         (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
           .then(initTicker);
       });
 
-      // Recompute on resize
-      window.addEventListener('resize', () => {
-        const track = document.querySelector('.news-track');
-        if (track) {
-          track.style.animationDuration = ''; // clear old duration
-        }
-        initTicker();
+      // Recalc on resize and when tab becomes visible (widths can be 0 when hidden)
+      const ro = 'ResizeObserver' in window ? new ResizeObserver(() => initTicker()) : null;
+      onReady(() => {
+        const ticker = document.querySelector(TICKER_SEL);
+        if (ro && ticker) ro.observe(ticker);
       });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) initTicker();
+      });
+      window.addEventListener('orientationchange', initTicker);
     })();
   </script>
 
   <main>
-    <!-- Featured JMP block -->
     <section class="jmp-hero" aria-labelledby="jmp-title">
       <h3 id="jmp-title">Featured: Job Market Paper</h3>
       <p><strong>Title:</strong> The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes</p>
