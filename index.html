@@ -12,7 +12,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Moran Koren – Academic Website</title>
+
+  <!-- External stylesheet (will be overridden where needed by the inline <style> below) -->
   <link rel="stylesheet" href="style.css">
+
   <style>
     /* ==== Global screen-optimized defaults ==== */
     :root{
@@ -155,6 +158,41 @@
       nav {
         padding: 10px 120px 0;
       }
+    }
+
+    /* === Overrides to force full-bleed width + full viewport height === */
+    html, body { height: 100%; }
+
+    body {
+      min-height: 100vh;   /* fallback */
+      min-height: 100svh;  /* correct on mobile safe areas */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Remove side gutters so sections span edge-to-edge */
+    header, nav, main, footer {
+      padding-inline: 0 !important;  /* kill left/right padding from above or from style.css */
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    /* Let the content area expand so footer sticks to bottom */
+    main { flex: 1 1 auto; }
+
+    /* Make the hero full-bleed to match the new layout */
+    .jmp-hero {
+      border-radius: 0;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    /* If style.css defines a constraining wrapper, neutralize it */
+    .container, .wrapper, .content, .page, .site, .main {
+      max-width: none !important;
+      margin: 0 !important;
+      padding-inline: 0 !important;
     }
   </style>
 </head>
