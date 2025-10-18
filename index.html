@@ -40,24 +40,37 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    /* Full width layout with comfortable padding */
     header, main, footer {
-      /* keep text line length in the 50–75 char sweet spot */
-      max-width: min(72ch, 92vw);
-      margin: 0 auto;
-      padding: 20px 16px;
+      width: 100%;
+      margin: 0;
+      padding: clamp(20px, 3vw, 32px) clamp(24px, 5vw, 80px);
+      box-sizing: border-box;
     }
 
-    header h1 { margin: 0 0 8px 0; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; }
+    header h1 { 
+      margin: 0 0 8px 0; 
+      font-weight: 800; 
+      letter-spacing: -0.015em; 
+      line-height: 1.2; 
+    }
     header p { margin: 6px 0; }
-    header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+    header a { 
+      color: var(--brand); 
+      text-decoration: underline; 
+      text-underline-offset: 3px; 
+    }
 
-    /* Simple top nav */
+    /* Simple top nav - full width */
     nav {
-      max-width: min(72ch, 92vw);
-      margin: 0 auto;
-      padding: 10px 16px 0;
-      display: flex; flex-wrap: wrap; gap: 14px;
+      width: 100%;
+      margin: 0;
+      padding: 10px clamp(24px, 5vw, 80px) 0;
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 14px;
       border-top: 1px solid var(--border);
+      box-sizing: border-box;
     }
     nav a {
       color: var(--brand);
@@ -65,7 +78,11 @@
       padding: 8px 10px;
       border-radius: 10px;
     }
-    nav a:hover { background: #f9fafb; text-decoration: underline; text-underline-offset: 3px; }
+    nav a:hover { 
+      background: #f9fafb; 
+      text-decoration: underline; 
+      text-underline-offset: 3px; 
+    }
 
     /* Section spacing */
     main section { margin: 26px 0; }
@@ -79,6 +96,7 @@
       padding: 18px 16px;
       box-shadow: var(--shadow);
       margin: 24px 0;
+      max-width: none; /* Ensure no width restrictions */
     }
     .jmp-hero h3 { margin: 0 0 8px; }
     .jmp-hero p { margin: 8px 0; }
@@ -91,7 +109,10 @@
       border: 1px solid var(--border);
       color: var(--brand);
     }
-    .jmp-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .jmp-links a:hover { 
+      text-decoration: underline; 
+      text-underline-offset: 3px; 
+    }
 
     /* Body copy */
     a { color: var(--brand); }
@@ -105,22 +126,36 @@
       padding-bottom: 32px;
     }
 
-    /* Small screens: keep generous spacing */
+    /* Small screens: adjust padding */
     @media (max-width: 640px){
-      nav { gap: 10px; padding-top: 8px; }
+      nav { 
+        gap: 10px; 
+        padding: 8px clamp(16px, 4vw, 24px) 0; 
+      }
+      header, main, footer {
+        padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px);
+      }
     }
-    header, main, footer {
-  max-width: none;      /* remove the cap */
-  width: 100%;          /* ensure full width */
-  margin: 0;            /* no auto-centering */
-  padding: clamp(16px, 2vw, 24px) max(16px, 4vw); /* comfy gutters */
-}
-nav {
-  max-width: none;
-  width: 100%;
-  margin: 0;
-  padding: 8px max(16px, 4vw) 0;
-}
+
+    /* Medium screens: balanced layout */
+    @media (min-width: 641px) and (max-width: 1024px) {
+      header, main, footer {
+        padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px);
+      }
+      nav {
+        padding: 10px clamp(32px, 6vw, 64px) 0;
+      }
+    }
+
+    /* Large screens: maximum comfortable width with generous padding */
+    @media (min-width: 1400px) {
+      header, main, footer {
+        padding: 32px 120px;
+      }
+      nav {
+        padding: 10px 120px 0;
+      }
+    }
   </style>
 </head>
 <body>
