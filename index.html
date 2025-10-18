@@ -9,11 +9,12 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Moran Koren – Academic Website</title>
 
-  <!-- External stylesheet (will be overridden where needed by the inline <style> below) -->
+  <!-- External stylesheet (optional; overridden where needed) -->
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -27,9 +28,7 @@
       --accent: #f59e0b;        /* highlight (JMP) */
       --panel: #ffffff;
       --shadow: 0 2px 12px rgba(0,0,0,.06);
-
-      /* News ticker speed (fallback); actual speed is auto-set by JS */
-      --ticker-speed: 24s;
+      --ticker-speed: 24s;      /* default/fallback; JS overwrites duration directly */
     }
 
     html { /* responsive base size, ~18–20px */
@@ -160,11 +159,13 @@
       position: relative;
       mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
       -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+      min-height: 2.2em; /* visible immediately */
     }
     .news-track {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       will-change: transform;
-      animation: ticker var(--ticker-speed) linear infinite;
+      animation: ticker 24s linear infinite; /* JS overrides duration */
     }
     .news-item {
       display: inline-flex;
@@ -285,9 +286,6 @@
       margin: 0 !important;
       padding-inline: 0 !important;
     }
-    /* Make the ticker visible immediately; ensure horizontal layout is consistent */
-.news-ticker { min-height: 2.2em; }
-.news-track  { display: inline-flex; align-items: center; }
   </style>
 </head>
 <body>
@@ -307,107 +305,105 @@
   </nav>
 
   <!-- NEWS REEL -->
-<section class="news-reel" aria-labelledby="news-reel-title">
-  <div class="inner">
-    <h3 id="news-reel-title" class="label">
-      <span class="badge-new">News</span> Lab & Student Updates
-    </h3>
+  <section class="news-reel" aria-labelledby="news-reel-title">
+    <div class="inner">
+      <h3 id="news-reel-title" class="label">
+        <span class="badge-new">News</span> Lab & Student Updates
+      </h3>
 
-    <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
-      <div class="news-track">
-        <!-- ✏️ Add/edit items: duplicate a <span class="news-item">…</span> -->
-        <span class="news-item">
-          <time datetime="2025-10-17">Oct 17, 2025</time>
-          Next week at the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, I’ll present
-          <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
-            <em>“Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments.”</em>
-          </a>
-          See you on the 26th, 8:30–8:45 AM.
-        </span>
+      <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
+        <div class="news-track">
+          <!-- ✏️ Add/edit items: duplicate a <span class="news-item">…</span> -->
+          <span class="news-item">
+            <time datetime="2025-10-17">Oct 17, 2025</time>
+            Next week at the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, I’ll present
+            <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
+              <em>“Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments.”</em>
+            </a>
+            See you on the 26th, 8:30–8:45 AM.
+          </span>
 
-        <span class="news-item">
-          <time datetime="2025-09-30">Sep 30, 2025</time>
-          Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">“Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment.”</a></em>,
-          led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
-          <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
-        </span>
+          <span class="news-item">
+            <time datetime="2025-09-30">Sep 30, 2025</time>
+            Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">“Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment.”</a></em>,
+            led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
+            <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
+          </span>
 
-        <span class="news-item">
-          <time datetime="2025-07-15">Jul 15, 2025</time>
-          Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
-        </span>
+          <span class="news-item">
+            <time datetime="2025-07-15">Jul 15, 2025</time>
+            Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
+          </span>
+        </div>
       </div>
+
+      <p class="sr-only">Tip: Hover over the news line to pause scrolling.</p>
     </div>
+  </section>
 
-    <p class="sr-only">Tip: Hover over the news line to pause scrolling.</p>
-  </div>
-</section>
+  <!-- Single, robust ticker script -->
+  <script>
+    (function () {
+      function initTicker() {
+        const ticker = document.querySelector('.news-ticker');
+        if (!ticker) return;
+        const track = ticker.querySelector('.news-track');
+        if (!track) return;
 
-<script>
-  // News ticker: robust init (DOM + fonts), clones for seamless loop, dynamic speed
-  (function () {
-    function initTicker() {
-      var ticker = document.querySelector('.news-ticker');
-      if (!ticker) return;
-      var track = ticker.querySelector('.news-track');
-      if (!track) return;
-
-      // Respect reduced motion
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
-      }
-
-      // Clone children once for seamless loop
-      if (!track.dataset.cloned) {
-        var kids = Array.prototype.slice.call(track.children);
-        kids.forEach(function (node) { track.appendChild(node.cloneNode(true)); });
-        track.dataset.cloned = '1';
-      }
-
-      // Compute width and set duration (px/sec)
-      function measureAndSet() {
-        var totalWidth = 0;
-        Array.prototype.forEach.call(track.children, function (el) {
-          totalWidth += el.offsetWidth;
-        });
-        if (!totalWidth) {
-          // Retry next frame if fonts/layout not ready yet
-          requestAnimationFrame(measureAndSet);
+        // Respect reduced motion (shows a static line)
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          track.style.animation = 'none';
           return;
         }
-        var pxPerSec = 80; // lower = slower scroll
-        var duration = Math.max(14, Math.round(totalWidth / pxPerSec));
-        track.style.setProperty('--ticker-speed', duration + 's');
-      }
-      requestAnimationFrame(measureAndSet);
-    }
 
-    // Wait for DOM; if font metrics are available, wait for fonts too
-    function ready(fn) {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fn);
-      } else {
-        fn();
+        // Clone children once for seamless loop
+        if (!track.dataset.cloned) {
+          const kids = Array.from(track.children);
+          kids.forEach(node => track.appendChild(node.cloneNode(true)));
+          track.dataset.cloned = '1';
+        }
+
+        // Measure total width and set animation duration
+        function measureAndSet() {
+          const width = Array.from(track.children)
+            .reduce((w, el) => w + el.getBoundingClientRect().width, 0);
+
+          if (!width) {
+            requestAnimationFrame(measureAndSet);
+            return;
+          }
+
+          const pxPerSec = 80; // lower = slower
+          const duration = Math.max(14, Math.round(width / pxPerSec));
+          track.style.animationDuration = duration + 's';
+        }
+
+        requestAnimationFrame(measureAndSet);
       }
-    }
-    ready(function () {
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(initTicker);
-      } else {
+
+      function ready(fn) {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', fn);
+        } else {
+          fn();
+        }
+      }
+
+      ready(() => {
+        (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+          .then(initTicker);
+      });
+
+      // Recompute on resize
+      window.addEventListener('resize', () => {
+        const track = document.querySelector('.news-track');
+        if (track) {
+          track.style.animationDuration = ''; // clear old duration
+        }
         initTicker();
-      }
-    });
-
-    // Recompute on window resize
-    window.addEventListener('resize', function () {
-      var track = document.querySelector('.news-track');
-      if (track) {
-        track.removeAttribute('style'); // clear old --ticker-speed
-      }
-      initTicker();
-    });
-  })();
-</script>
+      });
+    })();
+  </script>
 
   <main>
     <!-- Featured JMP block -->
@@ -451,30 +447,5 @@
   <footer>
     <p>&copy; 2025 Moran Koren</p>
   </footer>
-
-  <script>
-    // ====== News ticker: auto-clone content for seamless loop + dynamic speed ======
-    (function(){
-      const ticker = document.querySelector('.news-ticker');
-      const track  = ticker?.querySelector('.news-track');
-      if (!ticker || !track) return;
-
-      // If user prefers reduced motion, do nothing
-      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) return;
-
-      // Duplicate items to create a continuous loop
-      const clones = Array.from(track.children).map(node => node.cloneNode(true));
-      clones.forEach(clone => track.appendChild(clone));
-
-      // Compute total width and set a sensible animation duration (px per second)
-      requestAnimationFrame(() => {
-        const totalWidth = Array.from(track.children).reduce((w, el) => w + el.offsetWidth, 0);
-        const pxPerSec = 80; // lower = slower scroll
-        const duration = Math.max(14, Math.round(totalWidth / pxPerSec));
-        track.style.setProperty('--ticker-speed', duration + 's');
-      });
-    })();
-  </script>
 </body>
 </html>
