@@ -27,6 +27,7 @@
       --accent: #f59e0b;
       --panel: #ffffff;
       --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --ticker-speed: 30s; /* baseline duration; JS will update */
     }
 
     html { font-size: clamp(18px, 1.05vw + 8px, 20px); }
@@ -34,7 +35,8 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -60,10 +62,7 @@
       border-top: 1px solid var(--border);
       box-sizing: border-box;
     }
-    nav a {
-      color: var(--brand); text-decoration: none;
-      padding: 8px 10px; border-radius: 10px;
-    }
+    nav a { color: var(--brand); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
     nav a:hover { background: #f9fafb; text-decoration: underline; text-underline-offset: 3px; }
 
     main section { margin: 26px 0; }
@@ -91,7 +90,7 @@
     a { color: var(--brand); }
     p { margin: 12px 0; }
 
-    /* ======== News reel styles ======== */
+    /* ======== News reel ======== */
     .news-reel {
       background: #f9fafb;
       border-top: 1px solid var(--border);
@@ -116,8 +115,6 @@
       min-height: 2.2em;
       white-space: nowrap;
     }
-
-    /* Optional fade edges (enabled only if supported) */
     @supports (mask-image: linear-gradient(to right, black, black)) or (-webkit-mask-image: linear-gradient(to right, black, black)) {
       .news-ticker {
         mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
@@ -128,17 +125,18 @@
     .news-track {
       display: inline-flex; gap: 28px; align-items: center;
       will-change: transform;
-      /* We’ll set the full animation via JS to avoid external overrides */
+      /* Baseline animation so it moves immediately; JS only tweaks duration */
+      animation: mkTicker var(--ticker-speed) linear infinite;
     }
     .news-item { display: inline-flex; align-items: center; gap: 10px; }
     .news-item time { font-size: .9em; color: var(--muted); }
     .news-item a { color: var(--brand); text-decoration: none; border-bottom: 1px dashed var(--brand); }
     .news-item a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-    /* Unique keyframes name to avoid collisions */
+    /* Unique keyframes: we duplicate items once; -50% loops seamlessly */
     @keyframes mkTicker {
       from { transform: translateX(0); }
-      to   { transform: translateX(-50%); } /* we duplicate content once, so -50% loops seamlessly */
+      to   { transform: translateX(-50%); }
     }
 
     .news-ticker:hover .news-track { animation-play-state: paused; }
@@ -177,9 +175,7 @@
       .news-reel .inner { padding: 10px 120px; }
     }
 
-    header, nav, main, footer {
-      padding-inline: 0 !important; width: 100%; margin: 0; box-sizing: border-box;
-    }
+    header, nav, main, footer { padding-inline: 0 !important; width: 100%; margin: 0; box-sizing: border-box; }
     main { flex: 1 1 auto; }
     .jmp-hero { border-radius: 0; margin-left: 0; margin-right: 0; }
     .container, .wrapper, .content, .page, .site, .main {
@@ -239,15 +235,34 @@
     </div>
   </section>
 
-  <!-- Single, resilient ticker script -->
+  <!-- Single, immediate-start ticker script -->
   <script>
     (function () {
       const TICKER_SEL = '.news-ticker';
       const TRACK_SEL  = '.news-track';
 
-      function calcOriginalWidth(track, childrenSnapshot) {
-        // Sum widths of the original set (not the clones)
-        return childrenSnapshot.reduce((w, el) => w + el.getBoundingClientRect().width, 0);
+      function duplicateOnce(track) {
+        if (track.dataset.mkCloned) return;
+        const originals = Array.from(track.children);
+        const frag = document.createDocumentFragment();
+        originals.forEach(node => frag.appendChild(node.cloneNode(true)));
+        track.appendChild(frag);
+        track.dataset.mkCloned = '1';
+      }
+
+      function setDuration(track) {
+        // Sum width of the FIRST HALF (originals) only
+        const halfCount = Math.floor(track.children.length / 2);
+        let w = 0;
+        for (let i = 0; i < halfCount; i++) {
+          w += track.children[i].getBoundingClientRect().width;
+        }
+        if (w > 0) {
+          const pxPerSec = 80; // lower = slower
+          const duration = Math.max(14, Math.round(w / pxPerSec));
+          // Update via CSS variable so the baseline animation keeps running
+          track.style.setProperty('--ticker-speed', duration + 's');
+        }
       }
 
       function initTicker() {
@@ -257,65 +272,34 @@
 
         // Respect reduced motion
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          track.style.setProperty('animation', 'none', 'important');
+          track.style.animation = 'none';
           track.style.transform = 'none';
           return;
         }
 
-        // Take a snapshot of current children (original items only)
-        const originalChildren = Array.from(track.children);
-
-        // If we haven't duplicated yet, duplicate once to allow seamless -50% scroll
-        if (!track.dataset.mkCloned) {
-          const frag = document.createDocumentFragment();
-          originalChildren.forEach(node => frag.appendChild(node.cloneNode(true)));
-          track.appendChild(frag);
-          track.dataset.mkCloned = '1';
-        }
-
-        // Measure width after fonts/layout settle
-        requestAnimationFrame(() => {
-          const originalWidth = calcOriginalWidth(track, originalChildren);
-
-          // Guard: if hidden/0-width (e.g., in a hidden tab/iframe), try again soon
-          if (!originalWidth) {
-            setTimeout(initTicker, 60);
-            return;
-          }
-
-          // Duration so that distance (originalWidth px) moves at ~80 px/sec
-          const pxPerSec = 80;
-          const duration = Math.max(14, Math.round(originalWidth / pxPerSec));
-
-          // Force the full animation declaration (beats external `animation: none`)
-          track.style.setProperty('animation', `mkTicker ${duration}s linear infinite`, 'important');
-        });
+        duplicateOnce(track);
+        // Measure now and again shortly after (to cover late font/layout settles)
+        setDuration(track);
+        setTimeout(() => setDuration(track), 500);
+        setTimeout(() => setDuration(track), 2000);
       }
 
-      function onReady(fn) {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', fn, { once: true });
-        } else {
-          fn();
-        }
+      // Start ASAP on DOM ready (no waiting on fonts)
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTicker, { once: true });
+      } else {
+        initTicker();
       }
 
-      // Init after DOM and fonts
-      onReady(() => {
-        (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
-          .then(initTicker);
-      });
-
-      // Recalc on resize and when tab becomes visible (widths can be 0 when hidden)
-      const ro = 'ResizeObserver' in window ? new ResizeObserver(() => initTicker()) : null;
-      onReady(() => {
-        const ticker = document.querySelector(TICKER_SEL);
-        if (ro && ticker) ro.observe(ticker);
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) initTicker();
-      });
+      // Recalc on visibility/resize/orientation/content changes
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) initTicker(); });
+      window.addEventListener('resize', initTicker);
       window.addEventListener('orientationchange', initTicker);
+
+      // Optional: if you dynamically add/remove news items later
+      const mo = new MutationObserver(initTicker);
+      const target = document.querySelector(TRACK_SEL);
+      if (target) mo.observe(target, { childList: true, subtree: false });
     })();
   </script>
 
