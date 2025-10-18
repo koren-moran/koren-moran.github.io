@@ -285,6 +285,9 @@
       margin: 0 !important;
       padding-inline: 0 !important;
     }
+    /* Make the ticker visible immediately; ensure horizontal layout is consistent */
+.news-ticker { min-height: 2.2em; }
+.news-track  { display: inline-flex; align-items: center; }
   </style>
 </head>
 <body>
@@ -304,46 +307,107 @@
   </nav>
 
   <!-- NEWS REEL -->
-  <section class="news-reel" aria-labelledby="news-reel-title">
-    <div class="inner">
-      <h3 id="news-reel-title" class="label">
-        <span class="badge-new">News</span> Lab & Student Updates
-      </h3>
+<section class="news-reel" aria-labelledby="news-reel-title">
+  <div class="inner">
+    <h3 id="news-reel-title" class="label">
+      <span class="badge-new">News</span> Lab & Student Updates
+    </h3>
 
-      <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
-        <div class="news-track">
-          <!-- ✏️ Add/edit items below: just duplicate <span class="news-item">…</span> -->
-          <span class="news-item">
-            <time datetime="2025-09-30">Oct 17, 2025</time>
-            Next week, at <strong>INFORMS annual meeting at Atlanta, GA</strong>, I will be talking about <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480"><em>“Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments.”</em></a>. You are welcome to my talk on the 26th at8:30 AM - 8:45 AM.
-            <!--<a href="#" target="_blank" rel="noopener">Details</a>-->
-          </span>
-          <span class="news-item">
-            <time datetime="2025-09-30">Sep 30, 2025</time>
-            Our paper, <em><a href="https://arxiv.org/abs/2510.14872">“Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment.”</a></em>, led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to <strong><a href="https://wine2025.cs.rutgers.edu/">WINE 2025</a> ,See you there in December!</strong> 
-          </span>
-          <!--<span class="news-item">
-            <time datetime="2025-09-12">Sep 12, 2025</time>
-            <strong>Yuval Doron</strong>’s project <em>“YYY”</em> won funding from the <strong>ZZZ Fund</strong>.
-            <a href="#" target="_blank" rel="noopener">Announcement</a>
-          </span>
+    <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
+      <div class="news-track">
+        <!-- ✏️ Add/edit items: duplicate a <span class="news-item">…</span> -->
+        <span class="news-item">
+          <time datetime="2025-10-17">Oct 17, 2025</time>
+          Next week at the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, I’ll present
+          <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
+            <em>“Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments.”</em>
+          </a>
+          See you on the 26th, 8:30–8:45 AM.
+        </span>
 
-          <span class="news-item">
-            <time datetime="2025-08-20">Aug 20, 2025</time>
-            New preprint out: <em>“Classification Under Strategic Self-Selection—Extended”</em>.
-            <a href="#" target="_blank" rel="noopener">arXiv</a>
-          </span> -->
+        <span class="news-item">
+          <time datetime="2025-09-30">Sep 30, 2025</time>
+          Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">“Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment.”</a></em>,
+          led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
+          <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
+        </span>
 
-          <span class="news-item">
-            <time datetime="2025-07-15">Jul 15, 2025</time>
-            Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
-          </span>
-        </div>
+        <span class="news-item">
+          <time datetime="2025-07-15">Jul 15, 2025</time>
+          Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
+        </span>
       </div>
-
-      <p class="sr-only">Tip: Hover over the news line to pause scrolling.</p>
     </div>
-  </section>
+
+    <p class="sr-only">Tip: Hover over the news line to pause scrolling.</p>
+  </div>
+</section>
+
+<script>
+  // News ticker: robust init (DOM + fonts), clones for seamless loop, dynamic speed
+  (function () {
+    function initTicker() {
+      var ticker = document.querySelector('.news-ticker');
+      if (!ticker) return;
+      var track = ticker.querySelector('.news-track');
+      if (!track) return;
+
+      // Respect reduced motion
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
+
+      // Clone children once for seamless loop
+      if (!track.dataset.cloned) {
+        var kids = Array.prototype.slice.call(track.children);
+        kids.forEach(function (node) { track.appendChild(node.cloneNode(true)); });
+        track.dataset.cloned = '1';
+      }
+
+      // Compute width and set duration (px/sec)
+      function measureAndSet() {
+        var totalWidth = 0;
+        Array.prototype.forEach.call(track.children, function (el) {
+          totalWidth += el.offsetWidth;
+        });
+        if (!totalWidth) {
+          // Retry next frame if fonts/layout not ready yet
+          requestAnimationFrame(measureAndSet);
+          return;
+        }
+        var pxPerSec = 80; // lower = slower scroll
+        var duration = Math.max(14, Math.round(totalWidth / pxPerSec));
+        track.style.setProperty('--ticker-speed', duration + 's');
+      }
+      requestAnimationFrame(measureAndSet);
+    }
+
+    // Wait for DOM; if font metrics are available, wait for fonts too
+    function ready(fn) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fn);
+      } else {
+        fn();
+      }
+    }
+    ready(function () {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(initTicker);
+      } else {
+        initTicker();
+      }
+    });
+
+    // Recompute on window resize
+    window.addEventListener('resize', function () {
+      var track = document.querySelector('.news-track');
+      if (track) {
+        track.removeAttribute('style'); // clear old --ticker-speed
+      }
+      initTicker();
+    });
+  })();
+</script>
 
   <main>
     <!-- Featured JMP block -->
