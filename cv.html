@@ -2,35 +2,175 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Moran Koren – Academic Website</title>
+
+  <!-- External stylesheet (local defaults; overridden as needed below) -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-2VTLVLV9QM');
   </script>
+
+  <style>
+    /* ==== Global screen-optimized defaults (same as home) ==== */
+    :root{
+      --bg: #ffffff;            /* pure white */
+      --text: #111827;          /* near-black for contrast */
+      --muted: #4b5563;         /* secondary text */
+      --border: #e5e7eb;        /* subtle borders */
+      --brand: #303f9f;         /* link color */
+      --accent: #f59e0b;        /* highlight */
+      --panel: #ffffff;
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+
+    html { font-size: clamp(18px, 1.05vw + 8px, 20px); }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    header, main, footer {
+      width: 100%;
+      margin: 0;
+      padding: clamp(20px, 3vw, 32px) clamp(24px, 5vw, 80px);
+      box-sizing: border-box;
+    }
+
+    header h1 { margin: 0 0 8px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; }
+    header p { margin: 6px 0; }
+    header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Top site nav (same treatment as home) */
+    nav.site-nav, nav.section-nav {
+      width: 100%;
+      margin: 0;
+      padding: 10px clamp(24px, 5vw, 80px) 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      border-top: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+    nav.site-nav a, nav.section-nav a {
+      color: var(--brand);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    nav.site-nav a:hover, nav.section-nav a:hover {
+      background: #f9fafb;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Section spacing */
+    main section { margin: 26px 0; }
+    h2 { margin: 0 0 10px; line-height: 1.25; }
+    h3 { margin: 16px 0 8px; }
+
+    /* Body copy */
+    a { color: var(--brand); }
+    p { margin: 12px 0; }
+    ul { margin: 10px 0 16px 22px; }
+    li { margin: 6px 0; }
+
+    /* Footer */
+    footer {
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 28px;
+      padding-bottom: 32px;
+    }
+
+    /* Small screens */
+    @media (max-width: 640px){
+      nav.site-nav, nav.section-nav {
+        gap: 10px;
+        padding: 8px clamp(16px, 4vw, 24px) 0;
+      }
+      header, main, footer {
+        padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px);
+      }
+    }
+
+    /* Medium screens */
+    @media (min-width: 641px) and (max-width: 1024px) {
+      header, main, footer {
+        padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px);
+      }
+      nav.site-nav, nav.section-nav {
+        padding: 10px clamp(32px, 6vw, 64px) 0;
+      }
+    }
+
+    /* Large screens */
+    @media (min-width: 1400px) {
+      header, main, footer { padding: 32px 120px; }
+      nav.site-nav, nav.section-nav { padding: 10px 120px 0; }
+    }
+
+    /* === Full-bleed width + full viewport height overrides (same as home) === */
+    html, body { height: 100%; }
+    body {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+    }
+    header, nav.site-nav, nav.section-nav, main, footer {
+      padding-inline: 0 !important;   /* remove side gutters */
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    main { flex: 1 1 auto; }          /* push footer to bottom */
+
+    /* Neutralize any constraining wrappers from style.css */
+    .container, .wrapper, .content, .page, .site, .main {
+      max-width: none !important;
+      margin: 0 !important;
+      padding-inline: 0 !important;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Moran Koren</h1>
-    <p>Assistant Professor (Tenure Track) | Game Theory & Market Design Researcher</p>
+    <p>Assistant Professor (Tenure Track), Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev</p>
     <p>
-      Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a><br>
-      Phone: +972-52-6534005<br>
-      Location: Beer-Sheva, Israel<br>
-      Homepage: <a href="https://mkoren.org" target="_blank">mkoren.org</a><br>
-      ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank">0000-0003-0012-0208</a><br>
+      Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a> ·
+      Location: Beer-Sheva, Israel ·
+      Homepage: <a href="https://mkoren.org" target="_blank" rel="noopener">mkoren.org</a> ·
+      ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a> ·
       Scopus ID: 57198777365
     </p>
+    <p><strong>Research Interests:</strong> Operations & Economics; Information/Mechanism Design; Market Platforms; Algorithmic Screening</p>
   </header>
-  
-  <p><strong>Research Interests:</strong> Operations & Economics; Information/Mechanism Design; Market Platforms; Algorithmic Screening</p>
 
-  <nav>
+  <!-- Primary site nav (matches home) -->
+  <nav class="site-nav" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="cv.html" aria-current="page">CV</a>
+    <a href="publications.html">Publications</a>
+    <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">My Substack on AI Economics</a>
+  </nav>
+
+  <!-- Section nav (internal anchors for this page) -->
+  <nav class="section-nav" aria-label="CV Sections">
     <a href="#research">Research</a>
     <a href="#appointments">Appointments</a>
     <a href="#publications">Publications</a>
@@ -40,16 +180,25 @@
     <a href="#awards">Awards</a>
     <a href="#teaching">Teaching</a>
     <a href="#service">Service</a>
+    <a href="#memberships">Memberships</a>
     <a href="#talks">Talks</a>
+    <a href="#additional">Additional</a>
     <a href="#recommenders">Recommenders</a>
   </nav>
-  <p><a href="https://www.dropbox.com/scl/fi/r0rkpu1ar5f9ccr6bpj4n/Koren_short_cv.pdf?rlkey=icxp6mgj5wj0y42fp84mxwzqv&dl=0" target="_blank">Download Full CV (PDF)</a></p>
-  <p><a href="index.html">← Back to Home</a></p>
+
   <main>
+    <p style="margin:12px 0;">
+      <a href="https://www.dropbox.com/scl/fi/r0rkpu1ar5f9ccr6bpj4n/Koren_short_cv.pdf?rlkey=icxp6mgj5wj0y42fp84mxwzqv&dl=0" target="_blank" rel="noopener">Download Full CV (PDF)</a> ·
+      <a href="index.html">← Back to Home</a>
+    </p>
+
     <section id="research">
       <h2>Research Profile</h2>
       <p>
-        Operations & Economics scholar studying how <strong>screening/gatekeeping</strong>, <strong>allocation</strong>, and <strong>pricing</strong> shape behavior and the <strong>information</strong> managers rely on. I build game-theoretic models and experiments to design <strong>implementable mechanisms</strong> for hiring and service systems, organ/platform allocation, and data-driven screening. Published in <strong>Management Science</strong>, <strong>Theoretical Economics</strong>, <strong>Economic Theory</strong>, <strong>GEB</strong>, with ML-incentives work in <strong>ICML</strong> and <strong>NeurIPS</strong>; supported by <strong>ISF (personal & equipment)</strong> and <strong>MOST</strong> grants.
+        Operations & Economics scholar studying how <strong>screening/gatekeeping</strong>, <strong>allocation</strong>, and <strong>pricing</strong> shape behavior and the <strong>information</strong> managers rely on.
+        I build game-theoretic models and experiments to design <strong>implementable mechanisms</strong> for hiring and service systems, organ/platform allocation, and data-driven screening.
+        Published in <strong>Management Science</strong>, <strong>Theoretical Economics</strong>, <strong>Economic Theory</strong>, <strong>GEB</strong>, with ML-incentives work in <strong>ICML</strong> and <strong>NeurIPS</strong>;
+        supported by <strong>ISF (personal & equipment)</strong> and <strong>MOST</strong> grants.
       </p>
       <p><strong>Job talk:</strong> <em>The Gatekeeper Effect</em>—OM mechanisms for screening under uncertainty (<em>Management Science</em>, 2024).</p>
     </section>
@@ -114,42 +263,42 @@
     </section>
 
     <section id="pipeline">
-        <h2>Selected Pipeline (R&R / Major Revision)</h2>
-        <ul>
-            <li>
-                <p><strong>Counterbalancing Learning and Strategic Incentives in Allocation Markets</strong><br>
-                — <em>Manufacturing & Service Operations Management</em>, <strong>major revision</strong>.<br>
-                <em>Contribution: designs mechanisms that balance information acquisition and strategic incentives in dynamic allocation (e.g., organ/platform markets).</em></p>
-            </li>
-            <li>
-                <p><strong>Sequential Fundraising and Mutual Insurance</strong><br>
-                — <em>JPE Micro (Journal of Political Economy: Microeconomics)</em>, <strong>revise & resubmit</strong>.<br>
-                <em>Contribution: characterizes when sequential fundraising with risk-sharing generates inefficiency and provides implementable design fixes; delivers testable comparative statics.</em></p>
-            </li>
-            <li>
-                <p><strong>Classification Under Strategic Self-Selection</strong><br>
-                — <em>ICML 2024</em>; journal extension in preparation, <em>target: Management Science / Information Systems Research</em>.<br>
-                <em>Contribution: entry-aware classification under endogenous applicant pools; screening rules robust to self-selection.</em></p>
-            </li>
-            <li>
-                <p><strong>Reimagining Israel’s Food System</strong><br>
-                — <em>Israel Journal of Health Policy Research</em>, <strong>revise & resubmit</strong>.<br>
-                <em>Contribution: policy/OM interface; mechanism recommendations for national food-system resilience.</em></p>
-            </li>
-             <li>
-                <p><strong>Socially-Aware Allocation on Networks (Network--TTC)</strong><br>
-                — <em>working paper in preparation</em>; targets: <em>Management Science / Operations Research</em> (algorithms & simulations), <em>Economic Theory / GEB</em> (theory framework), <em>ACM EC / WINE</em> (tractable subclasses).<br>
-                <em>Contribution: introduces a network-aware TTC for refugee/IDP housing that preserves community ties; establishes stability/complexity properties and proposes a scalable heuristic with strong empirical performance.</em></p>
-            </li>
-        </ul>
+      <h2>Selected Pipeline (R&R / Major Revision)</h2>
+      <ul>
+        <li>
+          <p><strong>Counterbalancing Learning and Strategic Incentives in Allocation Markets</strong><br>
+          — <em>Manufacturing &amp; Service Operations Management</em>, <strong>major revision</strong>.<br>
+          <em>Contribution: designs mechanisms that balance information acquisition and strategic incentives in dynamic allocation (e.g., organ/platform markets).</em></p>
+        </li>
+        <li>
+          <p><strong>Sequential Fundraising and Mutual Insurance</strong><br>
+          — <em>JPE Micro (Journal of Political Economy: Microeconomics)</em>, <strong>revise &amp; resubmit</strong>.<br>
+          <em>Contribution: characterizes when sequential fundraising with risk-sharing generates inefficiency and provides implementable design fixes; delivers testable comparative statics.</em></p>
+        </li>
+        <li>
+          <p><strong>Classification Under Strategic Self-Selection</strong><br>
+          — <em>ICML 2024</em>; journal extension in preparation, <em>target: Management Science / Information Systems Research</em>.<br>
+          <em>Contribution: entry-aware classification under endogenous applicant pools; screening rules robust to self-selection.</em></p>
+        </li>
+        <li>
+          <p><strong>Reimagining Israel’s Food System</strong><br>
+          — <em>Israel Journal of Health Policy Research</em>, <strong>revise &amp; resubmit</strong>.<br>
+          <em>Contribution: policy/OM interface; mechanism recommendations for national food-system resilience.</em></p>
+        </li>
+        <li>
+          <p><strong>Socially-Aware Allocation on Networks (Network--TTC)</strong><br>
+          — <em>working paper in preparation</em>; targets: <em>Management Science / Operations Research</em> (algorithms &amp; simulations), <em>Economic Theory / GEB</em> (theory framework), <em>ACM EC / WINE</em> (tractable subclasses).<br>
+          <em>Contribution: introduces a network-aware TTC for refugee/IDP housing that preserves community ties; establishes stability/complexity properties and proposes a scalable heuristic with strong empirical performance.</em></p>
+        </li>
+      </ul>
     </section>
 
     <section id="education">
       <h2>Education</h2>
       <ul>
-        <li><strong>Ph.D. in Economics</strong>, Technion – IE&M (now Data and Decision Sciences), 2019
+        <li><strong>Ph.D. in Economics</strong>, Technion – IE&amp;M (now Data and Decision Sciences), 2019
           <ul>
-            <li>Advisors: Prof. Rann Smorodinsky & Prof. Itai Arieli</li>
+            <li>Advisors: Prof. Rann Smorodinsky &amp; Prof. Itai Arieli</li>
             <li>Dissertation: "Social Learning in Adaptive Environments"</li>
             <li>Keiden Prize for Graduate Students (2018)</li>
           </ul>
@@ -160,16 +309,16 @@
             <li>Thesis: "To Pool or Not to Pool? On Mining Competition and Transfer Fees in Bitcoin"</li>
           </ul>
         </li>
-        <li><strong>B.A. in Economics & Business</strong>, Hebrew University of Jerusalem, 2009
-            <ul>
-                <li><strong>Magna cum Laude</strong>, Dean's List for Honors Students</li>
-            </ul>
+        <li><strong>B.A. in Economics &amp; Business</strong>, Hebrew University of Jerusalem, 2009
+          <ul>
+            <li><strong>Magna cum Laude</strong>, Dean's List for Honors Students</li>
+          </ul>
         </li>
       </ul>
     </section>
 
     <section id="grants">
-      <h2>Research Grants & Fellowships</h2>
+      <h2>Research Grants &amp; Fellowships</h2>
       <h3>Competitive Research Grants</h3>
       <ul>
         <li><strong>ISF Personal Grant</strong> (2025–2026): "Pre-Filtering Mechanisms and Self-Selection", 380,000 NIS</li>
@@ -189,61 +338,61 @@
     </section>
 
     <section id="awards">
-      <h2>Awards & Fellowships</h2>
+      <h2>Awards &amp; Fellowships</h2>
       <ul>
         <li><strong>ISF Shamir Fellowship for Returning Scientists</strong> (2021): 280,000 NIS</li>
         <li><strong>Fulbright Post-doctoral Scholar</strong> (2019): $47,500</li>
         <li><strong>CMSA Fellowship, Harvard</strong> (2020): $90,000</li>
         <li><strong>Stanford Fellowship</strong> (2019): $30,000</li>
-        <li><strong>Harold & Inge Marcus Fellowship</strong> (2017)</li>
+        <li><strong>Harold &amp; Inge Marcus Fellowship</strong> (2017)</li>
         <li><strong>Technion Ph.D. Stipend</strong> (2015-2019)</li>
       </ul>
     </section>
 
     <section id="teaching">
       <h2>Teaching</h2>
-       <h3>Current Courses (BGU)</h3>
+      <h3>Current Courses (BGU)</h3>
       <ul>
         <li>Game Theory and Applications in Engineering (Graduate)</li>
         <li>Game Theory and Agentic Design (Undergraduate)</li>
         <li>Estimation and Hypothesis Testing</li>
-        <li>Introduction to Research in IE&M</li>
+        <li>Introduction to Research in IE&amp;M</li>
       </ul>
-      <h3>Teaching Interests & Coverage</h3>
+      <h3>Teaching Interests &amp; Coverage</h3>
       <ul>
-          <li><strong>Microeconomic Theory (UG/MA/PhD):</strong> static & dynamic games, information economics, contract theory</li>
-          <li><strong>Market & Mechanism Design (UG/MA elective):</strong> auctions, matching markets, pricing & screening, platform design</li>
-          <li><strong>Topics in Information & Learning (seminar):</strong> social learning, experimentation, gatekeeping/screening, allocation under uncertainty</li>
+        <li><strong>Microeconomic Theory (UG/MA/PhD):</strong> static &amp; dynamic games, information economics, contract theory</li>
+        <li><strong>Market &amp; Mechanism Design (UG/MA elective):</strong> auctions, matching markets, pricing &amp; screening, platform design</li>
+        <li><strong>Topics in Information &amp; Learning (seminar):</strong> social learning, experimentation, gatekeeping/screening, allocation under uncertainty</li>
       </ul>
-       <h3>PhD Teaching & Mentoring</h3>
-       <ul>
-          <li><strong>Seminars/mini-courses:</strong> Information & Mechanism Design; Learning vs. Incentives; Matching & Auctions</li>
-          <li><strong>Methods I can supervise:</strong> game-theoretic modeling, mechanism design, theory-driven experiments (online/field)</li>
+      <h3>PhD Teaching &amp; Mentoring</h3>
+      <ul>
+        <li><strong>Seminars/mini-courses:</strong> Information &amp; Mechanism Design; Learning vs. Incentives; Matching &amp; Auctions</li>
+        <li><strong>Methods I can supervise:</strong> game-theoretic modeling, mechanism design, theory-driven experiments (online/field)</li>
       </ul>
-       <h3>Student Supervision</h3>
-       <p>Supervising <strong>6 MSc students</strong> on topics including organ allocation, blockchain systems, reinforcement learning, and market design.</p>
-       <h3>Curriculum Contributions</h3>
-       <p>Faculty lead for accelerated MSc programs; founded the “Young Researchers (Hetz)” track.</p>
+      <h3>Student Supervision</h3>
+      <p>Supervising <strong>6 MSc students</strong> on topics including organ allocation, blockchain systems, reinforcement learning, and market design.</p>
+      <h3>Curriculum Contributions</h3>
+      <p>Faculty lead for accelerated MSc programs; founded the “Young Researchers (Hetz)” track.</p>
     </section>
 
     <section id="service">
       <h2>Professional Service</h2>
-      <h3>Editorial & Reviewing (selected)</h3>
+      <h3>Editorial &amp; Reviewing (selected)</h3>
       <p>Ad-hoc reviewer: <em>Review of Economics and Statistics</em>; <em>Review of Economic Studies</em>; <em>Management Science</em>; <em>Theoretical Economics</em>; <em>Artificial Intelligence</em>.</p>
       <h3>Program Committees (selected)</h3>
       <ul>
         <li>The Web Conference (2026); ITCS (2026); ACM EC (2020, 2024-2025); IJCAI (2024); WINE (2021, 2024); SAGT (2023–2025); NeurIPS (2021).</li>
       </ul>
     </section>
-    
+
     <section id="memberships">
       <h2>Professional Memberships</h2>
       <p>The Econometric Society; The Game Theory Society; American Economic Association; INFORMS; ACM; Israeli Economics Society; ORSIS (Israeli OR Society).</p>
     </section>
 
     <section id="talks">
-      <h2>Selected Invited Talks & Presentations</h2>
-       <h3>Upcoming Invited Talks</h3>
+      <h2>Selected Invited Talks &amp; Presentations</h2>
+      <h3>Upcoming Invited Talks</h3>
       <ul>
         <li><strong>INFORMS Annual Meeting</strong> (October 2025), Atlanta, Georgia</li>
         <li><strong>Israeli Game Theory Day</strong> (2025)</li>
@@ -256,34 +405,33 @@
         <li>Technion Game Theory Seminar (2022)</li>
         <li>Harvard CMSA Big Data Conference (2021)</li>
       </ul>
-       <h3>Conference Presentations</h3>
-       <p>Stony Brook Game Theory Festival (2025), ORSIS (2023-25), Games World Congress (2016, 2021), EC Workshop (2019), and others.</p>
+      <h3>Conference Presentations</h3>
+      <p>Stony Brook Game Theory Festival (2025), ORSIS (2023-25), Games World Congress (2016, 2021), EC Workshop (2019), and others.</p>
     </section>
 
     <section id="additional">
-        <h2>Additional</h2>
-        <p>Prior industry experience: Data Scientist, Taboola (2014-2015).</p>
-    </section>
-    
-    <section id="recommenders">
-        <h2>Recommenders</h2>
-        <p><strong>Prof. Rann Smorodinsky</strong><br>
-        Professor, Faculty of Data and Decision Sciences, Technion<br>
-        <a href="mailto:rann@technion.ac.il">rann@technion.ac.il</a></p>
-        
-        <p><strong>Prof. Itai Arieli</strong><br>
-        Associate Professor, Department of Economics, University of Toronto<br>
-        <a href="mailto:itai.arieli@utoronto.ca">itai.arieli@utoronto.ca</a></p>
-        
-        <p><strong>Prof. Itai Ashlagi</strong><br>
-        Professor, Management Science and Engineering, Stanford University<br>
-        <a href="mailto:iashlagi@stanford.edu">iashlagi@stanford.edu</a></p>
-        
-        <p><strong>Prof. Scott Duke Kominers</strong><br>
-        Professor, Harvard Business School<br>
-        <a href="mailto:skominers@hbs.edu">skominers@hbs.edu</a></p>
+      <h2>Additional</h2>
+      <p>Prior industry experience: Data Scientist, Taboola (2014-2015).</p>
     </section>
 
+    <section id="recommenders">
+      <h2>Recommenders</h2>
+      <p><strong>Prof. Rann Smorodinsky</strong><br>
+      Professor, Faculty of Data and Decision Sciences, Technion<br>
+      <a href="mailto:rann@technion.ac.il">rann@technion.ac.il</a></p>
+
+      <p><strong>Prof. Itai Arieli</strong><br>
+      Associate Professor, Department of Economics, University of Toronto<br>
+      <a href="mailto:itai.arieli@utoronto.ca">itai.arieli@utoronto.ca</a></p>
+
+      <p><strong>Prof. Itai Ashlagi</strong><br>
+      Professor, Management Science and Engineering, Stanford University<br>
+      <a href="mailto:iashlagi@stanford.edu">iashlagi@stanford.edu</a></p>
+
+      <p><strong>Prof. Scott Duke Kominers</strong><br>
+      Professor, Harvard Business School<br>
+      <a href="mailto:skominers@hbs.edu">skominers@hbs.edu</a></p>
+    </section>
   </main>
 
   <footer>
