@@ -18,7 +18,7 @@
   </script>
 
   <style>
-    /* ==== Global screen-optimized defaults (same as home) ==== */
+    /* ==== Global screen-optimized defaults (same as index) ==== */
     :root{
       --bg: #ffffff;            /* pure white */
       --text: #111827;          /* near-black for contrast */
@@ -31,7 +31,6 @@
     }
 
     html { font-size: clamp(18px, 1.05vw + 8px, 20px); }
-
     body {
       margin: 0;
       background: var(--bg);
@@ -43,6 +42,7 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    /* Page sections (same rhythm as index) */
     header, main, footer {
       width: 100%;
       margin: 0;
@@ -54,8 +54,8 @@
     header p { margin: 6px 0; }
     header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
 
-    /* Top site nav (same treatment as home) */
-    nav.site-nav, nav.section-nav {
+    /* Primary nav (identical to index) */
+    nav {
       width: 100%;
       margin: 0;
       padding: 10px clamp(24px, 5vw, 80px) 0;
@@ -65,28 +65,52 @@
       border-top: 1px solid var(--border);
       box-sizing: border-box;
     }
-    nav.site-nav a, nav.section-nav a {
+    nav a {
       color: var(--brand);
       text-decoration: none;
       padding: 8px 10px;
       border-radius: 10px;
     }
-    nav.site-nav a:hover, nav.section-nav a:hover {
+    nav a:hover {
       background: #f9fafb;
       text-decoration: underline;
       text-underline-offset: 3px;
     }
 
-    /* Section spacing */
+    /* Section spacing & type */
     main section { margin: 26px 0; }
     h2 { margin: 0 0 10px; line-height: 1.25; }
     h3 { margin: 16px 0 8px; }
-
-    /* Body copy */
-    a { color: var(--brand); }
-    p { margin: 12px 0; }
+    a  { color: var(--brand); }
+    p  { margin: 12px 0; }
     ul { margin: 10px 0 16px 22px; }
     li { margin: 6px 0; }
+
+    /* Hero block (reused style from index’s .jmp-hero) */
+    .cv-hero {
+      background: #fffbea;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      margin: 24px 0;
+      max-width: none;
+    }
+    .cv-hero h3 { margin: 0 0 8px; }
+    .cv-hero p  { margin: 8px 0; }
+    .hero-links a {
+      display: inline-block;
+      margin-right: 10px;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--brand);
+    }
+    .hero-links a:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
 
     /* Footer */
     footer {
@@ -98,32 +122,23 @@
 
     /* Small screens */
     @media (max-width: 640px){
-      nav.site-nav, nav.section-nav {
-        gap: 10px;
-        padding: 8px clamp(16px, 4vw, 24px) 0;
-      }
-      header, main, footer {
-        padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px);
-      }
+      nav { gap: 10px; padding: 8px clamp(16px, 4vw, 24px) 0; }
+      header, main, footer { padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px); }
     }
 
     /* Medium screens */
     @media (min-width: 641px) and (max-width: 1024px) {
-      header, main, footer {
-        padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px);
-      }
-      nav.site-nav, nav.section-nav {
-        padding: 10px clamp(32px, 6vw, 64px) 0;
-      }
+      header, main, footer { padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px); }
+      nav { padding: 10px clamp(32px, 6vw, 64px) 0; }
     }
 
     /* Large screens */
     @media (min-width: 1400px) {
       header, main, footer { padding: 32px 120px; }
-      nav.site-nav, nav.section-nav { padding: 10px 120px 0; }
+      nav { padding: 10px 120px 0; }
     }
 
-    /* === Full-bleed width + full viewport height overrides (same as home) === */
+    /* === Full-bleed width + full viewport height overrides (same as index fix) === */
     html, body { height: 100%; }
     body {
       min-height: 100vh;
@@ -131,15 +146,15 @@
       display: flex;
       flex-direction: column;
     }
-    header, nav.site-nav, nav.section-nav, main, footer {
-      padding-inline: 0 !important;   /* remove side gutters */
+    header, nav, main, footer {
+      padding-inline: 0 !important;  /* align with index full-bleed tweak */
       width: 100%;
       margin: 0;
       box-sizing: border-box;
     }
-    main { flex: 1 1 auto; }          /* push footer to bottom */
+    main { flex: 1 1 auto; }
 
-    /* Neutralize any constraining wrappers from style.css */
+    /* If style.css defines a constraining wrapper, neutralize it */
     .container, .wrapper, .content, .page, .site, .main {
       max-width: none !important;
       margin: 0 !important;
@@ -151,54 +166,37 @@
   <header>
     <h1>Moran Koren</h1>
     <p>Assistant Professor (Tenure Track), Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev</p>
-    <p>
-      Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a> ·
-      Location: Beer-Sheva, Israel ·
-      Homepage: <a href="https://mkoren.org" target="_blank" rel="noopener">mkoren.org</a> ·
-      ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a> ·
-      Scopus ID: 57198777365
+    <p>Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a> · ORCID:
+      <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a>
     </p>
-    <p><strong>Research Interests:</strong> Operations & Economics; Information/Mechanism Design; Market Platforms; Algorithmic Screening</p>
   </header>
 
-  <!-- Primary site nav (matches home) -->
-  <nav class="site-nav" aria-label="Primary">
+  <!-- Primary site nav (matches index) -->
+  <nav aria-label="Primary">
     <a href="index.html">Home</a>
     <a href="cv.html" aria-current="page">CV</a>
     <a href="publications.html">Publications</a>
     <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">My Substack on AI Economics</a>
   </nav>
 
-  <!-- Section nav (internal anchors for this page) -->
-  <nav class="section-nav" aria-label="CV Sections">
-    <a href="#research">Research</a>
-    <a href="#appointments">Appointments</a>
-    <a href="#publications">Publications</a>
-    <a href="#pipeline">Pipeline</a>
-    <a href="#education">Education</a>
-    <a href="#grants">Grants</a>
-    <a href="#awards">Awards</a>
-    <a href="#teaching">Teaching</a>
-    <a href="#service">Service</a>
-    <a href="#memberships">Memberships</a>
-    <a href="#talks">Talks</a>
-    <a href="#additional">Additional</a>
-    <a href="#recommenders">Recommenders</a>
-  </nav>
-
   <main>
-    <p style="margin:12px 0;">
-      <a href="https://www.dropbox.com/scl/fi/r0rkpu1ar5f9ccr6bpj4n/Koren_short_cv.pdf?rlkey=icxp6mgj5wj0y42fp84mxwzqv&dl=0" target="_blank" rel="noopener">Download Full CV (PDF)</a> ·
-      <a href="index.html">← Back to Home</a>
-    </p>
+    <!-- CV hero: mirrors index’s featured block -->
+    <section class="cv-hero" aria-labelledby="cv-hero-title">
+      <h3 id="cv-hero-title">Curriculum Vitae — Snapshot &amp; Quick Links</h3>
+      <p><strong>Research areas:</strong> Game theory, mechanism design, operations &amp; information economics, platform markets, algorithmic screening.</p>
+      <div class="hero-links">
+        <a href="https://www.dropbox.com/scl/fi/r0rkpu1ar5f9ccr6bpj4n/Koren_short_cv.pdf?rlkey=icxp6mgj5wj0y42fp84mxwzqv&dl=0" target="_blank" rel="noopener">Download Full CV (PDF)</a>
+        <a href="publications.html">Publications Page</a>
+      </div>
+    </section>
 
     <section id="research">
       <h2>Research Profile</h2>
       <p>
-        Operations & Economics scholar studying how <strong>screening/gatekeeping</strong>, <strong>allocation</strong>, and <strong>pricing</strong> shape behavior and the <strong>information</strong> managers rely on.
+        Operations &amp; Economics scholar studying how <strong>screening/gatekeeping</strong>, <strong>allocation</strong>, and <strong>pricing</strong> shape behavior and the <strong>information</strong> managers rely on.
         I build game-theoretic models and experiments to design <strong>implementable mechanisms</strong> for hiring and service systems, organ/platform allocation, and data-driven screening.
         Published in <strong>Management Science</strong>, <strong>Theoretical Economics</strong>, <strong>Economic Theory</strong>, <strong>GEB</strong>, with ML-incentives work in <strong>ICML</strong> and <strong>NeurIPS</strong>;
-        supported by <strong>ISF (personal & equipment)</strong> and <strong>MOST</strong> grants.
+        supported by <strong>ISF (personal &amp; equipment)</strong> and <strong>MOST</strong> grants.
       </p>
       <p><strong>Job talk:</strong> <em>The Gatekeeper Effect</em>—OM mechanisms for screening under uncertainty (<em>Management Science</em>, 2024).</p>
     </section>
@@ -244,26 +242,26 @@
       <h3>Journal Articles</h3>
       <ul>
         <li><strong>Koren, M.</strong> (2024). "The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes." <em>Management Science</em>. (e-pub ahead of print).</li>
-        <li>Danino, G., <strong>Koren, M.</strong>, & Madmon, O. (2025). "A Strategy-Proof Mechanism for Ownership Restructuring in Privately Owned Assets." <em>Journal of Economics & Management Strategy</em>. (forthcoming).</li>
-        <li>Arieli, I., <strong>Koren, M.</strong>, & Smorodinsky, R. (2024). "Information Aggregation in Large Collective Purchases." <em>Economic Theory</em>, 78(1), 295–345.</li>
-        <li>Cohen, A., Deligkas, A., & <strong>Koren, M.</strong> (2023). "Learning Approximately Optimal Contracts." <em>Theoretical Computer Science</em>, 980, 114219.</li>
-        <li>Arieli, I., <strong>Koren, M.</strong>, & Smorodinsky, R. (2022). "The Implication of Pricing on Social Learning." <em>Theoretical Economics</em>, 17(4), 1761–1802.</li>
-        <li><strong>Koren, M.</strong> & Mueller-Frank, M. (2022). "The Welfare Costs of Informationally Efficient Prices." <em>Games and Economic Behavior</em>, 131, 186–196.</li>
+        <li>Danino, G., <strong>Koren, M.</strong>, &amp; Madmon, O. (2025). "A Strategy-Proof Mechanism for Ownership Restructuring in Privately Owned Assets." <em>Journal of Economics &amp; Management Strategy</em>. (forthcoming).</li>
+        <li>Arieli, I., <strong>Koren, M.</strong>, &amp; Smorodinsky, R. (2024). "Information Aggregation in Large Collective Purchases." <em>Economic Theory</em>, 78(1), 295–345.</li>
+        <li>Cohen, A., Deligkas, A., &amp; <strong>Koren, M.</strong> (2023). "Learning Approximately Optimal Contracts." <em>Theoretical Computer Science</em>, 980, 114219.</li>
+        <li>Arieli, I., <strong>Koren, M.</strong>, &amp; Smorodinsky, R. (2022). "The Implication of Pricing on Social Learning." <em>Theoretical Economics</em>, 17(4), 1761–1802.</li>
+        <li><strong>Koren, M.</strong> &amp; Mueller-Frank, M. (2022). "The Welfare Costs of Informationally Efficient Prices." <em>Games and Economic Behavior</em>, 131, 186–196.</li>
       </ul>
       <h3>Refereed Conference Proceedings</h3>
       <ul>
-        <li>Amir, D., Hoter, B., & <strong>Koren, M.</strong> (2025). "Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment." <em>WINE 2025</em>. (acceptance rate: 29.8%).</li>
-        <li>Hoter, B., <strong>Koren, M.</strong>, Nitzan, D., Shapira, S., & Talmon, N. (2025). "Enhancing Food Security with Blockchain: Developing a Web3 Application." <em>IEEE ISCC 2025</em>. (acceptance rate: 36.6%, CORE B).</li>
-        <li>Havin, M., Wharton Kleinman, T., <strong>Koren, M.</strong>, Goldstein, A., & Dover, Y. (2025). "Can (A)I Change Your Mind?" <em>CogSci 2025</em>. (acceptance rate: ~30%, CORE B).</li>
-        <li>Horowitz, G., Sommer, Y., <strong>Koren, M.</strong>, & Rosenfeld, N. (2024). "Classification Under Strategic Self-Selection." <em>ICML 2024</em>. (acceptance rate: 27.5%, CORE A*).</li>
-        <li>Cohen, A., Deligkas, A., & <strong>Koren, M.</strong> (2022). "Learning Approximately Optimal Contracts." <em>SAGT 2022</em>. (acceptance rate: 41%, CORE B).</li>
-        <li>Kang, J., <strong>Koren, M.</strong>, Monachou, F., & Ashlagi, I. (2021). "Counterbalancing Learning and Strategic Incentives in Allocation Markets." <em>NeurIPS 2021</em>. (acceptance rate: 26%, CORE A*).</li>
-        <li>Ban, A., & <strong>Koren, M.</strong> (2020). "Sequential Fundraising and Social Insurance." <em>ACM EC 2020</em>. (acceptance rate: 20%, CORE A*).</li>
+        <li>Amir, D., Hoter, B., &amp; <strong>Koren, M.</strong> (2025). "Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment." <em>WINE 2025</em>. (acceptance rate: 29.8%).</li>
+        <li>Hoter, B., <strong>Koren, M.</strong>, Nitzan, D., Shapira, S., &amp; Talmon, N. (2025). "Enhancing Food Security with Blockchain: Developing a Web3 Application." <em>IEEE ISCC 2025</em>. (acceptance rate: 36.6%, CORE B).</li>
+        <li>Havin, M., Wharton Kleinman, T., <strong>Koren, M.</strong>, Goldstein, A., &amp; Dover, Y. (2025). "Can (A)I Change Your Mind?" <em>CogSci 2025</em>. (acceptance rate: ~30%, CORE B).</li>
+        <li>Horowitz, G., Sommer, Y., <strong>Koren, M.</strong>, &amp; Rosenfeld, N. (2024). "Classification Under Strategic Self-Selection." <em>ICML 2024</em>. (acceptance rate: 27.5%, CORE A*).</li>
+        <li>Cohen, A., Deligkas, A., &amp; <strong>Koren, M.</strong> (2022). "Learning Approximately Optimal Contracts." <em>SAGT 2022</em>. (acceptance rate: 41%, CORE B).</li>
+        <li>Kang, J., <strong>Koren, M.</strong>, Monachou, F., &amp; Ashlagi, I. (2021). "Counterbalancing Learning and Strategic Incentives in Allocation Markets." <em>NeurIPS 2021</em>. (acceptance rate: 26%, CORE A*).</li>
+        <li>Ban, A., &amp; <strong>Koren, M.</strong> (2020). "Sequential Fundraising and Social Insurance." <em>ACM EC 2020</em>. (acceptance rate: 20%, CORE A*).</li>
       </ul>
     </section>
 
     <section id="pipeline">
-      <h2>Selected Pipeline (R&R / Major Revision)</h2>
+      <h2>Selected Pipeline (R&amp;R / Major Revision)</h2>
       <ul>
         <li>
           <p><strong>Counterbalancing Learning and Strategic Incentives in Allocation Markets</strong><br>
@@ -414,28 +412,18 @@
       <p>Prior industry experience: Data Scientist, Taboola (2014-2015).</p>
     </section>
 
-    <section id="recommenders">
-      <h2>Recommenders</h2>
-      <p><strong>Prof. Rann Smorodinsky</strong><br>
-      Professor, Faculty of Data and Decision Sciences, Technion<br>
-      <a href="mailto:rann@technion.ac.il">rann@technion.ac.il</a></p>
-
-      <p><strong>Prof. Itai Arieli</strong><br>
-      Associate Professor, Department of Economics, University of Toronto<br>
-      <a href="mailto:itai.arieli@utoronto.ca">itai.arieli@utoronto.ca</a></p>
-
-      <p><strong>Prof. Itai Ashlagi</strong><br>
-      Professor, Management Science and Engineering, Stanford University<br>
-      <a href="mailto:iashlagi@stanford.edu">iashlagi@stanford.edu</a></p>
-
-      <p><strong>Prof. Scott Duke Kominers</strong><br>
-      Professor, Harvard Business School<br>
-      <a href="mailto:skominers@hbs.edu">skominers@hbs.edu</a></p>
+    <!-- Keep the LinkedIn feed link to mirror index’s “News & Student Updates” section -->
+    <section aria-labelledby="news-updates">
+      <h2 id="news-updates">
+        <a href="https://tinyurl.com/gtg2025" target="_blank" rel="noopener">
+          News &amp; Student Updates — BGU Game Theory &amp; Agentic Design Research Group (LinkedIn)
+        </a>
+      </h2>
     </section>
   </main>
 
   <footer>
-    <p>&copy; 2025 Moran Koren. Last updated: October 1, 2025</p>
+    <p>&copy; 2025 Moran Koren</p>
   </footer>
 </body>
 </html>
