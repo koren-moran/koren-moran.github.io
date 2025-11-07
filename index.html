@@ -30,7 +30,7 @@
       --ticker-speed: 30s; /* baseline duration; JS will update */
     }
 
-    html { font-size: clamp(18px, 1.05vw + 8px, 20px); }
+    html { font-size: clamp(18px, 1.05vw + 8px, 20px); scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--bg);
@@ -145,6 +145,112 @@
       .news-track { animation: none !important; transform: none !important; }
     }
 
+    /* ======== News Table Section ======== */
+    .news-table-section {
+      background: #f9fafb;
+      border-top: 1px solid var(--border);
+      padding: 32px clamp(24px, 5vw, 80px);
+      margin-top: 32px;
+    }
+
+    .news-table-section h2 {
+      margin: 0 0 20px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .news-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .news-table thead {
+      background: #f3f4f6;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .news-table th {
+      text-align: left;
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 0.9em;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .news-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s ease;
+    }
+
+    .news-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .news-table tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .news-table td {
+      padding: 16px 18px;
+      vertical-align: top;
+    }
+
+    .news-table .date-cell {
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 0.95em;
+      width: 140px;
+    }
+
+    .news-table .content-cell {
+      line-height: 1.6;
+    }
+
+    .news-table .content-cell strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .news-table .content-cell a {
+      color: var(--brand);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--brand);
+    }
+
+    .news-table .content-cell a:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .back-to-top {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .back-to-top a {
+      color: var(--brand);
+      text-decoration: none;
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      display: inline-block;
+      font-size: 0.9em;
+      transition: background 0.15s ease;
+    }
+
+    .back-to-top a:hover {
+      background: #f3f4f6;
+      text-decoration: none;
+    }
+
     .sr-only {
       position: absolute !important;
       width: 1px; height: 1px;
@@ -163,16 +269,21 @@
       nav { gap: 10px; padding: 8px clamp(16px, 4vw, 24px) 0; }
       header, main, footer { padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px); }
       .news-reel .inner { padding: 10px clamp(16px, 4vw, 24px); }
+      .news-table-section { padding: 24px clamp(16px, 4vw, 24px); }
+      .news-table th, .news-table td { padding: 12px 14px; }
+      .news-table .date-cell { display: block; margin-bottom: 8px; width: auto; }
     }
     @media (min-width: 641px) and (max-width: 1024px) {
       header, main, footer { padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px); }
       nav { padding: 10px clamp(32px, 6vw, 64px) 0; }
       .news-reel .inner { padding: 10px clamp(32px, 6vw, 64px); }
+      .news-table-section { padding: 28px clamp(32px, 6vw, 64px); }
     }
     @media (min-width: 1400px) {
       header, main, footer { padding: 32px 120px; }
       nav { padding: 10px 120px 0; }
       .news-reel .inner { padding: 10px 120px; }
+      .news-table-section { padding: 32px 120px; }
     }
 
     header, nav, main, footer { padding-inline: 0 !important; width: 100%; margin: 0; box-sizing: border-box; }
@@ -183,7 +294,7 @@
     }
   </style>
 </head>
-<body>
+<body id="top">
   <header>
     <h1>Moran Koren</h1>
     <p>Assistant Professor (Tenure Track), Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev</p>
@@ -196,10 +307,11 @@
     <a href="index.html">Home</a>
     <a href="cv.html">CV</a>
     <a href="publications.html">Publications</a>
+    <a href="#news-table-section">News</a>
     <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">My Substack on AI Economics</a>
   </nav>
 
-  <!-- NEWS REEL -->
+  <!-- NEWS REEL (ticker will be populated from table) -->
   <section class="news-reel" aria-labelledby="news-reel-title">
     <div class="inner">
       <h3 id="news-reel-title" class="label">
@@ -208,26 +320,7 @@
 
       <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
         <div class="news-track">
-          <span class="news-item">
-            <time datetime="2025-10-17">Oct 17, 2025</time>
-            Next week at the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, I’ll present
-            <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
-              <em>“Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments.”</em>
-            </a>
-            See you on the 26th, 8:30–8:45 AM.
-          </span>
-
-          <span class="news-item">
-            <time datetime="2025-09-30">Sep 30, 2025</time>
-            Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">“Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment.”</a></em>,
-            led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
-            <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
-          </span>
-
-          <span class="news-item">
-            <time datetime="2025-07-15">Jul 15, 2025</time>
-            Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
-          </span>
+          <!-- Will be populated from the news table by JavaScript -->
         </div>
       </div>
 
@@ -235,11 +328,46 @@
     </div>
   </section>
 
-  <!-- Single, immediate-start ticker script -->
   <script>
     (function () {
       const TICKER_SEL = '.news-ticker';
       const TRACK_SEL  = '.news-track';
+      const TABLE_SEL  = '#news-table';
+
+      function populateTickerFromTable() {
+        const track = document.querySelector(TRACK_SEL);
+        const table = document.querySelector(TABLE_SEL);
+        
+        if (!track || !table) return;
+        
+        // Clear existing items
+        track.innerHTML = '';
+        
+        // Get all rows from tbody
+        const rows = table.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+          const dateCell = row.querySelector('.date-cell');
+          const contentCell = row.querySelector('.content-cell');
+          
+          if (dateCell && contentCell) {
+            const newsItem = document.createElement('span');
+            newsItem.className = 'news-item';
+            
+            // Clone the content to preserve links and formatting
+            const dateTime = dateCell.getAttribute('data-datetime') || '';
+            const dateText = dateCell.textContent.trim();
+            const contentHTML = contentCell.innerHTML;
+            
+            newsItem.innerHTML = `
+              <time datetime="${dateTime}">${dateText}</time>
+              ${contentHTML}
+            `;
+            
+            track.appendChild(newsItem);
+          }
+        });
+      }
 
       function duplicateOnce(track) {
         if (track.dataset.mkCloned) return;
@@ -270,6 +398,9 @@
         const track  = ticker && ticker.querySelector(TRACK_SEL);
         if (!ticker || !track) return;
 
+        // Populate ticker from table
+        populateTickerFromTable();
+
         // Respect reduced motion
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           track.style.animation = 'none';
@@ -298,8 +429,8 @@
 
       // Optional: if you dynamically add/remove news items later
       const mo = new MutationObserver(initTicker);
-      const target = document.querySelector(TRACK_SEL);
-      if (target) mo.observe(target, { childList: true, subtree: false });
+      const target = document.querySelector(TABLE_SEL);
+      if (target) mo.observe(target, { childList: true, subtree: true });
     })();
   </script>
 
@@ -340,6 +471,65 @@
       </h2>
     </section>
   </main>
+
+  <!-- NEWS TABLE SECTION -->
+  <section class="news-table-section" id="news-table-section" aria-labelledby="news-table-title">
+    <h2 id="news-table-title">Recent News & Updates</h2>
+    <table class="news-table" id="news-table">
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
+          <td class="content-cell">
+            🎉 We’re proud to celebrate an exciting achievement in our research group!
+            <a href="https://www.linkedin.com/in/barhoter/">Bar Hoter</a>, has been awarded the KKL Fellowship for Sustainability and Climate Change, in memory of Goldman Sonnenfeld.
+              This prestigious fellowship recognizes academic excellence and contributions to research in the fields of sustainability, environment, and climate change.
+               The committee highlighted Bar’s outstanding performance and his commitment to advancing impactful research.
+                👏 Congratulations, Bar! We’re so proud of you and wish you continued success in your research journey.
+          </td>
+        </tr>
+          <tr>
+          <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
+          <td class="content-cell">
+            Yesterday was the first lesson of my revised course in game theory and agentic design. The course comprises an introduction for game theory and a hands-on workshop in agent design. In the GT part, we studied how to model real world scenarios into a formal game, what is an equilibrium, and started discussing how to find it.
+            In the agent design workshop, we learned what are agents, how they differ from previous programing paradigms and some of the tools available to construct agentic workflows. Next week the students will present their first "job-seeking" agent, designed to help job seekers find and secure a position.
+          </td>
+        </tr>
+        <tr>
+          <td class="date-cell" data-datetime="2025-11-07">Oct 17, 2025</td>
+          <td class="content-cell">
+            We are now after the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, where I presented
+            <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
+              <em>"Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments."</em>
+            </a>
+            It was great to meet friends and collueges. Old and new. Discuss research, and enjoy a wonderful venue. 
+          </td>
+        </tr>
+        <tr>
+          <td class="date-cell" data-datetime="2025-09-30">Nov 7, 2025</td>
+          <td class="content-cell">
+            Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">"Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment."</a></em>,
+            led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
+            <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
+          </td>
+        </tr>
+        <tr>
+          <td class="date-cell" data-datetime="2025-07-15">Jul 15, 2025</td>
+          <td class="content-cell">
+            Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="back-to-top">
+      <a href="#top">↑ Back to Top</a>
+    </div>
+  </section>
 
   <footer>
     <p>&copy; 2025 Moran Koren</p>
