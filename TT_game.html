@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Tenure Track Bros.</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Press+Start+2P&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0f0a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+canvas {
+  border: 4px solid #e94560;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(233, 69, 96, 0.3), 0 0 80px rgba(233, 69, 96, 0.1);
+}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2VTLVLV9QM');
+  </script>
+
+</head>
+<body>
+<canvas id="game"></canvas>
+<script>
+// ============================================================
+// SUPER TENURE TRACK BROS.
+// A platformer parody of the academic tenure track
+// ============================================================
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+const GAME_W = 800;
+const GAME_H = 480;
+const TILE = 32;
+
+canvas.width = GAME_W;
+canvas.height = GAME_H;
+
+function resizeCanvas() {
+  const scale = Math.min(window.innerWidth / GAME_W, window.innerHeight / GAME_H) * 0.95;
+  canvas.style.width = (GAME_W * scale) + 'px';
+  canvas.style.height = (GAME_H * scale) + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// ============================================================
+// INPUT
+// ============================================================
+const keys = {};
+const justPressed = {};
+window.addEventListener('keydown', e => {
+  if (!keys[e.code]) justPressed[e.code] = true;
+  keys[e.code] = true;
+  e.preventDefault();
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; e.preventDefault(); });
+
+// ============================================================
+// DRAWING HELPERS
+// ============================================================
+function drawRoundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawCircle(x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+}
+
+function drawEllipse(x, y, rx, ry) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+}
+
+function lerpColor(a, b, t) {
+  const ah = parseInt(a.replace('#', ''), 16);
+  const bh = parseInt(b.replace('#', ''), 16);
+  const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
+  const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+  const rr = Math.round(ar + (br - ar) * t);
+  const rg = Math.round(ag + (bg - ag) * t);
+  const rb = Math.round(ab + (bb - ab) * t);
+  return `rgb(${rr},${rg},${rb})`;
+}
+
+// ============================================================
+// LEVEL THEMES
+// ============================================================
+const THEMES = [
+  { // PhD Student - Cheerful campus
+    skyTop: '#4fc3f7', skyBot: '#b3e5fc', grass: '#66bb6a', grassDark: '#43a047',
+    dirt: '#8d6e63', dirtDark: '#6d4c41', platform: '#a1887f', platformTop: '#bcaaa4',
+    bgHill1: '#81c784', bgHill2: '#66bb6a', bgHill3: '#a5d6a7',
+    cloudColor: 'rgba(255,255,255,0.9)', flowerColors: ['#ef5350','#ffee58','#ab47bc','#ff7043'],
+    treeColor: '#388e3c', treeTrunk: '#5d4037',
+  },
+  { // Postdoc - Slightly muted, autumn feel
+    skyTop: '#ffb74d', skyBot: '#ffe0b2', grass: '#aed581', grassDark: '#8bc34a',
+    dirt: '#a1887f', dirtDark: '#8d6e63', platform: '#bcaaa4', platformTop: '#d7ccc8',
+    bgHill1: '#c5e1a5', bgHill2: '#aed581', bgHill3: '#dce775',
+    cloudColor: 'rgba(255,245,230,0.85)', flowerColors: ['#ffa726','#ef5350','#ffca28','#ff7043'],
+    treeColor: '#e65100', treeTrunk: '#4e342e',
+  },
+  { // Assistant Prof - Urban/institutional
+    skyTop: '#90a4ae', skyBot: '#cfd8dc', grass: '#78909c', grassDark: '#607d8b',
+    dirt: '#78909c', dirtDark: '#546e7a', platform: '#90a4ae', platformTop: '#b0bec5',
+    bgHill1: '#78909c', bgHill2: '#607d8b', bgHill3: '#90a4ae',
+    cloudColor: 'rgba(200,210,220,0.7)', flowerColors: ['#42a5f5','#78909c','#b0bec5','#26c6da'],
+    treeColor: '#546e7a', treeTrunk: '#455a64',
+  },
+  { // Associate Prof - Warm, golden
+    skyTop: '#ff8a65', skyBot: '#ffccbc', grass: '#ffb74d', grassDark: '#ffa726',
+    dirt: '#d7a86e', dirtDark: '#bf8040', platform: '#dcc69c', platformTop: '#efe0c0',
+    bgHill1: '#ffcc80', bgHill2: '#ffb74d', bgHill3: '#ffe0b2',
+    cloudColor: 'rgba(255,230,200,0.8)', flowerColors: ['#ffd54f','#ff8a65','#ffab40','#e65100'],
+    treeColor: '#ff6f00', treeTrunk: '#5d4037',
+  },
+  { // Tenure Review - Dramatic purple/night
+    skyTop: '#1a0533', skyBot: '#4a148c', grass: '#7e57c2', grassDark: '#5e35b1',
+    dirt: '#4a148c', dirtDark: '#311b92', platform: '#7e57c2', platformTop: '#b39ddb',
+    bgHill1: '#4a148c', bgHill2: '#311b92', bgHill3: '#6a1b9a',
+    cloudColor: 'rgba(150,120,200,0.5)', flowerColors: ['#ce93d8','#ba68c8','#e040fb','#ea80fc'],
+    treeColor: '#6a1b9a', treeTrunk: '#311b92',
+  },
+];
+
+// ============================================================
+// CUTE CHARACTER DRAWING
+// ============================================================
+function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
+  ctx.save();
+  const cx = x + w / 2;
+
+  if (!facingRight) {
+    ctx.translate(cx, 0);
+    ctx.scale(-1, 1);
+    ctx.translate(-cx, 0);
+  }
+
+  // Bounce animation
+  const bounce = Math.sin(frame * Math.PI / 2) * 2;
+  const drawY = y - Math.abs(bounce);
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  drawEllipse(x + w / 2, y + h, w / 2.2, 4);
+  ctx.fill();
+
+  // Body (round, chibi style)
+  const bodyGrad = ctx.createLinearGradient(x, drawY + 14, x + w, drawY + 14);
+  if (powered) {
+    bodyGrad.addColorStop(0, '#FFD700');
+    bodyGrad.addColorStop(1, '#FFA000');
+  } else {
+    bodyGrad.addColorStop(0, '#8d6e63');
+    bodyGrad.addColorStop(1, '#6d4c41');
+  }
+  ctx.fillStyle = bodyGrad;
+  drawRoundRect(x + 3, drawY + 14, w - 6, h - 18, 5);
+  ctx.fill();
+
+  // Elbow patches (cute detail)
+  ctx.fillStyle = powered ? '#ffcc02' : '#5d4037';
+  drawCircle(x + 4, drawY + 22, 3);
+  ctx.fill();
+  drawCircle(x + w - 4, drawY + 22, 3);
+  ctx.fill();
+
+  // Tie
+  ctx.fillStyle = '#ef5350';
+  ctx.beginPath();
+  ctx.moveTo(x + w / 2, drawY + 14);
+  ctx.lineTo(x + w / 2 + 3, drawY + 20);
+  ctx.lineTo(x + w / 2, drawY + 27);
+  ctx.lineTo(x + w / 2 - 3, drawY + 20);
+  ctx.closePath();
+  ctx.fill();
+
+  // Legs with shoes (walking animation)
+  const legPhase = frame * 0.8;
+  const leftLegX = x + 6 + Math.sin(legPhase) * 2;
+  const rightLegX = x + w - 10 - Math.sin(legPhase) * 2;
+
+  // Legs
+  ctx.fillStyle = '#37474f';
+  drawRoundRect(leftLegX, drawY + h - 10, 6, 8, 2);
+  ctx.fill();
+  drawRoundRect(rightLegX, drawY + h - 10, 6, 8, 2);
+  ctx.fill();
+
+  // Shoes
+  ctx.fillStyle = '#4e342e';
+  drawRoundRect(leftLegX - 1, drawY + h - 4, 8, 4, 2);
+  ctx.fill();
+  drawRoundRect(rightLegX - 1, drawY + h - 4, 8, 4, 2);
+  ctx.fill();
+
+  // Head (big, cute, round)
+  const headY = drawY - 2;
+  const headGrad = ctx.createRadialGradient(x + w / 2, headY + 7, 2, x + w / 2, headY + 7, 13);
+  headGrad.addColorStop(0, '#ffe0b2');
+  headGrad.addColorStop(1, '#ffcc80');
+  ctx.fillStyle = headGrad;
+  drawRoundRect(x + 2, headY, w - 4, 18, 8);
+  ctx.fill();
+
+  // Blush circles
+  ctx.fillStyle = 'rgba(255,138,128,0.4)';
+  drawCircle(x + 5, headY + 11, 3);
+  ctx.fill();
+  drawCircle(x + w - 5, headY + 11, 3);
+  ctx.fill();
+
+  // Hair (messy academic)
+  ctx.fillStyle = '#4e342e';
+  drawRoundRect(x + 1, headY - 3, w - 2, 8, 5);
+  ctx.fill();
+  // Messy tufts
+  ctx.fillRect(x + 2, headY - 5, 3, 4);
+  ctx.fillRect(x + w / 2 - 1, headY - 6, 3, 5);
+  ctx.fillRect(x + w - 6, headY - 4, 3, 3);
+
+  // Glasses
+  ctx.strokeStyle = '#37474f';
+  ctx.lineWidth = 1.5;
+  // Left lens
+  drawRoundRect(x + 5, headY + 5, 7, 6, 2);
+  ctx.stroke();
+  // Right lens
+  drawRoundRect(x + w - 12, headY + 5, 7, 6, 2);
+  ctx.stroke();
+  // Bridge
+  ctx.beginPath();
+  ctx.moveTo(x + 12, headY + 8);
+  ctx.lineTo(x + w - 12, headY + 8);
+  ctx.stroke();
+
+  // Lens glare
+  ctx.fillStyle = 'rgba(200,230,255,0.4)';
+  ctx.fillRect(x + 6, headY + 6, 3, 2);
+  ctx.fillRect(x + w - 11, headY + 6, 3, 2);
+
+  // Eyes behind glasses
+  if (isDead) {
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1.5;
+    // X eyes
+    for (const ex of [x + 8, x + w - 10]) {
+      ctx.beginPath();
+      ctx.moveTo(ex, headY + 7); ctx.lineTo(ex + 3, headY + 10);
+      ctx.moveTo(ex + 3, headY + 7); ctx.lineTo(ex, headY + 10);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = '#333';
+    drawCircle(x + 9, headY + 8, 1.5);
+    ctx.fill();
+    drawCircle(x + w - 9, headY + 8, 1.5);
+    ctx.fill();
+  }
+
+  // Mouth
+  if (isDead) {
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 9, headY + 14);
+    ctx.lineTo(x + w - 9, headY + 14);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.arc(x + w / 2, headY + 13, 3, 0, Math.PI);
+    ctx.fill();
+  }
+
+  // Power-up glow
+  if (powered) {
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 15;
+    ctx.strokeStyle = `rgba(255,215,0,${0.4 + Math.sin(levelTimer * 0.15) * 0.2})`;
+    ctx.lineWidth = 2;
+    drawRoundRect(x - 1, drawY - 4, w + 2, h + 6, 8);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Sparkles
+    for (let i = 0; i < 3; i++) {
+      const sx2 = x + Math.sin(levelTimer * 0.1 + i * 2.1) * (w / 2 + 5) + w / 2;
+      const sy2 = drawY + Math.cos(levelTimer * 0.13 + i * 1.7) * (h / 2 + 3) + h / 2 - 4;
+      ctx.fillStyle = '#FFD700';
+      drawStar(sx2, sy2, 4, 4, 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
+// ============================================================
+// CUTE ENEMY DRAWING
+// ============================================================
+function drawEnemy(e, x, y) {
+  const bob = Math.sin(levelTimer * 0.06 + e.startX * 0.1) * 2;
+  const dy = y + bob;
+  const facingLeft = e.vx < 0;
+
+  ctx.save();
+  if (facingLeft) {
+    ctx.translate(x + e.w, 0);
+    ctx.scale(-1, 1);
+    x = 0;
+  }
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  drawEllipse(x + e.w / 2, y + e.h + 2, e.w / 2.5, 3);
+  ctx.fill();
+
+  switch (e.type) {
+    case 'reviewer2': {
+      // Cute angry mushroom-like blob
+      const grad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 3, x + e.w / 2, dy + 12, 18);
+      grad.addColorStop(0, '#ef5350');
+      grad.addColorStop(1, '#c62828');
+      ctx.fillStyle = grad;
+      drawRoundRect(x + 1, dy + 2, e.w - 2, e.h - 4, 10);
+      ctx.fill();
+
+      // Angry eyebrows
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + 5, dy + 10);
+      ctx.lineTo(x + 12, dy + 12);
+      ctx.moveTo(x + e.w - 5, dy + 10);
+      ctx.lineTo(x + e.w - 12, dy + 12);
+      ctx.stroke();
+
+      // Eyes (big white circles with pupils)
+      ctx.fillStyle = '#fff';
+      drawCircle(x + 9, dy + 14, 5);
+      ctx.fill();
+      drawCircle(x + e.w - 9, dy + 14, 5);
+      ctx.fill();
+      ctx.fillStyle = '#333';
+      drawCircle(x + 10, dy + 14, 2.5);
+      ctx.fill();
+      drawCircle(x + e.w - 8, dy + 14, 2.5);
+      ctx.fill();
+
+      // Angry mouth
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + 9, dy + 22);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 19, x + e.w - 9, dy + 22);
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('R2', x + 8, dy + e.h - 2);
+      break;
+    }
+
+    case 'bureaucrat': {
+      // Cute suit blob
+      const grad = ctx.createLinearGradient(x, dy, x, dy + e.h);
+      grad.addColorStop(0, '#90a4ae');
+      grad.addColorStop(1, '#607d8b');
+      ctx.fillStyle = grad;
+      drawRoundRect(x + 2, dy + 8, e.w - 4, e.h - 10, 8);
+      ctx.fill();
+
+      // Head
+      const headGrad = ctx.createRadialGradient(x + e.w / 2, dy + 6, 2, x + e.w / 2, dy + 6, 10);
+      headGrad.addColorStop(0, '#ffe0b2');
+      headGrad.addColorStop(1, '#ffcc80');
+      ctx.fillStyle = headGrad;
+      drawCircle(x + e.w / 2, dy + 6, 9);
+      ctx.fill();
+
+      // Tie
+      ctx.fillStyle = '#263238';
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2, dy + 12);
+      ctx.lineTo(x + e.w / 2 + 3, dy + 18);
+      ctx.lineTo(x + e.w / 2, dy + 24);
+      ctx.lineTo(x + e.w / 2 - 3, dy + 18);
+      ctx.closePath();
+      ctx.fill();
+
+      // Eyes (beady, annoyed)
+      ctx.fillStyle = '#333';
+      drawCircle(x + e.w / 2 - 4, dy + 5, 2);
+      ctx.fill();
+      drawCircle(x + e.w / 2 + 4, dy + 5, 2);
+      ctx.fill();
+
+      // Flat mouth
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2 - 3, dy + 10);
+      ctx.lineTo(x + e.w / 2 + 3, dy + 10);
+      ctx.stroke();
+
+      // Briefcase
+      ctx.fillStyle = '#5d4037';
+      drawRoundRect(x + e.w - 2, dy + e.h - 14, 8, 10, 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffd54f';
+      ctx.fillRect(x + e.w + 1, dy + e.h - 11, 4, 1);
+      break;
+    }
+
+    case 'imposter': {
+      // Ghostly translucent figure
+      const alpha = 0.45 + Math.sin(levelTimer * 0.08) * 0.2;
+      ctx.globalAlpha = alpha;
+
+      const grad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 3, x + e.w / 2, dy + e.h / 2, 18);
+      grad.addColorStop(0, '#ce93d8');
+      grad.addColorStop(1, '#7b1fa2');
+      ctx.fillStyle = grad;
+
+      // Ghost body
+      ctx.beginPath();
+      ctx.moveTo(x + 3, dy + e.h);
+      ctx.lineTo(x + 3, dy + 8);
+      ctx.quadraticCurveTo(x + e.w / 2, dy - 4, x + e.w - 3, dy + 8);
+      ctx.lineTo(x + e.w - 3, dy + e.h);
+      // Wavy bottom
+      for (let i = 0; i < 4; i++) {
+        const wx = x + 3 + i * ((e.w - 6) / 4);
+        const wx2 = x + 3 + (i + 0.5) * ((e.w - 6) / 4);
+        const wx3 = x + 3 + (i + 1) * ((e.w - 6) / 4);
+        ctx.quadraticCurveTo(wx2, dy + e.h + 5, wx3, dy + e.h);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Spooky eyes
+      ctx.fillStyle = '#fff';
+      drawEllipse(x + 8, dy + 12, 5, 6);
+      ctx.fill();
+      drawEllipse(x + e.w - 8, dy + 12, 5, 6);
+      ctx.fill();
+      ctx.fillStyle = '#4a148c';
+      drawCircle(x + 9, dy + 13, 2.5);
+      ctx.fill();
+      drawCircle(x + e.w - 7, dy + 13, 2.5);
+      ctx.fill();
+
+      // Open mouth
+      ctx.fillStyle = '#4a148c';
+      drawEllipse(x + e.w / 2, dy + 22, 4, 3);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
+
+      // Label floats
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.fillStyle = '#e1bee7';
+      ctx.font = '7px monospace';
+      ctx.fillText('fraud?', x + 2, dy - 2);
+      ctx.globalAlpha = 1;
+      break;
+    }
+
+    case 'teaching': {
+      // Walking stack of books with eyes
+      const bookColors = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc'];
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = bookColors[i];
+        drawRoundRect(x + 2 + (i % 2), dy + 4 + i * 5, e.w - 4 - (i % 2) * 2, 6, 2);
+        ctx.fill();
+        // Book spine lines
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(x + 4 + (i % 2), dy + 5 + i * 5, e.w - 8, 1);
+      }
+
+      // Eyes peeking out from between books
+      ctx.fillStyle = '#fff';
+      drawCircle(x + 8, dy + 10, 4);
+      ctx.fill();
+      drawCircle(x + e.w - 8, dy + 10, 4);
+      ctx.fill();
+      ctx.fillStyle = '#333';
+      drawCircle(x + 9, dy + 10, 2);
+      ctx.fill();
+      drawCircle(x + e.w - 7, dy + 10, 2);
+      ctx.fill();
+
+      // Stressed expression lines
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + e.w + 2, dy + 6);
+      ctx.lineTo(x + e.w + 5, dy + 4);
+      ctx.moveTo(x + e.w + 2, dy + 10);
+      ctx.lineTo(x + e.w + 5, dy + 10);
+      ctx.moveTo(x + e.w + 2, dy + 14);
+      ctx.lineTo(x + e.w + 5, dy + 16);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px monospace';
+      ctx.fillText('4/4', x + 8, dy + e.h - 1);
+      break;
+    }
+
+    case 'committee': {
+      // Three tiny cute figures huddled
+      for (let i = 0; i < 3; i++) {
+        const cx = x + 2 + i * 9;
+        const bodyColor = ['#546e7a', '#455a64', '#37474f'][i];
+
+        // Body
+        ctx.fillStyle = bodyColor;
+        drawRoundRect(cx, dy + 12, 8, 16, 3);
+        ctx.fill();
+
+        // Head
+        ctx.fillStyle = '#ffe0b2';
+        drawCircle(cx + 4, dy + 8, 5);
+        ctx.fill();
+
+        // Eyes (dots)
+        ctx.fillStyle = '#333';
+        drawCircle(cx + 3, dy + 7, 1);
+        ctx.fill();
+        drawCircle(cx + 6, dy + 7, 1);
+        ctx.fill();
+
+        // Serious mouth
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx + 2, dy + 10);
+        ctx.lineTo(cx + 6, dy + 10);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'dean': {
+      // Large imposing figure
+      // Robe
+      const robeGrad = ctx.createLinearGradient(x, dy + 20, x, dy + e.h);
+      robeGrad.addColorStop(0, '#880e4f');
+      robeGrad.addColorStop(1, '#4a0028');
+      ctx.fillStyle = robeGrad;
+      drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
+      ctx.fill();
+
+      // Gold trim
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 2;
+      drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
+      ctx.stroke();
+
+      // Head
+      const headGrad = ctx.createRadialGradient(x + e.w / 2, dy + 12, 3, x + e.w / 2, dy + 12, 14);
+      headGrad.addColorStop(0, '#ffe0b2');
+      headGrad.addColorStop(1, '#ffcc80');
+      ctx.fillStyle = headGrad;
+      drawRoundRect(x + 10, dy + 2, e.w - 20, 22, 10);
+      ctx.fill();
+
+      // Bald top with side hair
+      ctx.fillStyle = '#9e9e9e';
+      drawRoundRect(x + 8, dy + 10, 5, 10, 2);
+      ctx.fill();
+      drawRoundRect(x + e.w - 13, dy + 10, 5, 10, 2);
+      ctx.fill();
+
+      // Monocle
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 2;
+      drawCircle(x + e.w / 2 + 6, dy + 10, 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2 + 6, dy + 15);
+      ctx.lineTo(x + e.w / 2 + 6, dy + 22);
+      ctx.stroke();
+
+      // Eyes
+      ctx.fillStyle = '#333';
+      drawCircle(x + e.w / 2 - 5, dy + 10, 2);
+      ctx.fill();
+      drawCircle(x + e.w / 2 + 6, dy + 10, 2);
+      ctx.fill();
+
+      // Stern frown
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2 - 6, dy + 18);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 16, x + e.w / 2 + 6, dy + 18);
+      ctx.stroke();
+
+      // HP bar
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      drawRoundRect(x - 2, dy - 12, e.w + 4, 8, 3);
+      ctx.fill();
+      ctx.fillStyle = e.hp > e.maxHp / 2 ? '#66bb6a' : e.hp > 1 ? '#ffa726' : '#ef5350';
+      drawRoundRect(x, dy - 10, (e.w) * (e.hp / e.maxHp), 4, 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('THE DEAN', x + e.w / 2, dy - 14);
+      ctx.textAlign = 'left';
+      break;
+    }
+
+    case 'rejection': {
+      // Flying paper
+      const rot = Math.atan2(e.vy || 0, e.vx || 1);
+      ctx.save();
+      ctx.translate(x + e.w / 2, dy + e.h / 2);
+      ctx.rotate(rot * 0.3 + Math.sin(levelTimer * 0.2) * 0.2);
+      ctx.fillStyle = '#fff';
+      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2);
+      ctx.fill();
+      ctx.fillStyle = '#c62828';
+      ctx.font = 'bold 7px monospace';
+      ctx.fillText('REJ', -8, 3);
+      // Red stamp
+      ctx.strokeStyle = '#c62828';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-6, -4, 12, 8);
+      ctx.restore();
+      break;
+    }
+  }
+
+  ctx.restore();
+}
+
+// ============================================================
+// CUTE COLLECTIBLE DRAWING
+// ============================================================
+function drawCollectible(type, x, y, w, h) {
+  const glow = 0.3 + Math.sin(levelTimer * 0.1) * 0.15;
+
+  switch (type) {
+    case 'publication': {
+      // Glowing paper/scroll
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = 8 * glow * 2;
+
+      ctx.fillStyle = '#fff';
+      drawRoundRect(x + 3, y + 1, w - 6, h - 2, 3);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // Lines of text
+      ctx.fillStyle = '#90a4ae';
+      for (let i = 0; i < 3; i++) {
+        drawRoundRect(x + 6, y + 5 + i * 4, w - 12 - (i === 2 ? 4 : 0), 2, 1);
+        ctx.fill();
+      }
+
+      // Star on paper
+      ctx.fillStyle = '#ffd54f';
+      drawStar(x + w / 2, y + h - 5, 4, 4, 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'grant': {
+      // Shiny money bag
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 10 * glow * 2;
+
+      const grad = ctx.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, 12);
+      grad.addColorStop(0, '#66bb6a');
+      grad.addColorStop(1, '#2e7d32');
+      ctx.fillStyle = grad;
+      drawRoundRect(x + 3, y + 4, w - 6, h - 5, 6);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // Bag top
+      ctx.fillStyle = '#43a047';
+      drawEllipse(x + w / 2, y + 5, 6, 3);
+      ctx.fill();
+
+      // Dollar sign
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('$', x + w / 2, y + h - 4);
+      ctx.textAlign = 'left';
+
+      // Sparkle
+      ctx.fillStyle = '#fff';
+      drawStar(x + w - 4, y + 3, 4, 3, 1.5);
+      ctx.fill();
+      break;
+    }
+
+    case 'citation': {
+      // Glowing star
+      ctx.shadowColor = '#4fc3f7';
+      ctx.shadowBlur = 12 * glow * 2;
+
+      const grad = ctx.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, 10);
+      grad.addColorStop(0, '#e1f5fe');
+      grad.addColorStop(1, '#29b6f6');
+      ctx.fillStyle = grad;
+      drawStar(x + w / 2, y + h / 2, 5, 10, 5);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // Inner star
+      ctx.fillStyle = '#fff';
+      drawStar(x + w / 2, y + h / 2, 5, 5, 2.5);
+      ctx.fill();
+      break;
+    }
+
+    case 'coffee': {
+      // Cute coffee cup
+      ctx.shadowColor = '#ff6f00';
+      ctx.shadowBlur = 8 * glow * 2;
+
+      // Cup body
+      const cupGrad = ctx.createLinearGradient(x + 4, y, x + 4, y + h);
+      cupGrad.addColorStop(0, '#8d6e63');
+      cupGrad.addColorStop(1, '#5d4037');
+      ctx.fillStyle = cupGrad;
+      drawRoundRect(x + 4, y + 6, w - 8, h - 8, 4);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      // Cup rim
+      ctx.fillStyle = '#bcaaa4';
+      drawRoundRect(x + 3, y + 5, w - 6, 4, 2);
+      ctx.fill();
+
+      // Coffee inside
+      ctx.fillStyle = '#4e342e';
+      drawRoundRect(x + 5, y + 7, w - 10, 4, 2);
+      ctx.fill();
+
+      // Handle
+      ctx.strokeStyle = '#8d6e63';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x + w - 4, y + 14, 4, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
+
+      // Steam (animated)
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const sx2 = x + 8 + i * 4;
+        const t = levelTimer * 0.08 + i * 1.2;
+        ctx.beginPath();
+        ctx.moveTo(sx2, y + 4);
+        ctx.quadraticCurveTo(sx2 + Math.sin(t) * 3, y - 2, sx2 + Math.sin(t + 1) * 2, y - 6);
+        ctx.stroke();
+      }
+
+      // Heart on cup
+      ctx.fillStyle = '#ef5350';
+      ctx.font = '8px serif';
+      ctx.fillText('\u2665', x + 9, y + 18);
+      break;
+    }
+  }
+}
+
+function drawStar(cx, cy, spikes, outerR, innerR) {
+  let rot = Math.PI / 2 * 3;
+  const step = Math.PI / spikes;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerR);
+  for (let i = 0; i < spikes; i++) {
+    ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+    rot += step;
+    ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+    rot += step;
+  }
+  ctx.lineTo(cx, cy - outerR);
+  ctx.closePath();
+}
+
+// ============================================================
+// BACKGROUND DRAWING
+// ============================================================
+let clouds = [];
+let bgDecor = [];
+
+function initBackgroundDecor() {
+  clouds = [];
+  bgDecor = [];
+  for (let i = 0; i < 15; i++) {
+    clouds.push({
+      x: Math.random() * 3000,
+      y: 30 + Math.random() * 120,
+      w: 60 + Math.random() * 80,
+      h: 25 + Math.random() * 20,
+      speed: 0.15 + Math.random() * 0.25,
+      layer: Math.random() < 0.5 ? 0 : 1,
+    });
+  }
+  // Background flowers/decorations
+  for (let i = 0; i < 40; i++) {
+    bgDecor.push({
+      x: Math.random() * 4000,
+      type: Math.floor(Math.random() * 3), // flower, mushroom, bush
+      colorIdx: Math.floor(Math.random() * 4),
+      size: 0.6 + Math.random() * 0.6,
+    });
+  }
+}
+
+function drawBackground(ci) {
+  const theme = THEMES[ci];
+
+  // Gradient sky
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
+  skyGrad.addColorStop(0, theme.skyTop);
+  skyGrad.addColorStop(1, theme.skyBot);
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Sun/Moon
+  if (ci < 4) {
+    // Sun
+    const sunGrad = ctx.createRadialGradient(650, 60, 10, 650, 60, 50);
+    sunGrad.addColorStop(0, 'rgba(255,245,157,1)');
+    sunGrad.addColorStop(0.5, 'rgba(255,241,118,0.5)');
+    sunGrad.addColorStop(1, 'rgba(255,241,118,0)');
+    ctx.fillStyle = sunGrad;
+    drawCircle(650, 60, 50);
+    ctx.fill();
+    ctx.fillStyle = '#fff9c4';
+    drawCircle(650, 60, 20);
+    ctx.fill();
+  } else {
+    // Moon for final level
+    const moonGrad = ctx.createRadialGradient(650, 60, 5, 650, 60, 30);
+    moonGrad.addColorStop(0, 'rgba(255,255,255,0.95)');
+    moonGrad.addColorStop(1, 'rgba(200,180,255,0.3)');
+    ctx.fillStyle = moonGrad;
+    drawCircle(650, 60, 30);
+    ctx.fill();
+    // Stars
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.sin(levelTimer * 0.05 + i) * 0.3})`;
+      const sx2 = (i * 137 + 20) % GAME_W;
+      const sy2 = (i * 73 + 10) % 150;
+      drawCircle(sx2, sy2, 1 + (i % 3) * 0.5);
+      ctx.fill();
+    }
+  }
+
+  // Clouds (parallax)
+  for (const c of clouds) {
+    c.x += c.speed * 0.3;
+    if (c.x > 4000) c.x = -c.w;
+
+    const sx = c.x - camera.x * (c.layer === 0 ? 0.05 : 0.1);
+    const screenX = ((sx % (GAME_W + c.w + 100)) + GAME_W + c.w + 100) % (GAME_W + c.w + 100) - c.w - 50;
+
+    ctx.fillStyle = theme.cloudColor;
+    // Fluffy cloud shape
+    drawEllipse(screenX + c.w * 0.5, c.y, c.w * 0.5, c.h * 0.5);
+    ctx.fill();
+    drawEllipse(screenX + c.w * 0.3, c.y + 3, c.w * 0.35, c.h * 0.4);
+    ctx.fill();
+    drawEllipse(screenX + c.w * 0.7, c.y + 2, c.w * 0.35, c.h * 0.38);
+    ctx.fill();
+  }
+
+  // Rolling hills (3 layers of parallax)
+  for (let layer = 2; layer >= 0; layer--) {
+    const parallax = 0.08 + layer * 0.06;
+    const offset = -camera.x * parallax;
+    const hillColor = [theme.bgHill3, theme.bgHill2, theme.bgHill1][layer];
+    const baseY = GAME_H - 40 - layer * 40;
+
+    ctx.fillStyle = hillColor;
+    ctx.beginPath();
+    ctx.moveTo(0, GAME_H);
+    for (let px = -10; px <= GAME_W + 10; px += 5) {
+      const worldX = px - offset;
+      const hy = baseY - Math.sin(worldX * 0.008 + layer * 2) * (30 + layer * 15)
+                       - Math.sin(worldX * 0.003 + layer) * (20 + layer * 10);
+      ctx.lineTo(px, hy);
+    }
+    ctx.lineTo(GAME_W + 10, GAME_H);
+    ctx.closePath();
+    ctx.fill();
+
+    // Trees on hills
+    if (layer <= 1) {
+      for (let i = 0; i < 12; i++) {
+        const treeWorldX = i * 150 + layer * 60 + 30;
+        const treeSX = ((treeWorldX + offset) % (GAME_W + 200)) - 100;
+        const treeBaseY = baseY - Math.sin((treeSX - offset) * 0.008 + layer * 2) * (30 + layer * 15)
+                                - Math.sin((treeSX - offset) * 0.003 + layer) * (20 + layer * 10);
+
+        // Tree trunk
+        ctx.fillStyle = theme.treeTrunk;
+        ctx.fillRect(treeSX + 6, treeBaseY - 15, 4, 15);
+
+        // Tree crown (cute round)
+        ctx.fillStyle = theme.treeColor;
+        drawCircle(treeSX + 8, treeBaseY - 20, 10 + layer * 3);
+        ctx.fill();
+        drawCircle(treeSX + 3, treeBaseY - 15, 7 + layer * 2);
+        ctx.fill();
+        drawCircle(treeSX + 14, treeBaseY - 16, 8 + layer * 2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ============================================================
+// TILE DRAWING
+// ============================================================
+function drawTiles() {
+  const ci = currentLevel;
+  const theme = THEMES[ci];
+
+  const startTX = Math.floor(camera.x / TILE);
+  const endTX = startTX + Math.ceil(GAME_W / TILE) + 1;
+  const startTY = Math.floor(camera.y / TILE);
+  const endTY = startTY + Math.ceil(GAME_H / TILE) + 1;
+
+  for (let ty = startTY; ty <= endTY; ty++) {
+    for (let tx = startTX; tx <= endTX; tx++) {
+      const tile = getTile(tx, ty);
+      const sx = tx * TILE - camera.x;
+      const sy = ty * TILE - camera.y;
+
+      if (tile === 1) {
+        const isTop = getTile(tx, ty - 1) !== 1;
+
+        if (isTop) {
+          // Grass top with gradient
+          const grassGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
+          grassGrad.addColorStop(0, theme.grass);
+          grassGrad.addColorStop(0.3, theme.grassDark);
+          grassGrad.addColorStop(1, theme.dirt);
+          ctx.fillStyle = grassGrad;
+          drawRoundRect(sx - 0.5, sy, TILE + 1, TILE, 0);
+          ctx.fill();
+
+          // Grass blades on top
+          ctx.fillStyle = theme.grass;
+          for (let i = 0; i < 5; i++) {
+            const gx = sx + 3 + i * 6 + Math.sin(tx * 3 + i) * 2;
+            const gh = 4 + Math.sin(tx * 2 + i * 1.5) * 2;
+            ctx.beginPath();
+            ctx.moveTo(gx, sy);
+            ctx.lineTo(gx + 1.5, sy - gh);
+            ctx.lineTo(gx + 3, sy);
+            ctx.fill();
+          }
+
+          // Occasional flower on grass
+          if ((tx * 7 + ty * 13) % 11 === 0) {
+            const flowerColor = theme.flowerColors[(tx * 3 + ty) % theme.flowerColors.length];
+            const fx = sx + 10 + (tx % 3) * 5;
+            const fy = sy - 2;
+            // Stem
+            ctx.fillStyle = '#66bb6a';
+            ctx.fillRect(fx + 1, fy, 2, 5);
+            // Petals
+            ctx.fillStyle = flowerColor;
+            drawCircle(fx + 2, fy - 1, 3);
+            ctx.fill();
+            ctx.fillStyle = '#fff9c4';
+            drawCircle(fx + 2, fy - 1, 1.5);
+            ctx.fill();
+          }
+        } else {
+          // Underground dirt
+          const dirtGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
+          dirtGrad.addColorStop(0, theme.dirt);
+          dirtGrad.addColorStop(1, theme.dirtDark);
+          ctx.fillStyle = dirtGrad;
+          ctx.fillRect(sx, sy, TILE, TILE);
+
+          // Dirt texture (pebbles)
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          if ((tx + ty) % 3 === 0) {
+            drawCircle(sx + 8, sy + 12, 3);
+            ctx.fill();
+          }
+          if ((tx + ty) % 5 === 1) {
+            drawCircle(sx + 22, sy + 20, 2);
+            ctx.fill();
+          }
+        }
+      } else if (tile === 2) {
+        // Platform - cute wooden plank style
+        const platGrad = ctx.createLinearGradient(sx, sy, sx, sy + 10);
+        platGrad.addColorStop(0, theme.platformTop);
+        platGrad.addColorStop(1, theme.platform);
+        ctx.fillStyle = platGrad;
+        drawRoundRect(sx - 1, sy, TILE + 2, 10, 4);
+        ctx.fill();
+
+        // Wood grain
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + 4, sy + 3);
+        ctx.lineTo(sx + TILE - 4, sy + 3);
+        ctx.moveTo(sx + 2, sy + 6);
+        ctx.lineTo(sx + TILE - 2, sy + 6);
+        ctx.stroke();
+
+        // Cute bracket supports
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(sx + 4, sy + 9, 3, 6);
+        ctx.fillRect(sx + TILE - 7, sy + 9, 3, 6);
+
+        // Books on platform (random decoration)
+        if ((tx + ty * 3) % 5 === 0) {
+          const bookColors = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726'];
+          for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = bookColors[(tx + i) % bookColors.length];
+            drawRoundRect(sx + 3 + i * 8, sy - 6 - i, 7, 6 + i, 1);
+            ctx.fill();
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// SIGN DRAWING
+// ============================================================
+function drawSigns() {
+  for (const s of signs) {
+    const sx = s.x - camera.x;
+    const sy = s.y - camera.y;
+
+    // Post
+    ctx.fillStyle = '#8d6e63';
+    drawRoundRect(sx + 11, sy - 20, 6, 34, 2);
+    ctx.fill();
+
+    // Sign board
+    const signGrad = ctx.createLinearGradient(sx - 18, sy - 35, sx - 18, sy - 12);
+    signGrad.addColorStop(0, '#ffe0b2');
+    signGrad.addColorStop(1, '#ffcc80');
+    ctx.fillStyle = signGrad;
+    drawRoundRect(sx - 18, sy - 35, 64, 22, 5);
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = '#8d6e63';
+    ctx.lineWidth = 2;
+    drawRoundRect(sx - 18, sy - 35, 64, 22, 5);
+    ctx.stroke();
+
+    // Icon on sign
+    ctx.fillStyle = '#ef5350';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('!', sx + 14, sy - 19);
+    ctx.textAlign = 'left';
+
+    // Tooltip when close
+    if (s.showText) {
+      const tw = ctx.measureText(s.text).width + 30;
+
+      // Speech bubble
+      ctx.fillStyle = 'rgba(30,30,50,0.92)';
+      drawRoundRect(sx - tw / 2 + 14, sy - 72, tw, 32, 8);
+      ctx.fill();
+
+      // Bubble tail
+      ctx.beginPath();
+      ctx.moveTo(sx + 10, sy - 40);
+      ctx.lineTo(sx + 14, sy - 34);
+      ctx.lineTo(sx + 18, sy - 40);
+      ctx.closePath();
+      ctx.fill();
+
+      // Text
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.text, sx + 14, sy - 52);
+      ctx.textAlign = 'left';
+    }
+  }
+}
+
+// ============================================================
+// FLAG DRAWING
+// ============================================================
+function drawFlag() {
+  if (!flagObj) return;
+  const sx = flagObj.x - camera.x;
+  const sy = flagObj.y - camera.y;
+
+  // Pole with gradient
+  const poleGrad = ctx.createLinearGradient(sx + 14, sy - 50, sx + 18, sy - 50);
+  poleGrad.addColorStop(0, '#e0e0e0');
+  poleGrad.addColorStop(1, '#9e9e9e');
+  ctx.fillStyle = poleGrad;
+  drawRoundRect(sx + 13, sy - 50, 5, TILE * 3 + 50, 2);
+  ctx.fill();
+
+  // Ball on top
+  ctx.fillStyle = flagObj.reached ? '#ffd54f' : '#e0e0e0';
+  drawCircle(sx + 15.5, sy - 52, 5);
+  ctx.fill();
+
+  // Flag cloth with wave
+  const flagColor = flagObj.reached ? '#ffd54f' : '#ef5350';
+  const wave = Math.sin(levelTimer * 0.06) * 4;
+  ctx.fillStyle = flagColor;
+  ctx.beginPath();
+  ctx.moveTo(sx + 18, sy - 45);
+  ctx.quadraticCurveTo(sx + 38 + wave, sy - 40 + wave * 0.5, sx + 55, sy - 35 + wave);
+  ctx.quadraticCurveTo(sx + 38 + wave * 0.7, sy - 28, sx + 18, sy - 20);
+  ctx.closePath();
+  ctx.fill();
+
+  // Text on flag
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText(currentLevel === 4 ? 'TENURE!' : 'NEXT', sx + 24, sy - 30);
+
+  // Sparkles when reached
+  if (flagObj.reached) {
+    for (let i = 0; i < 5; i++) {
+      const angle = levelTimer * 0.08 + i * Math.PI * 2 / 5;
+      const sparkX = sx + 35 + Math.cos(angle) * 20;
+      const sparkY = sy - 32 + Math.sin(angle) * 12;
+      ctx.fillStyle = '#ffd54f';
+      drawStar(sparkX, sparkY, 4, 3, 1.5);
+      ctx.fill();
+    }
+  }
+}
+
+// ============================================================
+// HUD DRAWING
+// ============================================================
+function drawHUD() {
+  // Background bar with gradient
+  const hudGrad = ctx.createLinearGradient(0, 0, 0, 42);
+  hudGrad.addColorStop(0, 'rgba(20,20,40,0.9)');
+  hudGrad.addColorStop(1, 'rgba(20,20,40,0.7)');
+  ctx.fillStyle = hudGrad;
+  drawRoundRect(4, 4, GAME_W - 8, 38, 8);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  drawRoundRect(4, 4, GAME_W - 8, 38, 8);
+  ctx.stroke();
+
+  ctx.font = 'bold 11px monospace';
+
+  // Lives with hearts
+  ctx.fillStyle = '#ef5350';
+  for (let i = 0; i < stats.lives; i++) {
+    ctx.font = '14px serif';
+    ctx.fillText('\u2665', 14 + i * 18, 24);
+  }
+
+  // Publications
+  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = '#fff';
+  ctx.fillText(`Pubs: ${stats.publications}`, 14, 36);
+
+  // Grants
+  ctx.fillStyle = '#66bb6a';
+  ctx.fillText(`Grants: ${stats.grants}`, 115, 24);
+
+  // Citations
+  ctx.fillStyle = '#4fc3f7';
+  ctx.fillText(`Cites: ${stats.citations}`, 115, 36);
+
+  // h-index (prominent)
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`h=${stats.hIndex}`, 225, 24);
+
+  // Score
+  ctx.fillStyle = '#ffa726';
+  ctx.font = 'bold 10px monospace';
+  ctx.fillText(`Score: ${stats.score}`, 225, 36);
+
+  // Coffee indicator
+  if (player && player.powered) {
+    ctx.fillStyle = '#ff6f00';
+    ctx.font = 'bold 11px monospace';
+    const coffeeBar = Math.ceil(player.powerTimer / 60);
+    ctx.fillText(`CAFFEINE ${coffeeBar}s`, 330, 24);
+
+    // Coffee bar
+    ctx.fillStyle = 'rgba(255,111,0,0.3)';
+    drawRoundRect(330, 28, 80, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ff6f00';
+    drawRoundRect(330, 28, 80 * (player.powerTimer / 300), 6, 3);
+    ctx.fill();
+  }
+
+  // Level name (right side)
+  ctx.fillStyle = '#b0bec5';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(LEVEL_NAMES[currentLevel], GAME_W - 14, 22);
+  ctx.fillStyle = '#78909c';
+  ctx.fillText(`Time: ${Math.floor(levelTimer / 60)}s`, GAME_W - 14, 34);
+  ctx.textAlign = 'left';
+}
+
+// ============================================================
+// LEVEL DATA
+// ============================================================
+const LEVEL_NAMES = [
+  'World 1: PhD Student',
+  'World 2: Postdoc',
+  'World 3: Assistant Prof',
+  'World 4: Associate Prof',
+  'World 5: TENURE REVIEW'
+];
+
+const LEVEL_SUBTITLES = [
+  '"Your stipend is a badge of honor" - Your Advisor',
+  '"Just one more postdoc and you\'ll be ready" - Everyone',
+  '"Teach 4 courses AND get a Nature paper" - The Dean',
+  '"We need you on 12 more committees" - The Department',
+  '"We\'ve been reviewing your case for 8 months..."'
+];
+
+const LEVELS = [
+  { width: 100, height: 15, gravity: 0.5 },
+  { width: 120, height: 15, gravity: 0.5 },
+  { width: 140, height: 15, gravity: 0.5 },
+  { width: 130, height: 15, gravity: 0.5 },
+  { width: 80, height: 15, gravity: 0.5 },
+];
+
+// ============================================================
+// LEVEL GENERATION
+// ============================================================
+function generateLevel(levelIdx) {
+  const lvl = LEVELS[levelIdx];
+  const w = lvl.width;
+  const h = lvl.height;
+  const tiles = [];
+  const entities = [];
+
+  for (let y = 0; y < h; y++) {
+    tiles[y] = [];
+    for (let x = 0; x < w; x++) {
+      tiles[y][x] = 0;
+    }
+  }
+
+  const groundY = h - 2;
+
+  for (let x = 0; x < w; x++) {
+    tiles[groundY][x] = 1;
+    tiles[groundY + 1][x] = 1;
+  }
+
+  entities.push({ type: 'player', x: 2, y: groundY - 2 });
+  entities.push({ type: 'flag', x: w - 4, y: groundY - 3 });
+
+  // Pits
+  const pitCount = 3 + levelIdx * 2;
+  const pitPositions = [];
+  for (let i = 0; i < pitCount; i++) {
+    const px = 12 + Math.floor(Math.random() * (w - 25));
+    let tooClose = false;
+    for (const pp of pitPositions) {
+      if (Math.abs(pp - px) < 8) tooClose = true;
+    }
+    if (tooClose) continue;
+    pitPositions.push(px);
+    const pitWidth = 3 + Math.floor(Math.random() * 2);
+    for (let dx = 0; dx < pitWidth; dx++) {
+      if (px + dx < w - 5) {
+        tiles[groundY][px + dx] = 0;
+        tiles[groundY + 1][px + dx] = 0;
+      }
+    }
+    if (Math.random() < 0.6) {
+      entities.push({ type: 'sign', x: px - 1, y: groundY - 1,
+        text: ['Exit to Industry', 'Quit Academia?', 'Alt-Ac Career', 'Data Science Bootcamp', 'LinkedIn Awaits'][Math.floor(Math.random() * 5)] });
+    }
+  }
+
+  // Platforms
+  const platCount = 8 + levelIdx * 4;
+  for (let i = 0; i < platCount; i++) {
+    const px = 5 + Math.floor(Math.random() * (w - 10));
+    const py = groundY - 3 - Math.floor(Math.random() * 5);
+    const pw = 3 + Math.floor(Math.random() * 4);
+    for (let dx = 0; dx < pw; dx++) {
+      if (px + dx < w && py >= 0) {
+        tiles[py][px + dx] = 2;
+      }
+    }
+    if (Math.random() < 0.7) {
+      const collectTypes = ['publication', 'grant', 'citation', 'coffee'];
+      const weights = levelIdx === 0 ? [0.5, 0.1, 0.3, 0.1] :
+                      levelIdx === 1 ? [0.4, 0.2, 0.2, 0.2] :
+                      [0.3, 0.3, 0.2, 0.2];
+      let r = Math.random(), cumul = 0, cType = 'publication';
+      for (let ci = 0; ci < collectTypes.length; ci++) {
+        cumul += weights[ci];
+        if (r < cumul) { cType = collectTypes[ci]; break; }
+      }
+      entities.push({ type: cType, x: px + Math.floor(pw / 2), y: py - 1 });
+    }
+  }
+
+  // Ground collectibles
+  for (let i = 0; i < 10 + levelIdx * 3; i++) {
+    const cx = 5 + Math.floor(Math.random() * (w - 10));
+    if (tiles[groundY][cx] === 1) {
+      const collectTypes = ['publication', 'grant', 'citation'];
+      entities.push({ type: collectTypes[Math.floor(Math.random() * collectTypes.length)], x: cx, y: groundY - 1 });
+    }
+  }
+
+  // Enemies
+  const enemyTypes = [
+    ['reviewer2', 'imposter'],
+    ['reviewer2', 'imposter', 'bureaucrat'],
+    ['reviewer2', 'bureaucrat', 'teaching'],
+    ['bureaucrat', 'teaching', 'committee'],
+    ['reviewer2', 'bureaucrat', 'dean']
+  ];
+
+  const enemyCount = 5 + levelIdx * 3;
+  for (let i = 0; i < enemyCount; i++) {
+    const ex = 10 + Math.floor(Math.random() * (w - 15));
+    if (tiles[groundY][ex] === 1) {
+      const types = enemyTypes[levelIdx];
+      const eType = types[Math.floor(Math.random() * types.length)];
+      entities.push({ type: eType, x: ex, y: groundY - 1.5, patrolRange: 2 + Math.floor(Math.random() * 3) });
+    }
+  }
+
+  // Signs
+  const signMsgs = [
+    ['"Sleep is for the tenured"', '"Free food in seminar room"', '"Advisor meeting: cancelled (again)"', '"IRB approval pending since 2019"'],
+    ['"Temporary position (5th year)"', '"Your PI took first authorship"', '"Visa renewal: pending"', '"Lab meeting at 7 AM Saturday"'],
+    ['"Startup funds: depleted"', '"Service: mandatory. Credit: none."', '"Teach intro AND advanced"', '"REU students need mentoring"'],
+    ['"Meeting about meeting schedule"', '"Form 27B/6 required"', '"Annual report due yesterday"', '"Diversity statement v12 needed"'],
+    ['"Decision in 6-8 months"', '"External letters: still waiting"', '"H-index insufficient"', '"One more R&R should do it"']
+  ];
+
+  for (let i = 0; i < 4; i++) {
+    const sx = 8 + Math.floor(i * (w - 10) / 4);
+    if (tiles[groundY][sx] === 1) {
+      const msgs = signMsgs[levelIdx];
+      entities.push({ type: 'sign', x: sx, y: groundY - 1, text: msgs[Math.floor(Math.random() * msgs.length)] });
+    }
+  }
+
+  if (levelIdx === 4) {
+    entities.push({ type: 'dean', x: w - 15, y: groundY - 2, patrolRange: 4, hp: 5 });
+  }
+
+  return { tiles, entities, width: w, height: h };
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let gameState = 'menu';
+let currentLevel = 0;
+let level = null;
+let player = null;
+let camera = { x: 0, y: 0 };
+let enemies = [];
+let collectibles = [];
+let signs = [];
+let particles = [];
+let floatingTexts = [];
+let flagObj = null;
+
+let stats = {
+  publications: 0, grants: 0, citations: 0,
+  hIndex: 0, lives: 3, coffee: 0, score: 0,
+};
+
+let levelTimer = 0;
+let introTimer = 0;
+let deathTimer = 0;
+let winTimer = 0;
+let messageQueue = [];
+let currentMessage = null;
+let messageTimer = 0;
+
+// ============================================================
+// INITIALIZE LEVEL
+// ============================================================
+function initLevel(idx) {
+  currentLevel = idx;
+  const data = generateLevel(idx);
+  level = data;
+
+  enemies = [];
+  collectibles = [];
+  signs = [];
+  particles = [];
+  floatingTexts = [];
+  flagObj = null;
+  messageQueue = [];
+  currentMessage = null;
+
+  initBackgroundDecor();
+
+  for (const ent of data.entities) {
+    const wx = ent.x * TILE;
+    const wy = ent.y * TILE;
+
+    switch (ent.type) {
+      case 'player':
+        player = {
+          x: wx, y: wy, vx: 0, vy: 0,
+          w: 26, h: 32,
+          onGround: false, facingRight: true,
+          frame: 0, frameTimer: 0,
+          powered: false, powerTimer: 0,
+          invincible: false, invTimer: 0,
+          dead: false,
+          hasDoubleJumped: false
+        };
+        break;
+      case 'flag':
+        flagObj = { x: wx, y: wy, w: TILE, h: TILE * 3, reached: false };
+        break;
+      case 'publication':
+      case 'grant':
+      case 'citation':
+      case 'coffee':
+        collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
+        break;
+      case 'reviewer2':
+      case 'bureaucrat':
+      case 'imposter':
+      case 'teaching':
+      case 'committee':
+        enemies.push({
+          type: ent.type, x: wx, y: wy, w: 28, h: 30,
+          vx: (Math.random() < 0.5 ? 1 : -1) * (1 + idx * 0.3),
+          startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
+          alive: true, frame: 0, frameTimer: 0
+        });
+        break;
+      case 'dean':
+        enemies.push({
+          type: 'dean', x: wx, y: wy - TILE, w: 48, h: 56,
+          vx: 1.5, startX: wx, patrolRange: (ent.patrolRange || 4) * TILE,
+          alive: true, hp: ent.hp || 5, maxHp: ent.hp || 5,
+          frame: 0, frameTimer: 0, attackTimer: 0
+        });
+        break;
+      case 'sign':
+        signs.push({ x: wx, y: wy, text: ent.text });
+        break;
+    }
+  }
+
+  camera.x = 0;
+  camera.y = 0;
+  levelTimer = 0;
+  gameState = 'levelIntro';
+  introTimer = 180;
+}
+
+// ============================================================
+// COLLISION
+// ============================================================
+function getTile(tx, ty) {
+  if (tx < 0 || tx >= level.width || ty < 0 || ty >= level.height) return 0;
+  return level.tiles[ty][tx];
+}
+function isSolid(tx, ty) { return getTile(tx, ty) === 1; }
+function isPlatform(tx, ty) { return getTile(tx, ty) === 2; }
+function rectCollide(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// ============================================================
+// PHYSICS
+// ============================================================
+function moveEntity(ent, gravity) {
+  ent.x += ent.vx;
+  const left = Math.floor(ent.x / TILE);
+  const right = Math.floor((ent.x + ent.w - 1) / TILE);
+  const top = Math.floor(ent.y / TILE);
+  const bottom = Math.floor((ent.y + ent.h - 1) / TILE);
+
+  for (let ty = top; ty <= bottom; ty++) {
+    for (let tx = left; tx <= right; tx++) {
+      if (isSolid(tx, ty)) {
+        if (ent.vx > 0) ent.x = tx * TILE - ent.w;
+        else if (ent.vx < 0) ent.x = (tx + 1) * TILE;
+        if (ent === player) ent.vx = 0;
+        else ent.vx *= -1;
+      }
+    }
+  }
+
+  ent.vy += gravity;
+  if (ent.vy > 12) ent.vy = 12;
+  ent.y += ent.vy;
+  ent.onGround = false;
+
+  const left2 = Math.floor(ent.x / TILE);
+  const right2 = Math.floor((ent.x + ent.w - 1) / TILE);
+  const top2 = Math.floor(ent.y / TILE);
+  const bottom2 = Math.floor((ent.y + ent.h - 1) / TILE);
+
+  for (let ty = top2; ty <= bottom2; ty++) {
+    for (let tx = left2; tx <= right2; tx++) {
+      if (isSolid(tx, ty)) {
+        if (ent.vy > 0) {
+          ent.y = ty * TILE - ent.h;
+          ent.vy = 0;
+          ent.onGround = true;
+        } else if (ent.vy < 0) {
+          ent.y = (ty + 1) * TILE;
+          ent.vy = 0;
+        }
+      }
+      if (isPlatform(tx, ty) && ent.vy >= 0) {
+        const platTop = ty * TILE;
+        const entBottom = ent.y + ent.h;
+        const prevBottom = entBottom - ent.vy;
+        if (prevBottom <= platTop + 2 && entBottom >= platTop) {
+          ent.y = platTop - ent.h;
+          ent.vy = 0;
+          ent.onGround = true;
+        }
+      }
+    }
+  }
+
+  if (ent.y > level.height * TILE) return 'fell';
+  return null;
+}
+
+// ============================================================
+// PARTICLES
+// ============================================================
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: -Math.random() * 5 - 2,
+      life: 30 + Math.random() * 20,
+      maxLife: 50,
+      color,
+      size: 2 + Math.random() * 3,
+      type: Math.random() < 0.3 ? 'star' : 'circle'
+    });
+  }
+}
+
+function spawnFloatingText(x, y, text, color) {
+  floatingTexts.push({ x, y, text, color, life: 60, vy: -1.5, scale: 1.5 });
+}
+
+function showMessage(text) {
+  messageQueue.push(text);
+}
+
+// ============================================================
+// UPDATE
+// ============================================================
+function update() {
+  if (!currentMessage && messageQueue.length > 0) {
+    currentMessage = messageQueue.shift();
+    messageTimer = 180;
+  }
+  if (currentMessage) {
+    messageTimer--;
+    if (messageTimer <= 0) currentMessage = null;
+  }
+
+  if (gameState === 'levelIntro') {
+    introTimer--;
+    if (introTimer <= 0 || keys['Space'] || keys['Enter']) {
+      gameState = 'playing';
+      keys['Space'] = false;
+      keys['Enter'] = false;
+    }
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'dead') {
+    deathTimer--;
+    if (deathTimer <= 0) {
+      if (stats.lives > 0) {
+        initLevel(currentLevel);
+        gameState = 'levelIntro';
+        introTimer = 120;
+      } else {
+        gameState = 'menu';
+      }
+    }
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'levelComplete') {
+    winTimer--;
+    if (winTimer <= 0) {
+      if (currentLevel < LEVELS.length - 1) {
+        initLevel(currentLevel + 1);
+      } else {
+        gameState = 'gameWin';
+        winTimer = 600;
+      }
+    }
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'gameWin') {
+    winTimer--;
+    if (winTimer <= 0) gameState = 'menu';
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState !== 'playing') {
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  levelTimer++;
+
+  // Player input
+  const speed = player.powered ? 5 : 3.5;
+  if (keys['ArrowLeft'] || keys['KeyA']) {
+    player.vx = -speed;
+    player.facingRight = false;
+  } else if (keys['ArrowRight'] || keys['KeyD']) {
+    player.vx = speed;
+    player.facingRight = true;
+  } else {
+    player.vx *= 0.7;
+    if (Math.abs(player.vx) < 0.3) player.vx = 0;
+  }
+
+  const jumpPressed = justPressed['ArrowUp'] || justPressed['KeyW'] || justPressed['Space'];
+  if (jumpPressed && player.onGround) {
+    player.vy = player.powered ? -13 : -11;
+    player.onGround = false;
+    player.hasDoubleJumped = false;
+    // Jump dust
+    spawnParticles(player.x + player.w / 2, player.y + player.h, 'rgba(180,180,180,0.6)', 4);
+  } else if (jumpPressed && !player.onGround && !player.hasDoubleJumped) {
+    player.vy = player.powered ? -11 : -9;
+    player.hasDoubleJumped = true;
+    spawnParticles(player.x + player.w / 2, player.y + player.h, '#aaa', 6);
+  }
+
+  // Animation
+  if (Math.abs(player.vx) > 0.5) {
+    player.frameTimer++;
+    if (player.frameTimer > 8) {
+      player.frame = (player.frame + 1) % 4;
+      player.frameTimer = 0;
+    }
+  }
+
+  if (player.powered) {
+    player.powerTimer--;
+    if (player.powerTimer <= 0) player.powered = false;
+  }
+  if (player.invincible) {
+    player.invTimer--;
+    if (player.invTimer <= 0) player.invincible = false;
+  }
+
+  const result = moveEntity(player, 0.5);
+  if (result === 'fell') {
+    playerDie('Fell into industry...');
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  // Camera (smooth)
+  const targetCamX = player.x - GAME_W / 2 + player.w / 2;
+  const targetCamY = player.y - GAME_H / 2;
+  camera.x += (targetCamX - camera.x) * 0.1;
+  camera.y += (targetCamY - camera.y) * 0.05;
+  camera.x = Math.max(0, Math.min(level.width * TILE - GAME_W, camera.x));
+  camera.y = Math.max(0, Math.min(level.height * TILE - GAME_H, camera.y));
+
+  // Collectibles
+  for (const c of collectibles) {
+    if (c.collected) continue;
+    c.bobOffset += 0.05;
+    const cy = c.y + Math.sin(c.bobOffset) * 4;
+    if (rectCollide(player, { x: c.x, y: cy, w: c.w, h: c.h })) {
+      c.collected = true;
+      switch (c.type) {
+        case 'publication':
+          stats.publications++;
+          stats.score += 100;
+          spawnParticles(c.x + 12, cy + 12, '#fff', 8);
+          spawnFloatingText(c.x, cy, '+1 Pub!', '#fff');
+          if (stats.publications % 5 === 0) showMessage('h-index increased!');
+          stats.hIndex = Math.floor(Math.sqrt(stats.publications * 2));
+          break;
+        case 'grant':
+          stats.grants++;
+          stats.score += 500;
+          spawnParticles(c.x + 12, cy + 12, '#ffd54f', 12);
+          spawnFloatingText(c.x, cy, '$$$!', '#ffd54f');
+          showMessage(["NSF Grant funded!", "NIH R01 approved!", "Internal seed grant!", "Industry partnership!"][Math.floor(Math.random() * 4)]);
+          break;
+        case 'citation':
+          stats.citations++;
+          stats.score += 50;
+          spawnParticles(c.x + 12, cy + 12, '#4fc3f7', 6);
+          spawnFloatingText(c.x, cy, 'Cited!', '#4fc3f7');
+          break;
+        case 'coffee':
+          stats.coffee++;
+          player.powered = true;
+          player.powerTimer = 300;
+          stats.score += 200;
+          spawnParticles(c.x + 12, cy + 12, '#8d6e63', 15);
+          spawnFloatingText(c.x, cy, 'CAFFEINE!', '#ff6f00');
+          showMessage('Coffee power! Speed boost!');
+          break;
+      }
+    }
+  }
+
+  // Enemies
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    e.x += e.vx;
+    if (Math.abs(e.x - e.startX) > e.patrolRange) e.vx *= -1;
+
+    e.frameTimer++;
+    if (e.frameTimer > 12) {
+      e.frame = (e.frame + 1) % 2;
+      e.frameTimer = 0;
+    }
+
+    if (e.type === 'dean' && e.alive) {
+      e.attackTimer++;
+      if (e.attackTimer > 120) {
+        e.attackTimer = 0;
+        enemies.push({
+          type: 'rejection', x: e.x + e.w / 2, y: e.y + 10,
+          w: 20, h: 14, vx: player.x < e.x ? -4 : 4, vy: -2,
+          startX: e.x, patrolRange: 300, alive: true,
+          frame: 0, frameTimer: 0, isProjectile: true
+        });
+      }
+    }
+
+    if (e.isProjectile) {
+      e.vy = (e.vy || 0) + 0.15;
+      e.y += e.vy;
+      if (e.y > level.height * TILE) e.alive = false;
+    }
+
+    if (rectCollide(player, e)) {
+      if (player.invincible) continue;
+      if (player.vy > 0 && player.y + player.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
+        player.vy = -8;
+        if (e.type === 'dean') {
+          e.hp--;
+          spawnParticles(e.x + e.w / 2, e.y, '#ff0000', 10);
+          spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
+          if (e.hp <= 0) {
+            e.alive = false;
+            stats.score += 5000;
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
+            spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
+            showMessage('You defeated the Dean! Tenure is yours!');
+          } else {
+            showMessage(`Dean HP: ${e.hp}/${e.maxHp} - Keep jumping!`);
+          }
+        } else {
+          e.alive = false;
+          stats.score += 200;
+          spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffa726', 10);
+          const defeatMsgs = {
+            'reviewer2': 'Reviewer 2 defeated! Major revisions avoided!',
+            'bureaucrat': 'Bureaucrat squashed! Form denied!',
+            'imposter': 'Imposter syndrome banished!',
+            'teaching': 'Teaching load lightened!',
+            'committee': 'Committee meeting cancelled!',
+          };
+          spawnFloatingText(e.x, e.y, '+200', '#ffd54f');
+          if (defeatMsgs[e.type]) showMessage(defeatMsgs[e.type]);
+        }
+      } else {
+        if (!player.powered) {
+          playerDie(getDeathMessage(e.type));
+        } else {
+          player.powered = false;
+          player.invincible = true;
+          player.invTimer = 90;
+          showMessage('Lost your coffee buzz!');
+        }
+      }
+    }
+  }
+
+  enemies = enemies.filter(e => e.alive || !e.isProjectile);
+
+  // Flag
+  if (flagObj && !flagObj.reached && rectCollide(player, flagObj)) {
+    flagObj.reached = true;
+    gameState = 'levelComplete';
+    winTimer = 180;
+    stats.score += 1000;
+    spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
+
+    const completeMsgs = [
+      'Qualifying exam passed! On to the postdoc!',
+      'Postdoc complete! You got a faculty position!',
+      'Third-year review passed! Keep going!',
+      'Survived committee hell! Almost there!',
+      'TENURE GRANTED! YOU WIN!'
+    ];
+    showMessage(completeMsgs[currentLevel]);
+  }
+
+  // Signs proximity
+  for (const s of signs) {
+    const dist = Math.abs(player.x - s.x) + Math.abs(player.y - s.y);
+    s.showText = dist < TILE * 2.5;
+  }
+
+  // Particles
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.15;
+    p.life--;
+  }
+  particles = particles.filter(p => p.life > 0);
+
+  // Floating texts
+  for (const ft of floatingTexts) {
+    ft.y += ft.vy;
+    ft.life--;
+    ft.scale = Math.max(1, ft.scale - 0.02);
+  }
+  floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+
+  for (const key in justPressed) delete justPressed[key];
+}
+
+function playerDie(msg) {
+  player.dead = true;
+  stats.lives--;
+  gameState = 'dead';
+  deathTimer = 120;
+  showMessage(msg || 'Career over!');
+  spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 20);
+}
+
+function getDeathMessage(enemyType) {
+  const msgs = {
+    'reviewer2': 'Reviewer 2 says: "Reject with prejudice"',
+    'bureaucrat': 'Buried under paperwork! Career paused.',
+    'imposter': 'Imposter syndrome wins... you never belonged.',
+    'teaching': 'Teaching overload! No time for research!',
+    'committee': 'Endless meetings consumed your soul!',
+    'dean': 'The Dean denied your tenure case!',
+    'rejection': 'Hit by a rejection letter!'
+  };
+  return msgs[enemyType] || 'Academic career interrupted!';
+}
+
+// ============================================================
+// DRAW
+// ============================================================
+function draw() {
+  ctx.clearRect(0, 0, GAME_W, GAME_H);
+
+  if (gameState === 'menu') { drawMenu(); return; }
+  if (gameState === 'gameWin') { drawWinScreen(); return; }
+
+  const ci = currentLevel;
+
+  // Background
+  drawBackground(ci);
+
+  // Tiles
+  drawTiles();
+
+  // Signs
+  drawSigns();
+
+  // Collectibles
+  for (const c of collectibles) {
+    if (c.collected) continue;
+    const sx = c.x - camera.x;
+    const sy = c.y - camera.y + Math.sin(c.bobOffset) * 4;
+    drawCollectible(c.type, sx, sy, c.w, c.h);
+  }
+
+  // Enemies
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    drawEnemy(e, e.x - camera.x, e.y - camera.y);
+  }
+
+  // Player
+  if (player && !player.dead) {
+    const sx = player.x - camera.x;
+    const sy = player.y - camera.y;
+    if (player.invincible && Math.floor(player.invTimer / 3) % 2 === 0) {
+      // blink
+    } else {
+      drawPlayer(sx, sy, player.w, player.h, player.frame, player.facingRight, player.powered, player.dead);
+    }
+  }
+
+  // Flag
+  drawFlag();
+
+  // Particles (with glow)
+  for (const p of particles) {
+    const alpha = p.life / (p.maxLife || 50);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = p.color;
+    if (p.type === 'star') {
+      drawStar(p.x - camera.x, p.y - camera.y, 4, p.size, p.size * 0.4);
+      ctx.fill();
+    } else {
+      drawCircle(p.x - camera.x, p.y - camera.y, p.size * alpha);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Floating texts
+  for (const ft of floatingTexts) {
+    const alpha = ft.life / 60;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = ft.color;
+    ctx.font = `bold ${Math.round(12 * ft.scale)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(ft.text, ft.x - camera.x + 12, ft.y - camera.y);
+    ctx.textAlign = 'left';
+  }
+  ctx.globalAlpha = 1;
+
+  // HUD
+  drawHUD();
+
+  // Overlays
+  if (gameState === 'levelIntro') drawLevelIntro();
+  if (gameState === 'dead') drawDeathScreen();
+  if (gameState === 'levelComplete') drawLevelComplete();
+
+  // Message popup
+  if (currentMessage) {
+    const alpha = messageTimer > 160 ? (180 - messageTimer) / 20 : messageTimer < 20 ? messageTimer / 20 : 1;
+    ctx.globalAlpha = alpha;
+
+    const tw = ctx.measureText(currentMessage).width + 40;
+    ctx.fillStyle = 'rgba(20,20,40,0.9)';
+    drawRoundRect(GAME_W / 2 - tw / 2, GAME_H - 75, tw, 34, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,213,79,0.4)';
+    ctx.lineWidth = 1;
+    drawRoundRect(GAME_W / 2 - tw / 2, GAME_H - 75, tw, 34, 10);
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(currentMessage, GAME_W / 2, GAME_H - 53);
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ============================================================
+// MENU SCREEN
+// ============================================================
+function drawMenu() {
+  // Animated gradient background
+  const t = Date.now() * 0.001;
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
+  bgGrad.addColorStop(0, '#1a0533');
+  bgGrad.addColorStop(0.5, '#2d1b69');
+  bgGrad.addColorStop(1, '#0f0a1a');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Floating particles in background
+  for (let i = 0; i < 30; i++) {
+    const px = (Math.sin(t * 0.3 + i * 1.7) * 0.5 + 0.5) * GAME_W;
+    const py = (Math.cos(t * 0.2 + i * 2.3) * 0.5 + 0.5) * GAME_H;
+    const size = 1 + Math.sin(t + i) * 1;
+    ctx.fillStyle = `rgba(233, 69, 96, ${0.15 + Math.sin(t + i) * 0.1})`;
+    drawCircle(px, py, size);
+    ctx.fill();
+  }
+
+  // Title with shadow
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = 'rgba(233,69,96,0.3)';
+  ctx.font = 'bold 38px monospace';
+  ctx.fillText('SUPER TENURE TRACK', GAME_W / 2 + 2, 97);
+
+  ctx.fillStyle = '#e94560';
+  ctx.fillText('SUPER TENURE TRACK', GAME_W / 2, 95);
+
+  ctx.fillStyle = 'rgba(255,213,79,0.3)';
+  ctx.font = 'bold 44px monospace';
+  ctx.fillText('BROS.', GAME_W / 2 + 2, 142);
+
+  ctx.fillStyle = '#ffd54f';
+  ctx.fillText('BROS.', GAME_W / 2, 140);
+
+  // Subtitle
+  ctx.fillStyle = '#b0bec5';
+  ctx.font = '13px monospace';
+  ctx.fillText('A Platformer Parody of Academic Life', GAME_W / 2, 172);
+
+  // Character preview (animated)
+  drawPlayer(GAME_W / 2 - 13, 195, 26, 32, Math.floor(Date.now() / 250) % 4, true, false, false);
+
+  // Start prompt
+  const blink = Math.sin(t * 4) > 0;
+  if (blink) {
+    ctx.fillStyle = '#e94560';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('PRESS SPACE TO START', GAME_W / 2, 275);
+  }
+
+  // Controls
+  ctx.fillStyle = '#78909c';
+  ctx.font = '11px monospace';
+  ctx.fillText('Arrow Keys / WASD to Move', GAME_W / 2, 310);
+  ctx.fillText('Space to Jump (x2 for Double Jump!)', GAME_W / 2, 328);
+  ctx.fillText('Jump on enemies to defeat them', GAME_W / 2, 346);
+
+  // Level path
+  ctx.font = '10px monospace';
+  const levels = ['PhD', 'Postdoc', 'Asst.Prof', 'Assoc.Prof', 'TENURE!'];
+  const pathY = 385;
+  for (let i = 0; i < levels.length; i++) {
+    const lx = 120 + i * 145;
+    // Node
+    ctx.fillStyle = i === 4 ? '#ffd54f' : '#e94560';
+    drawCircle(lx, pathY, 8);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText(`${i + 1}`, lx, pathY + 3);
+    // Label
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '9px monospace';
+    ctx.fillText(levels[i], lx, pathY + 22);
+    // Arrow
+    if (i < 4) {
+      ctx.strokeStyle = '#546e7a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lx + 12, pathY);
+      ctx.lineTo(lx + 130, pathY);
+      ctx.stroke();
+      // Arrowhead
+      ctx.beginPath();
+      ctx.moveTo(lx + 125, pathY - 4);
+      ctx.lineTo(lx + 132, pathY);
+      ctx.lineTo(lx + 125, pathY + 4);
+      ctx.stroke();
+    }
+  }
+
+  // Collectibles legend
+  ctx.font = '10px monospace';
+  ctx.fillStyle = '#78909c';
+  ctx.fillText('Collect: Publications | Grants ($) | Citations | Coffee', GAME_W / 2, 430);
+  ctx.fillStyle = '#ef5350';
+  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Imposter Syndrome', GAME_W / 2, 448);
+
+  ctx.fillStyle = '#37474f';
+  ctx.font = '9px monospace';
+  ctx.fillText('No academics were harmed in the making of this game', GAME_W / 2, 470);
+
+  ctx.textAlign = 'left';
+
+  if (keys['Space']) {
+    startGame();
+    keys['Space'] = false;
+  }
+}
+
+// ============================================================
+// OVERLAY SCREENS
+// ============================================================
+function drawLevelIntro() {
+  ctx.fillStyle = 'rgba(15,10,26,0.88)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+
+  // World number (big)
+  ctx.fillStyle = 'rgba(233,69,96,0.2)';
+  ctx.font = 'bold 100px monospace';
+  ctx.fillText(`${currentLevel + 1}`, GAME_W / 2, GAME_H / 2 - 10);
+
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 26px monospace';
+  ctx.fillText(LEVEL_NAMES[currentLevel], GAME_W / 2, GAME_H / 2 - 40);
+
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = '13px monospace';
+  ctx.fillText(LEVEL_SUBTITLES[currentLevel], GAME_W / 2, GAME_H / 2 + 15);
+
+  const blink = Math.sin(Date.now() * 0.005) > 0;
+  if (blink) {
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '11px monospace';
+    ctx.fillText('Press SPACE to begin...', GAME_W / 2, GAME_H / 2 + 65);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+function drawDeathScreen() {
+  const progress = 1 - deathTimer / 120;
+  ctx.fillStyle = `rgba(120, 10, 20, ${0.5 + progress * 0.2})`;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px monospace';
+  ctx.fillText(stats.lives > 0 ? 'CAREER SETBACK!' : 'GAME OVER', GAME_W / 2, GAME_H / 2 - 20);
+
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = '13px monospace';
+  if (stats.lives > 0) {
+    ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
+  } else {
+    ctx.fillText('You left academia. Maybe that\'s okay.', GAME_W / 2, GAME_H / 2 + 20);
+    ctx.font = '11px monospace';
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillText(`Final Score: ${stats.score}  |  Pubs: ${stats.publications}  |  h-index: ${stats.hIndex}`, GAME_W / 2, GAME_H / 2 + 50);
+  }
+  ctx.textAlign = 'left';
+}
+
+function drawLevelComplete() {
+  ctx.fillStyle = 'rgba(10,20,30,0.75)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Confetti
+  for (let i = 0; i < 30; i++) {
+    ctx.fillStyle = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ffd54f'][i % 6];
+    const cx = Math.sin(Date.now() * 0.002 + i * 1.3) * 300 + GAME_W / 2;
+    const cy = (Date.now() * 0.08 + i * 60) % (GAME_H + 20) - 10;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(Date.now() * 0.003 + i);
+    ctx.fillRect(-3, -3, 6, 6);
+    ctx.restore();
+  }
+
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 30px monospace';
+  ctx.fillText(currentLevel === 4 ? 'TENURE GRANTED!' : 'LEVEL COMPLETE!', GAME_W / 2, GAME_H / 2 - 30);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '14px monospace';
+  const promotions = ['PhD Earned!', 'Postdoc Survived!', 'Passed 3rd Year Review!', 'Full Professor!', 'ENDOWED CHAIR!'];
+  ctx.fillText(promotions[currentLevel], GAME_W / 2, GAME_H / 2 + 10);
+
+  ctx.fillStyle = '#b0bec5';
+  ctx.font = '11px monospace';
+  ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h-index: ${stats.hIndex} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
+  ctx.textAlign = 'left';
+}
+
+function drawWinScreen() {
+  const t = Date.now() * 0.001;
+
+  // Grand background
+  const bgGrad = ctx.createRadialGradient(GAME_W / 2, GAME_H / 2, 50, GAME_W / 2, GAME_H / 2, 400);
+  bgGrad.addColorStop(0, '#1a237e');
+  bgGrad.addColorStop(0.5, '#0d1442');
+  bgGrad.addColorStop(1, '#000');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Confetti
+  for (let i = 0; i < 60; i++) {
+    ctx.fillStyle = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ffd54f'][i % 6];
+    const cx = Math.sin(t * 1.5 + i * 1.3) * 350 + GAME_W / 2;
+    const cy = (Date.now() * 0.06 + i * 80) % (GAME_H + 20) - 10;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * 2 + i);
+    ctx.fillRect(-4, -2, 8, 4);
+    ctx.restore();
+  }
+
+  ctx.textAlign = 'center';
+
+  // Glow behind title
+  ctx.fillStyle = 'rgba(255,213,79,0.1)';
+  drawCircle(GAME_W / 2, 80, 60 + Math.sin(t * 2) * 10);
+  ctx.fill();
+
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 36px monospace';
+  ctx.fillText('CONGRATULATIONS!', GAME_W / 2, 80);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 20px monospace';
+  ctx.fillText('You achieved TENURE!', GAME_W / 2, 125);
+
+  // Character celebration
+  drawPlayer(GAME_W / 2 - 13, 140, 26, 32, Math.floor(Date.now() / 200) % 4, true, true, false);
+
+  ctx.fillStyle = '#e94560';
+  ctx.font = '13px monospace';
+  ctx.fillText('After years of sacrifice, you can finally...', GAME_W / 2, 200);
+
+  const rewards = [
+    'Attend even MORE committee meetings!',
+    'Mentor the next generation of sufferers!',
+    'Finally buy that house (in this economy?)',
+    'Start worrying about Full Professor now!',
+    'Update your email signature with pride!',
+  ];
+  for (let i = 0; i < rewards.length; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#e94560' : '#ffd54f';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText(rewards[i], GAME_W / 2, 230 + i * 24);
+  }
+
+  ctx.fillStyle = '#78909c';
+  ctx.font = '11px monospace';
+  ctx.fillText(`Final Stats: Pubs ${stats.publications} | Grants ${stats.grants} | Citations ${stats.citations} | h-index ${stats.hIndex}`, GAME_W / 2, 380);
+  ctx.fillText(`Score: ${stats.score}`, GAME_W / 2, 400);
+
+  ctx.fillStyle = '#546e7a';
+  ctx.font = '10px monospace';
+  const blink = Math.sin(t * 4) > 0;
+  if (blink) ctx.fillText('Press SPACE to play again (just like real academia)', GAME_W / 2, 440);
+  ctx.textAlign = 'left';
+
+  if (keys['Space']) {
+    gameState = 'menu';
+    keys['Space'] = false;
+  }
+}
+
+function startGame() {
+  stats = { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0 };
+  initLevel(0);
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
