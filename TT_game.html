@@ -22,7 +22,7 @@ canvas {
   box-shadow: 0 0 40px rgba(233, 69, 96, 0.3), 0 0 80px rgba(233, 69, 96, 0.1);
 }
 </style>
-  <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -30,6 +30,7 @@ canvas {
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
+
 
 </head>
 <body>
@@ -126,6 +127,13 @@ const THEMES = [
     cloudColor: 'rgba(255,245,230,0.85)', flowerColors: ['#ffa726','#ef5350','#ffca28','#ff7043'],
     treeColor: '#e65100', treeTrunk: '#4e342e',
   },
+  { // Job Market - Stressful blue/steel
+    skyTop: '#37474f', skyBot: '#78909c', grass: '#546e7a', grassDark: '#455a64',
+    dirt: '#455a64', dirtDark: '#37474f', platform: '#607d8b', platformTop: '#90a4ae',
+    bgHill1: '#546e7a', bgHill2: '#455a64', bgHill3: '#607d8b',
+    cloudColor: 'rgba(176,190,197,0.5)', flowerColors: ['#ef5350','#78909c','#42a5f5','#ff7043'],
+    treeColor: '#455a64', treeTrunk: '#37474f',
+  },
   { // Assistant Prof - Urban/institutional
     skyTop: '#90a4ae', skyBot: '#cfd8dc', grass: '#78909c', grassDark: '#607d8b',
     dirt: '#78909c', dirtDark: '#546e7a', platform: '#90a4ae', platformTop: '#b0bec5',
@@ -150,6 +158,134 @@ const THEMES = [
 ];
 
 // ============================================================
+// DIVERSITY SYSTEM
+// ============================================================
+const SKIN_TONES = [
+  { base: '#ffe0b2', shadow: '#ffcc80', blush: 'rgba(255,138,128,0.35)' },  // light
+  { base: '#ffcc80', shadow: '#ffb74d', blush: 'rgba(255,120,100,0.3)' },   // light-medium
+  { base: '#deb887', shadow: '#c8a070', blush: 'rgba(200,100,80,0.25)' },   // medium
+  { base: '#c68c53', shadow: '#a8723f', blush: 'rgba(180,80,60,0.25)' },    // medium-dark
+  { base: '#8d5524', shadow: '#704214', blush: 'rgba(140,60,40,0.2)' },     // dark
+  { base: '#5c3310', shadow: '#3d200a', blush: 'rgba(100,40,30,0.15)' },    // very dark
+];
+
+const HAIR_COLORS = [
+  '#4e342e', // dark brown
+  '#212121', // black
+  '#5d4037', // brown
+  '#795548', // light brown
+  '#bf360c', // red/auburn
+  '#f9a825', // blonde
+  '#424242', // dark gray
+  '#9e9e9e', // gray/silver
+  '#1b5e20', // fun: dark green
+  '#4a148c', // fun: purple
+];
+
+const HAIR_STYLES = [
+  'messy',     // tufts sticking up (current default)
+  'short',     // close-cropped
+  'long',      // longer, flowing down sides
+  'curly',     // round poofy curls
+  'bun',       // top bun / updo
+  'mohawk',    // tall center spike
+  'bob',       // neat bob cut
+  'afro',      // round afro
+];
+
+const JACKET_COLORS = [
+  { main: '#8d6e63', patch: '#5d4037' },  // brown tweed
+  { main: '#546e7a', patch: '#37474f' },  // charcoal
+  { main: '#5c6bc0', patch: '#3949ab' },  // navy
+  { main: '#7b1fa2', patch: '#4a148c' },  // plum
+  { main: '#00695c', patch: '#004d40' },  // teal
+  { main: '#bf360c', patch: '#8e2400' },  // burgundy
+  { main: '#37474f', patch: '#263238' },  // dark gray
+];
+
+const TIE_COLORS = ['#ef5350', '#42a5f5', '#ffd54f', '#66bb6a', '#ab47bc', '#ff7043', '#26c6da'];
+
+function randomAppearance() {
+  return {
+    skin: SKIN_TONES[Math.floor(Math.random() * SKIN_TONES.length)],
+    hair: HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)],
+    hairStyle: HAIR_STYLES[Math.floor(Math.random() * HAIR_STYLES.length)],
+    jacket: JACKET_COLORS[Math.floor(Math.random() * JACKET_COLORS.length)],
+    tie: TIE_COLORS[Math.floor(Math.random() * TIE_COLORS.length)],
+  };
+}
+
+let playerAppearance = randomAppearance();
+
+function drawHairStyle(style, color, x, headY, w) {
+  ctx.fillStyle = color;
+  switch (style) {
+    case 'messy':
+      drawRoundRect(x + 1, headY - 3, w - 2, 8, 5);
+      ctx.fill();
+      ctx.fillRect(x + 2, headY - 5, 3, 4);
+      ctx.fillRect(x + w / 2 - 1, headY - 6, 3, 5);
+      ctx.fillRect(x + w - 6, headY - 4, 3, 3);
+      break;
+    case 'short':
+      drawRoundRect(x + 2, headY - 1, w - 4, 6, 4);
+      ctx.fill();
+      break;
+    case 'long':
+      drawRoundRect(x, headY - 3, w, 8, 5);
+      ctx.fill();
+      // Side hair flowing down
+      drawRoundRect(x - 1, headY + 3, 4, 12, 2);
+      ctx.fill();
+      drawRoundRect(x + w - 3, headY + 3, 4, 12, 2);
+      ctx.fill();
+      break;
+    case 'curly':
+      // Poofy round curls
+      for (let i = 0; i < 5; i++) {
+        drawCircle(x + 3 + i * ((w - 6) / 4), headY - 1, 4);
+        ctx.fill();
+      }
+      drawCircle(x + 1, headY + 3, 3);
+      ctx.fill();
+      drawCircle(x + w - 1, headY + 3, 3);
+      ctx.fill();
+      break;
+    case 'bun':
+      drawRoundRect(x + 2, headY - 1, w - 4, 5, 3);
+      ctx.fill();
+      // Top bun
+      drawCircle(x + w / 2, headY - 5, 5);
+      ctx.fill();
+      break;
+    case 'mohawk':
+      drawRoundRect(x + 2, headY - 1, w - 4, 5, 3);
+      ctx.fill();
+      // Tall center spike
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2 - 3, headY - 1);
+      ctx.lineTo(x + w / 2, headY - 10);
+      ctx.lineTo(x + w / 2 + 3, headY - 1);
+      ctx.fill();
+      break;
+    case 'bob':
+      drawRoundRect(x, headY - 2, w, 7, 5);
+      ctx.fill();
+      // Neat sides
+      drawRoundRect(x - 1, headY + 3, 5, 8, 3);
+      ctx.fill();
+      drawRoundRect(x + w - 4, headY + 3, 5, 8, 3);
+      ctx.fill();
+      break;
+    case 'afro':
+      // Big round afro
+      drawCircle(x + w / 2, headY + 2, w / 2 + 3);
+      ctx.fill();
+      break;
+  }
+}
+
+// ============================================================
 // CUTE CHARACTER DRAWING
 // ============================================================
 function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
@@ -172,27 +308,28 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   ctx.fill();
 
   // Body (round, chibi style)
+  const app = playerAppearance;
   const bodyGrad = ctx.createLinearGradient(x, drawY + 14, x + w, drawY + 14);
   if (powered) {
     bodyGrad.addColorStop(0, '#FFD700');
     bodyGrad.addColorStop(1, '#FFA000');
   } else {
-    bodyGrad.addColorStop(0, '#8d6e63');
-    bodyGrad.addColorStop(1, '#6d4c41');
+    bodyGrad.addColorStop(0, app.jacket.main);
+    bodyGrad.addColorStop(1, lerpColor(app.jacket.main, '#000000', 0.2));
   }
   ctx.fillStyle = bodyGrad;
   drawRoundRect(x + 3, drawY + 14, w - 6, h - 18, 5);
   ctx.fill();
 
   // Elbow patches (cute detail)
-  ctx.fillStyle = powered ? '#ffcc02' : '#5d4037';
+  ctx.fillStyle = powered ? '#ffcc02' : app.jacket.patch;
   drawCircle(x + 4, drawY + 22, 3);
   ctx.fill();
   drawCircle(x + w - 4, drawY + 22, 3);
   ctx.fill();
 
   // Tie
-  ctx.fillStyle = '#ef5350';
+  ctx.fillStyle = app.tie;
   ctx.beginPath();
   ctx.moveTo(x + w / 2, drawY + 14);
   ctx.lineTo(x + w / 2 + 3, drawY + 20);
@@ -223,27 +360,21 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   // Head (big, cute, round)
   const headY = drawY - 2;
   const headGrad = ctx.createRadialGradient(x + w / 2, headY + 7, 2, x + w / 2, headY + 7, 13);
-  headGrad.addColorStop(0, '#ffe0b2');
-  headGrad.addColorStop(1, '#ffcc80');
+  headGrad.addColorStop(0, app.skin.base);
+  headGrad.addColorStop(1, app.skin.shadow);
   ctx.fillStyle = headGrad;
   drawRoundRect(x + 2, headY, w - 4, 18, 8);
   ctx.fill();
 
   // Blush circles
-  ctx.fillStyle = 'rgba(255,138,128,0.4)';
+  ctx.fillStyle = app.skin.blush;
   drawCircle(x + 5, headY + 11, 3);
   ctx.fill();
   drawCircle(x + w - 5, headY + 11, 3);
   ctx.fill();
 
-  // Hair (messy academic)
-  ctx.fillStyle = '#4e342e';
-  drawRoundRect(x + 1, headY - 3, w - 2, 8, 5);
-  ctx.fill();
-  // Messy tufts
-  ctx.fillRect(x + 2, headY - 5, 3, 4);
-  ctx.fillRect(x + w / 2 - 1, headY - 6, 3, 5);
-  ctx.fillRect(x + w - 6, headY - 4, 3, 3);
+  // Hair
+  drawHairStyle(app.hairStyle, app.hair, x, headY, w);
 
   // Glasses
   ctx.strokeStyle = '#37474f';
@@ -390,24 +521,30 @@ function drawEnemy(e, x, y) {
     }
 
     case 'bureaucrat': {
+      const ba = e.appearance || { skin: SKIN_TONES[0], jacket: JACKET_COLORS[0], tie: TIE_COLORS[0], hair: HAIR_COLORS[0], hairStyle: 'short' };
       // Cute suit blob
       const grad = ctx.createLinearGradient(x, dy, x, dy + e.h);
-      grad.addColorStop(0, '#90a4ae');
-      grad.addColorStop(1, '#607d8b');
+      grad.addColorStop(0, ba.jacket.main);
+      grad.addColorStop(1, ba.jacket.patch);
       ctx.fillStyle = grad;
       drawRoundRect(x + 2, dy + 8, e.w - 4, e.h - 10, 8);
       ctx.fill();
 
       // Head
       const headGrad = ctx.createRadialGradient(x + e.w / 2, dy + 6, 2, x + e.w / 2, dy + 6, 10);
-      headGrad.addColorStop(0, '#ffe0b2');
-      headGrad.addColorStop(1, '#ffcc80');
+      headGrad.addColorStop(0, ba.skin.base);
+      headGrad.addColorStop(1, ba.skin.shadow);
       ctx.fillStyle = headGrad;
       drawCircle(x + e.w / 2, dy + 6, 9);
       ctx.fill();
 
+      // Hair on bureaucrat
+      ctx.fillStyle = ba.hair;
+      drawRoundRect(x + e.w / 2 - 9, dy - 3, 18, 5, 4);
+      ctx.fill();
+
       // Tie
-      ctx.fillStyle = '#263238';
+      ctx.fillStyle = ba.tie;
       ctx.beginPath();
       ctx.moveTo(x + e.w / 2, dy + 12);
       ctx.lineTo(x + e.w / 2 + 3, dy + 18);
@@ -537,19 +674,38 @@ function drawEnemy(e, x, y) {
     }
 
     case 'committee': {
-      // Three tiny cute figures huddled
+      // Three tiny cute figures huddled — each with different appearance
+      const committeeSkins = [
+        SKIN_TONES[Math.floor((e.startX * 3) % SKIN_TONES.length)],
+        SKIN_TONES[Math.floor((e.startX * 7 + 1) % SKIN_TONES.length)],
+        SKIN_TONES[Math.floor((e.startX * 11 + 3) % SKIN_TONES.length)],
+      ];
+      const committeeHair = [
+        HAIR_COLORS[Math.floor((e.startX * 5) % HAIR_COLORS.length)],
+        HAIR_COLORS[Math.floor((e.startX * 3 + 2) % HAIR_COLORS.length)],
+        HAIR_COLORS[Math.floor((e.startX * 9 + 4) % HAIR_COLORS.length)],
+      ];
+      const committeeJackets = [
+        JACKET_COLORS[Math.floor((e.startX * 2) % JACKET_COLORS.length)],
+        JACKET_COLORS[Math.floor((e.startX * 4 + 1) % JACKET_COLORS.length)],
+        JACKET_COLORS[Math.floor((e.startX * 6 + 3) % JACKET_COLORS.length)],
+      ];
       for (let i = 0; i < 3; i++) {
         const cx = x + 2 + i * 9;
-        const bodyColor = ['#546e7a', '#455a64', '#37474f'][i];
 
         // Body
-        ctx.fillStyle = bodyColor;
+        ctx.fillStyle = committeeJackets[i].main;
         drawRoundRect(cx, dy + 12, 8, 16, 3);
         ctx.fill();
 
         // Head
-        ctx.fillStyle = '#ffe0b2';
+        ctx.fillStyle = committeeSkins[i].base;
         drawCircle(cx + 4, dy + 8, 5);
+        ctx.fill();
+
+        // Hair
+        ctx.fillStyle = committeeHair[i];
+        drawRoundRect(cx, dy + 3, 8, 3, 3);
         ctx.fill();
 
         // Eyes (dots)
@@ -571,6 +727,7 @@ function drawEnemy(e, x, y) {
     }
 
     case 'dean': {
+      const da = e.appearance || { skin: SKIN_TONES[0], hair: '#9e9e9e' };
       // Large imposing figure
       // Robe
       const robeGrad = ctx.createLinearGradient(x, dy + 20, x, dy + e.h);
@@ -587,15 +744,15 @@ function drawEnemy(e, x, y) {
       ctx.stroke();
 
       // Head
-      const headGrad = ctx.createRadialGradient(x + e.w / 2, dy + 12, 3, x + e.w / 2, dy + 12, 14);
-      headGrad.addColorStop(0, '#ffe0b2');
-      headGrad.addColorStop(1, '#ffcc80');
-      ctx.fillStyle = headGrad;
+      const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 12, 3, x + e.w / 2, dy + 12, 14);
+      headGrad2.addColorStop(0, da.skin.base);
+      headGrad2.addColorStop(1, da.skin.shadow);
+      ctx.fillStyle = headGrad2;
       drawRoundRect(x + 10, dy + 2, e.w - 20, 22, 10);
       ctx.fill();
 
-      // Bald top with side hair
-      ctx.fillStyle = '#9e9e9e';
+      // Side hair (distinguished)
+      ctx.fillStyle = da.hair;
       drawRoundRect(x + 8, dy + 10, 5, 10, 2);
       ctx.fill();
       drawRoundRect(x + e.w - 13, dy + 10, 5, 10, 2);
@@ -861,7 +1018,7 @@ function drawBackground(ci) {
   ctx.fillRect(0, 0, GAME_W, GAME_H);
 
   // Sun/Moon
-  if (ci < 4) {
+  if (ci < 5) {
     // Sun
     const sunGrad = ctx.createRadialGradient(650, 60, 10, 650, 60, 50);
     sunGrad.addColorStop(0, 'rgba(255,245,157,1)');
@@ -1166,7 +1323,7 @@ function drawFlag() {
   // Text on flag
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 9px monospace';
-  ctx.fillText(currentLevel === 4 ? 'TENURE!' : 'NEXT', sx + 24, sy - 30);
+  ctx.fillText(currentLevel === 5 ? 'TENURE!' : 'NEXT', sx + 24, sy - 30);
 
   // Sparkles when reached
   if (flagObj.reached) {
@@ -1262,14 +1419,16 @@ function drawHUD() {
 const LEVEL_NAMES = [
   'World 1: PhD Student',
   'World 2: Postdoc',
-  'World 3: Assistant Prof',
-  'World 4: Associate Prof',
-  'World 5: TENURE REVIEW'
+  'World 3: THE JOB MARKET',
+  'World 4: Assistant Prof',
+  'World 5: Associate Prof',
+  'World 6: TENURE REVIEW'
 ];
 
 const LEVEL_SUBTITLES = [
   '"Your stipend is a badge of honor" - Your Advisor',
   '"Just one more postdoc and you\'ll be ready" - Everyone',
+  '"200 applicants for 1 position" - Search Committee',
   '"Teach 4 courses AND get a Nature paper" - The Dean',
   '"We need you on 12 more committees" - The Department',
   '"We\'ve been reviewing your case for 8 months..."'
@@ -1278,10 +1437,30 @@ const LEVEL_SUBTITLES = [
 const LEVELS = [
   { width: 100, height: 15, gravity: 0.5 },
   { width: 120, height: 15, gravity: 0.5 },
+  { width: 110, height: 15, gravity: 0.5 },
   { width: 140, height: 15, gravity: 0.5 },
   { width: 130, height: 15, gravity: 0.5 },
   { width: 80, height: 15, gravity: 0.5 },
 ];
+
+// Job market thresholds to pass World 3
+const JOB_MARKET_THRESHOLDS = {
+  publications: 5,
+  grants: 2,
+  citations: 8,
+  hIndex: 2,
+  leaderboardRank: 1000, // must be in top 1000
+};
+
+// Leaderboard API
+const LEADERBOARD_URL = 'https://tenure-track-leaderboard.onrender.com/api/leaderboard';
+let leaderboardData = [];
+let leaderboardRank = null;
+let playerName = '';
+let nameInputActive = false;
+let jobMarketPassed = null; // null = not checked, true/false = result
+let jobMarketFailReason = '';
+let postdocCount = 0; // how many times sent back to postdoc
 
 // ============================================================
 // LEVEL GENERATION
@@ -1372,6 +1551,7 @@ function generateLevel(levelIdx) {
   const enemyTypes = [
     ['reviewer2', 'imposter'],
     ['reviewer2', 'imposter', 'bureaucrat'],
+    ['reviewer2', 'committee', 'bureaucrat'],  // Job Market
     ['reviewer2', 'bureaucrat', 'teaching'],
     ['bureaucrat', 'teaching', 'committee'],
     ['reviewer2', 'bureaucrat', 'dean']
@@ -1391,6 +1571,7 @@ function generateLevel(levelIdx) {
   const signMsgs = [
     ['"Sleep is for the tenured"', '"Free food in seminar room"', '"Advisor meeting: cancelled (again)"', '"IRB approval pending since 2019"'],
     ['"Temporary position (5th year)"', '"Your PI took first authorship"', '"Visa renewal: pending"', '"Lab meeting at 7 AM Saturday"'],
+    ['"200 applicants, 1 position"', '"Skype interview at 3 AM"', '"Fly-out cancelled (budget cuts)"', '"We went with an internal candidate"'],
     ['"Startup funds: depleted"', '"Service: mandatory. Credit: none."', '"Teach intro AND advanced"', '"REU students need mentoring"'],
     ['"Meeting about meeting schedule"', '"Form 27B/6 required"', '"Annual report due yesterday"', '"Diversity statement v12 needed"'],
     ['"Decision in 6-8 months"', '"External letters: still waiting"', '"H-index insufficient"', '"One more R&R should do it"']
@@ -1404,7 +1585,7 @@ function generateLevel(levelIdx) {
     }
   }
 
-  if (levelIdx === 4) {
+  if (levelIdx === 5) {
     entities.push({ type: 'dean', x: w - 15, y: groundY - 2, patrolRange: 4, hp: 5 });
   }
 
@@ -1472,7 +1653,10 @@ function initLevel(idx) {
           powered: false, powerTimer: 0,
           invincible: false, invTimer: 0,
           dead: false,
-          hasDoubleJumped: false
+          hasDoubleJumped: false,
+          jumpBuffer: 0,
+          coyoteTime: 0,
+          wasOnGround: false
         };
         break;
       case 'flag':
@@ -1493,7 +1677,8 @@ function initLevel(idx) {
           type: ent.type, x: wx, y: wy, w: 28, h: 30,
           vx: (Math.random() < 0.5 ? 1 : -1) * (1 + idx * 0.3),
           startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
-          alive: true, frame: 0, frameTimer: 0
+          alive: true, frame: 0, frameTimer: 0,
+          appearance: randomAppearance()
         });
         break;
       case 'dean':
@@ -1501,7 +1686,8 @@ function initLevel(idx) {
           type: 'dean', x: wx, y: wy - TILE, w: 48, h: 56,
           vx: 1.5, startX: wx, patrolRange: (ent.patrolRange || 4) * TILE,
           alive: true, hp: ent.hp || 5, maxHp: ent.hp || 5,
-          frame: 0, frameTimer: 0, attackTimer: 0
+          frame: 0, frameTimer: 0, attackTimer: 0,
+          appearance: randomAppearance()
         });
         break;
       case 'sign':
@@ -1642,13 +1828,34 @@ function update() {
 
   if (gameState === 'dead') {
     deathTimer--;
-    if (deathTimer <= 0) {
-      if (stats.lives > 0) {
+    if (stats.lives > 0) {
+      // Auto-dismiss after timer for setbacks
+      if (deathTimer <= 0) {
         initLevel(currentLevel);
         gameState = 'levelIntro';
         introTimer = 120;
-      } else {
+      }
+    } else {
+      // Game over: wait for keypress (after a brief delay)
+      if (deathTimer <= 0 && (justPressed['Space'] || justPressed['Enter'])) {
         gameState = 'menu';
+      }
+    }
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'jobMarketCheck') {
+    if (jobMarketPassed !== null) {
+      winTimer--;
+      if (winTimer <= 0) {
+        if (jobMarketPassed) {
+          jobMarketPassed = null;
+          initLevel(3); // advance to Assistant Prof
+        } else {
+          jobMarketPassed = null;
+          initLevel(1); // back to Postdoc
+        }
       }
     }
     for (const key in justPressed) delete justPressed[key];
@@ -1663,6 +1870,8 @@ function update() {
       } else {
         gameState = 'gameWin';
         winTimer = 600;
+        submitScore();
+        fetchLeaderboard();
       }
     }
     for (const key in justPressed) delete justPressed[key];
@@ -1672,6 +1881,11 @@ function update() {
   if (gameState === 'gameWin') {
     winTimer--;
     if (winTimer <= 0) gameState = 'menu';
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'enterName' || gameState === 'showLeaderboard') {
     for (const key in justPressed) delete justPressed[key];
     return;
   }
@@ -1696,16 +1910,35 @@ function update() {
     if (Math.abs(player.vx) < 0.3) player.vx = 0;
   }
 
+  // Coyote time: track frames since last on ground
+  if (player.onGround) {
+    player.coyoteTime = 8; // 8 frames of grace after leaving ground
+    player.wasOnGround = true;
+  } else {
+    if (player.coyoteTime > 0) player.coyoteTime--;
+  }
+
+  // Jump buffer: remember jump press for several frames
   const jumpPressed = justPressed['ArrowUp'] || justPressed['KeyW'] || justPressed['Space'];
-  if (jumpPressed && player.onGround) {
+  if (jumpPressed) player.jumpBuffer = 8; // 8 frames of input buffer
+  if (player.jumpBuffer > 0) player.jumpBuffer--;
+
+  const wantsJump = player.jumpBuffer > 0;
+  const canGroundJump = player.onGround || player.coyoteTime > 0;
+
+  if (wantsJump && canGroundJump) {
     player.vy = player.powered ? -13 : -11;
     player.onGround = false;
+    player.coyoteTime = 0;
+    player.jumpBuffer = 0;
     player.hasDoubleJumped = false;
+    player.wasOnGround = false;
     // Jump dust
     spawnParticles(player.x + player.w / 2, player.y + player.h, 'rgba(180,180,180,0.6)', 4);
-  } else if (jumpPressed && !player.onGround && !player.hasDoubleJumped) {
+  } else if (jumpPressed && !canGroundJump && !player.hasDoubleJumped) {
     player.vy = player.powered ? -11 : -9;
     player.hasDoubleJumped = true;
+    player.jumpBuffer = 0;
     spawnParticles(player.x + player.w / 2, player.y + player.h, '#aaa', 6);
   }
 
@@ -1864,19 +2097,26 @@ function update() {
   // Flag
   if (flagObj && !flagObj.reached && rectCollide(player, flagObj)) {
     flagObj.reached = true;
-    gameState = 'levelComplete';
-    winTimer = 180;
     stats.score += 1000;
     spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
 
-    const completeMsgs = [
-      'Qualifying exam passed! On to the postdoc!',
-      'Postdoc complete! You got a faculty position!',
-      'Third-year review passed! Keep going!',
-      'Survived committee hell! Almost there!',
-      'TENURE GRANTED! YOU WIN!'
-    ];
-    showMessage(completeMsgs[currentLevel]);
+    if (currentLevel === 2) {
+      // Job Market gate — check thresholds and leaderboard
+      gameState = 'jobMarketCheck';
+      checkJobMarket();
+    } else {
+      gameState = 'levelComplete';
+      winTimer = 180;
+      const completeMsgs = [
+        'Qualifying exam passed! On to the postdoc!',
+        'Postdoc complete! Time for the job market!',
+        '', // job market handled separately
+        'Third-year review passed! Keep going!',
+        'Survived committee hell! Almost there!',
+        'TENURE GRANTED! YOU WIN!'
+      ];
+      showMessage(completeMsgs[currentLevel]);
+    }
   }
 
   // Signs proximity
@@ -1912,6 +2152,11 @@ function playerDie(msg) {
   deathTimer = 120;
   showMessage(msg || 'Career over!');
   spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 20);
+  if (stats.lives <= 0) {
+    // Game over — submit score and fetch leaderboard
+    submitScore();
+    fetchLeaderboard();
+  }
 }
 
 function getDeathMessage(enemyType) {
@@ -1934,7 +2179,13 @@ function draw() {
   ctx.clearRect(0, 0, GAME_W, GAME_H);
 
   if (gameState === 'menu') { drawMenu(); return; }
+  if (gameState === 'enterName') { drawNameInput(); return; }
   if (gameState === 'gameWin') { drawWinScreen(); return; }
+  if (gameState === 'showLeaderboard') {
+    drawLeaderboardOverlay();
+    if (keys['Space']) { gameState = 'menu'; keys['Space'] = false; }
+    return;
+  }
 
   const ci = currentLevel;
 
@@ -2009,6 +2260,7 @@ function draw() {
   if (gameState === 'levelIntro') drawLevelIntro();
   if (gameState === 'dead') drawDeathScreen();
   if (gameState === 'levelComplete') drawLevelComplete();
+  if (gameState === 'jobMarketCheck') drawJobMarketResult();
 
   // Message popup
   if (currentMessage) {
@@ -2099,54 +2351,91 @@ function drawMenu() {
 
   // Level path
   ctx.font = '10px monospace';
-  const levels = ['PhD', 'Postdoc', 'Asst.Prof', 'Assoc.Prof', 'TENURE!'];
+  const levels = ['PhD', 'Postdoc', 'Market', 'Asst.Prof', 'Assoc.Prof', 'TENURE!'];
   const pathY = 385;
   for (let i = 0; i < levels.length; i++) {
-    const lx = 120 + i * 145;
+    const lx = 68 + i * 115;
     // Node
-    ctx.fillStyle = i === 4 ? '#ffd54f' : '#e94560';
-    drawCircle(lx, pathY, 8);
+    ctx.fillStyle = i === 5 ? '#ffd54f' : i === 2 ? '#ef5350' : '#e94560';
+    drawCircle(lx, pathY, 7);
     ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 8px monospace';
+    ctx.font = 'bold 7px monospace';
     ctx.fillText(`${i + 1}`, lx, pathY + 3);
     // Label
     ctx.fillStyle = '#b0bec5';
-    ctx.font = '9px monospace';
-    ctx.fillText(levels[i], lx, pathY + 22);
-    // Arrow
-    if (i < 4) {
+    ctx.font = '8px monospace';
+    ctx.fillText(levels[i], lx, pathY + 20);
+    // Arrow (with loop-back indicator for job market)
+    if (i < 5) {
       ctx.strokeStyle = '#546e7a';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(lx + 12, pathY);
-      ctx.lineTo(lx + 130, pathY);
+      ctx.moveTo(lx + 10, pathY);
+      ctx.lineTo(lx + 102, pathY);
       ctx.stroke();
-      // Arrowhead
       ctx.beginPath();
-      ctx.moveTo(lx + 125, pathY - 4);
-      ctx.lineTo(lx + 132, pathY);
-      ctx.lineTo(lx + 125, pathY + 4);
+      ctx.moveTo(lx + 98, pathY - 3);
+      ctx.lineTo(lx + 104, pathY);
+      ctx.lineTo(lx + 98, pathY + 3);
       ctx.stroke();
+    }
+    // Loop-back arrow from Job Market to Postdoc
+    if (i === 2) {
+      ctx.strokeStyle = '#ef5350';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(lx, pathY + 10);
+      ctx.quadraticCurveTo(lx - 57, pathY + 30, lx - 115, pathY + 10);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // arrowhead
+      ctx.beginPath();
+      ctx.moveTo(lx - 112, pathY + 14);
+      ctx.lineTo(lx - 115, pathY + 8);
+      ctx.lineTo(lx - 118, pathY + 14);
+      ctx.stroke();
+      ctx.fillStyle = '#ef5350';
+      ctx.font = '6px monospace';
+      ctx.fillText('fail', lx - 70, pathY + 32);
     }
   }
 
-  // Collectibles legend
-  ctx.font = '10px monospace';
-  ctx.fillStyle = '#78909c';
-  ctx.fillText('Collect: Publications | Grants ($) | Citations | Coffee', GAME_W / 2, 430);
-  ctx.fillStyle = '#ef5350';
-  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Imposter Syndrome', GAME_W / 2, 448);
+  // Mini leaderboard on menu
+  if (leaderboardData.length > 0) {
+    drawMiniLeaderboard(420, 290, 8);
+  } else {
+    ctx.fillStyle = '#42a5f5';
+    ctx.font = '10px monospace';
+    ctx.fillText('Press L for Leaderboard', GAME_W / 2, 430);
+  }
 
+  // Collectibles legend (left side when leaderboard shown, center otherwise)
+  const legendX = leaderboardData.length > 0 ? 30 : GAME_W / 2;
+  const legendAlign = leaderboardData.length > 0 ? 'left' : 'center';
+  ctx.textAlign = legendAlign;
+  ctx.font = '9px monospace';
+  ctx.fillStyle = '#78909c';
+  ctx.fillText('Collect: Pubs | Grants | Citations | Coffee', legendX, 430);
+  ctx.fillStyle = '#ef5350';
+  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Imposter Syndrome', legendX, 446);
+
+  ctx.textAlign = 'center';
   ctx.fillStyle = '#37474f';
   ctx.font = '9px monospace';
-  ctx.fillText('No academics were harmed in the making of this game', GAME_W / 2, 470);
+  ctx.fillText('No academics were harmed in the making of this game', GAME_W / 2, 472);
 
   ctx.textAlign = 'left';
 
   if (keys['Space']) {
     startGame();
     keys['Space'] = false;
+  }
+  if (keys['KeyL']) {
+    keys['KeyL'] = false;
+    gameState = 'showLeaderboard';
+    fetchLeaderboard();
   }
 }
 
@@ -2172,11 +2461,29 @@ function drawLevelIntro() {
   ctx.font = '13px monospace';
   ctx.fillText(LEVEL_SUBTITLES[currentLevel], GAME_W / 2, GAME_H / 2 + 15);
 
+  // Show job market requirements on World 3 intro
+  if (currentLevel === 2) {
+    const t = JOB_MARKET_THRESHOLDS;
+    ctx.fillStyle = '#ef5350';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('To get an offer you need:', GAME_W / 2, GAME_H / 2 + 40);
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '10px monospace';
+    ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
+    ctx.fillStyle = '#78909c';
+    ctx.font = '9px monospace';
+    ctx.fillText(`You have: ${stats.publications} pubs, ${stats.grants} grants, ${stats.citations} cites, h=${stats.hIndex}`, GAME_W / 2, GAME_H / 2 + 75);
+    if (postdocCount > 0) {
+      ctx.fillStyle = '#ffa726';
+      ctx.fillText(`Postdoc attempt #${postdocCount + 1}`, GAME_W / 2, GAME_H / 2 + 92);
+    }
+  }
+
   const blink = Math.sin(Date.now() * 0.005) > 0;
   if (blink) {
     ctx.fillStyle = '#b0bec5';
     ctx.font = '11px monospace';
-    ctx.fillText('Press SPACE to begin...', GAME_W / 2, GAME_H / 2 + 65);
+    ctx.fillText('Press SPACE to begin...', GAME_W / 2, GAME_H / 2 + 115);
   }
 
   ctx.textAlign = 'left';
@@ -2184,26 +2491,54 @@ function drawLevelIntro() {
 
 function drawDeathScreen() {
   const progress = 1 - deathTimer / 120;
-  ctx.fillStyle = `rgba(120, 10, 20, ${0.5 + progress * 0.2})`;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
 
-  ctx.textAlign = 'center';
-
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 28px monospace';
-  ctx.fillText(stats.lives > 0 ? 'CAREER SETBACK!' : 'GAME OVER', GAME_W / 2, GAME_H / 2 - 20);
-
-  ctx.fillStyle = '#ffd54f';
-  ctx.font = '13px monospace';
   if (stats.lives > 0) {
+    // Just a setback — brief overlay
+    ctx.fillStyle = `rgba(120, 10, 20, ${0.5 + progress * 0.2})`;
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 28px monospace';
+    ctx.fillText('CAREER SETBACK!', GAME_W / 2, GAME_H / 2 - 20);
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '13px monospace';
     ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
+    ctx.textAlign = 'left';
   } else {
-    ctx.fillText('You left academia. Maybe that\'s okay.', GAME_W / 2, GAME_H / 2 + 20);
-    ctx.font = '11px monospace';
+    // Game over — full screen with leaderboard
+    ctx.fillStyle = 'rgba(15, 5, 10, 0.93)';
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ef5350';
+    ctx.font = 'bold 32px monospace';
+    ctx.fillText('GAME OVER', GAME_W / 2, 50);
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '13px monospace';
+    ctx.fillText('You left academia. Maybe that\'s okay.', GAME_W / 2, 80);
+
     ctx.fillStyle = '#b0bec5';
-    ctx.fillText(`Final Score: ${stats.score}  |  Pubs: ${stats.publications}  |  h-index: ${stats.hIndex}`, GAME_W / 2, GAME_H / 2 + 50);
+    ctx.font = '11px monospace';
+    ctx.fillText(`Final Score: ${stats.score}  |  Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  h-index: ${stats.hIndex}`, GAME_W / 2, 108);
+    if (leaderboardRank) {
+      ctx.fillStyle = '#ffd54f';
+      ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W / 2, 128);
+    }
+
+    // Leaderboard
+    drawMiniLeaderboard(GAME_W / 2 - 180, 150, 10);
+
+    const blink = Math.sin(Date.now() * 0.005) > 0;
+    if (blink) {
+      ctx.fillStyle = '#78909c';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Press SPACE to continue', GAME_W / 2, GAME_H - 20);
+    }
+    ctx.textAlign = 'left';
   }
-  ctx.textAlign = 'left';
 }
 
 function drawLevelComplete() {
@@ -2226,11 +2561,11 @@ function drawLevelComplete() {
 
   ctx.fillStyle = '#ffd54f';
   ctx.font = 'bold 30px monospace';
-  ctx.fillText(currentLevel === 4 ? 'TENURE GRANTED!' : 'LEVEL COMPLETE!', GAME_W / 2, GAME_H / 2 - 30);
+  ctx.fillText(currentLevel === 5 ? 'TENURE GRANTED!' : 'LEVEL COMPLETE!', GAME_W / 2, GAME_H / 2 - 30);
 
   ctx.fillStyle = '#fff';
   ctx.font = '14px monospace';
-  const promotions = ['PhD Earned!', 'Postdoc Survived!', 'Passed 3rd Year Review!', 'Full Professor!', 'ENDOWED CHAIR!'];
+  const promotions = ['PhD Earned!', 'Postdoc Survived!', 'Job Offer Received!', 'Passed 3rd Year Review!', 'Full Professor!', 'ENDOWED CHAIR!'];
   ctx.fillText(promotions[currentLevel], GAME_W / 2, GAME_H / 2 + 10);
 
   ctx.fillStyle = '#b0bec5';
@@ -2299,13 +2634,17 @@ function drawWinScreen() {
 
   ctx.fillStyle = '#78909c';
   ctx.font = '11px monospace';
-  ctx.fillText(`Final Stats: Pubs ${stats.publications} | Grants ${stats.grants} | Citations ${stats.citations} | h-index ${stats.hIndex}`, GAME_W / 2, 380);
-  ctx.fillText(`Score: ${stats.score}`, GAME_W / 2, 400);
+  ctx.fillText(`Final Stats: Pubs ${stats.publications} | Grants ${stats.grants} | Citations ${stats.citations} | h-index ${stats.hIndex}`, GAME_W / 2, 370);
+  ctx.fillText(`Score: ${stats.score}`, GAME_W / 2, 390);
+  if (leaderboardRank) {
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 410);
+  }
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '10px monospace';
   const blink = Math.sin(t * 4) > 0;
-  if (blink) ctx.fillText('Press SPACE to play again (just like real academia)', GAME_W / 2, 440);
+  if (blink) ctx.fillText('Press SPACE to play again (just like real academia)', GAME_W / 2, 445);
   ctx.textAlign = 'left';
 
   if (keys['Space']) {
@@ -2314,8 +2653,378 @@ function drawWinScreen() {
   }
 }
 
+// ============================================================
+// LEADERBOARD & JOB MARKET
+// ============================================================
+async function fetchLeaderboard() {
+  try {
+    const res = await fetch(LEADERBOARD_URL);
+    leaderboardData = await res.json();
+  } catch (e) {
+    leaderboardData = [];
+  }
+}
+
+async function fetchRank(score) {
+  try {
+    const res = await fetch(`${LEADERBOARD_URL}/rank?score=${score}`);
+    const data = await res.json();
+    return data.rank;
+  } catch (e) {
+    return 1; // if server is down, let them pass
+  }
+}
+
+async function submitScore() {
+  try {
+    const res = await fetch(LEADERBOARD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: playerName || 'Anonymous',
+        score: stats.score,
+        publications: stats.publications,
+        grants: stats.grants,
+        citations: stats.citations,
+        hIndex: stats.hIndex,
+      }),
+    });
+    const data = await res.json();
+    leaderboardRank = data.rank;
+  } catch (e) {
+    leaderboardRank = null;
+  }
+}
+
+async function checkJobMarket() {
+  const t = JOB_MARKET_THRESHOLDS;
+  const failReasons = [];
+
+  if (stats.publications < t.publications) failReasons.push(`Pubs: ${stats.publications}/${t.publications}`);
+  if (stats.grants < t.grants) failReasons.push(`Grants: ${stats.grants}/${t.grants}`);
+  if (stats.citations < t.citations) failReasons.push(`Cites: ${stats.citations}/${t.citations}`);
+  if (stats.hIndex < t.hIndex) failReasons.push(`h-index: ${stats.hIndex}/${t.hIndex}`);
+
+  // Check leaderboard rank
+  const rank = await fetchRank(stats.score);
+  leaderboardRank = rank;
+  if (rank > t.leaderboardRank) failReasons.push(`Rank: #${rank} (need top ${t.leaderboardRank})`);
+
+  if (failReasons.length === 0) {
+    jobMarketPassed = true;
+    jobMarketFailReason = '';
+  } else {
+    jobMarketPassed = false;
+    jobMarketFailReason = failReasons.join('  |  ');
+  }
+  // Submit score regardless
+  await submitScore();
+  await fetchLeaderboard();
+
+  winTimer = 300;
+}
+
+// Name input handling
+let nameChars = [];
+function handleNameInput(e) {
+  if (!nameInputActive) return;
+  if (e.key === 'Enter' && nameChars.length > 0) {
+    playerName = nameChars.join('');
+    nameInputActive = false;
+    window.removeEventListener('keydown', handleNameInput);
+    startGameAfterName();
+    return;
+  }
+  if (e.key === 'Backspace') {
+    nameChars.pop();
+    return;
+  }
+  if (e.key.length === 1 && nameChars.length < 15) {
+    nameChars.push(e.key);
+  }
+}
+
+function drawNameInput() {
+  const t = Date.now() * 0.001;
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
+  bgGrad.addColorStop(0, '#1a0533');
+  bgGrad.addColorStop(1, '#0f0a1a');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = '#e94560';
+  ctx.font = 'bold 28px monospace';
+  ctx.fillText('ENTER YOUR NAME', GAME_W / 2, 150);
+
+  ctx.fillStyle = '#78909c';
+  ctx.font = '12px monospace';
+  ctx.fillText('(for the leaderboard)', GAME_W / 2, 180);
+
+  // Name box
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  drawRoundRect(GAME_W / 2 - 150, 210, 300, 50, 10);
+  ctx.fill();
+  ctx.strokeStyle = '#e94560';
+  ctx.lineWidth = 2;
+  drawRoundRect(GAME_W / 2 - 150, 210, 300, 50, 10);
+  ctx.stroke();
+
+  const displayName = nameChars.join('') + (Math.sin(t * 5) > 0 ? '_' : '');
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px monospace';
+  ctx.fillText(displayName, GAME_W / 2, 242);
+
+  const blink = Math.sin(t * 4) > 0;
+  if (blink && nameChars.length > 0) {
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '14px monospace';
+    ctx.fillText('Press ENTER to start', GAME_W / 2, 310);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+function drawJobMarketResult() {
+  ctx.fillStyle = 'rgba(10,20,30,0.88)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+
+  if (jobMarketPassed === null) {
+    // Still checking
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('Reviewing your application...', GAME_W / 2, GAME_H / 2);
+    const dots = '.'.repeat(Math.floor(Date.now() / 500) % 4);
+    ctx.fillText(dots, GAME_W / 2, GAME_H / 2 + 30);
+  } else if (jobMarketPassed) {
+    // Success!
+    // Confetti
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ffd54f'][i % 6];
+      const cx = Math.sin(Date.now() * 0.002 + i * 1.3) * 300 + GAME_W / 2;
+      const cy = (Date.now() * 0.08 + i * 60) % (GAME_H + 20) - 10;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Date.now() * 0.003 + i);
+      ctx.fillRect(-3, -3, 6, 6);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = '#66bb6a';
+    ctx.font = 'bold 28px monospace';
+    ctx.fillText('OFFER RECEIVED!', GAME_W / 2, 120);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px monospace';
+    ctx.fillText('The search committee was impressed!', GAME_W / 2, 160);
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '12px monospace';
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | Cites: ${stats.citations} | h=${stats.hIndex}`, GAME_W / 2, 200);
+    if (leaderboardRank) {
+      ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 225);
+    }
+
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '11px monospace';
+    ctx.fillText('Starting assistant professorship...', GAME_W / 2, 280);
+  } else {
+    // Failed
+    ctx.fillStyle = '#ef5350';
+    ctx.font = 'bold 26px monospace';
+    ctx.fillText('APPLICATION REJECTED', GAME_W / 2, 100);
+
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = '13px monospace';
+    ctx.fillText('"We regret to inform you..."', GAME_W / 2, 140);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px monospace';
+    ctx.fillText('Your CV did not meet the requirements:', GAME_W / 2, 180);
+
+    ctx.fillStyle = '#ef5350';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(jobMarketFailReason, GAME_W / 2, 210);
+
+    // Show thresholds
+    ctx.fillStyle = '#78909c';
+    ctx.font = '10px monospace';
+    const t = JOB_MARKET_THRESHOLDS;
+    ctx.fillText(`Required: ${t.publications} pubs, ${t.grants} grants, ${t.citations} cites, h>=${t.hIndex}, top ${t.leaderboardRank} rank`, GAME_W / 2, 240);
+
+    if (leaderboardRank) {
+      ctx.fillStyle = '#ffa726';
+      ctx.fillText(`Your leaderboard rank: #${leaderboardRank}`, GAME_W / 2, 265);
+    }
+
+    postdocCount++;
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText(`Back to Postdoc #${postdocCount + 1}...`, GAME_W / 2, 310);
+
+    ctx.fillStyle = '#78909c';
+    ctx.font = '10px monospace';
+    ctx.fillText('Collect more pubs, grants, and citations!', GAME_W / 2, 340);
+  }
+
+  ctx.textAlign = 'left';
+}
+
+function drawLeaderboardOverlay() {
+  ctx.fillStyle = 'rgba(15,10,26,0.95)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 22px monospace';
+  ctx.fillText('LEADERBOARD', GAME_W / 2, 40);
+
+  if (leaderboardData.length === 0) {
+    ctx.fillStyle = '#78909c';
+    ctx.font = '12px monospace';
+    ctx.fillText('No scores yet. Be the first!', GAME_W / 2, GAME_H / 2);
+  } else {
+    // Header
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('#', 100, 70);
+    ctx.fillText('NAME', 130, 70);
+    ctx.fillText('SCORE', 320, 70);
+    ctx.fillText('PUBS', 410, 70);
+    ctx.fillText('GRANTS', 470, 70);
+    ctx.fillText('h-idx', 540, 70);
+    ctx.fillText('CITES', 600, 70);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(90, 75);
+    ctx.lineTo(670, 75);
+    ctx.stroke();
+
+    const maxShow = Math.min(leaderboardData.length, 15);
+    for (let i = 0; i < maxShow; i++) {
+      const e = leaderboardData[i];
+      const y = 92 + i * 22;
+      const isMe = e.name === playerName && i === (leaderboardRank ? leaderboardRank - 1 : -1);
+
+      if (isMe) {
+        ctx.fillStyle = 'rgba(255,213,79,0.15)';
+        ctx.fillRect(85, y - 12, 590, 20);
+      }
+
+      ctx.fillStyle = i < 3 ? '#ffd54f' : '#b0bec5';
+      ctx.font = i < 3 ? 'bold 10px monospace' : '10px monospace';
+      ctx.fillText(`${e.rank || i + 1}`, 100, y);
+      ctx.fillStyle = isMe ? '#ffd54f' : '#fff';
+      ctx.fillText(e.name, 130, y);
+      ctx.fillStyle = '#ffa726';
+      ctx.fillText(`${e.score}`, 320, y);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`${e.publications}`, 410, y);
+      ctx.fillStyle = '#66bb6a';
+      ctx.fillText(`${e.grants}`, 470, y);
+      ctx.fillStyle = '#ffd54f';
+      ctx.fillText(`${e.hIndex}`, 540, y);
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fillText(`${e.citations}`, 600, y);
+    }
+  }
+
+  ctx.textAlign = 'center';
+  const blink = Math.sin(Date.now() * 0.005) > 0;
+  if (blink) {
+    ctx.fillStyle = '#78909c';
+    ctx.font = '11px monospace';
+    ctx.fillText('Press SPACE to continue', GAME_W / 2, GAME_H - 30);
+  }
+  ctx.textAlign = 'left';
+}
+
+// Draw a compact leaderboard table at a given position
+function drawMiniLeaderboard(startX, startY, maxRows) {
+  const lbW = 360;
+  // Panel background
+  ctx.fillStyle = 'rgba(10,10,30,0.7)';
+  drawRoundRect(startX - 10, startY - 18, lbW + 20, maxRows * 16 + 34, 6);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,213,79,0.2)';
+  ctx.lineWidth = 1;
+  drawRoundRect(startX - 10, startY - 18, lbW + 20, maxRows * 16 + 34, 6);
+  ctx.stroke();
+
+  // Title
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('LEADERBOARD', startX + lbW / 2, startY - 4);
+  ctx.textAlign = 'left';
+
+  if (leaderboardData.length === 0) {
+    ctx.fillStyle = '#78909c';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('No scores yet', startX + lbW / 2, startY + 20);
+    ctx.textAlign = 'left';
+    return;
+  }
+
+  // Header
+  ctx.fillStyle = '#78909c';
+  ctx.font = '8px monospace';
+  ctx.fillText('#', startX, startY + 12);
+  ctx.fillText('NAME', startX + 20, startY + 12);
+  ctx.fillText('SCORE', startX + 150, startY + 12);
+  ctx.fillText('PUBS', startX + 210, startY + 12);
+  ctx.fillText('h', startX + 255, startY + 12);
+  ctx.fillText('GRANTS', startX + 280, startY + 12);
+
+  const rows = Math.min(leaderboardData.length, maxRows);
+  for (let i = 0; i < rows; i++) {
+    const e = leaderboardData[i];
+    const rowY = startY + 26 + i * 16;
+    const isMe = playerName && e.name === playerName;
+
+    if (isMe) {
+      ctx.fillStyle = 'rgba(255,213,79,0.1)';
+      ctx.fillRect(startX - 5, rowY - 10, lbW + 10, 15);
+    }
+
+    ctx.font = i < 3 ? 'bold 9px monospace' : '9px monospace';
+    ctx.fillStyle = i < 3 ? '#ffd54f' : '#b0bec5';
+    ctx.fillText(`${e.rank || i + 1}`, startX, rowY);
+    ctx.fillStyle = isMe ? '#ffd54f' : '#fff';
+    ctx.fillText(e.name.slice(0, 12), startX + 20, rowY);
+    ctx.fillStyle = '#ffa726';
+    ctx.fillText(`${e.score}`, startX + 150, rowY);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`${e.publications}`, startX + 210, rowY);
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillText(`${e.hIndex}`, startX + 255, rowY);
+    ctx.fillStyle = '#66bb6a';
+    ctx.fillText(`${e.grants}`, startX + 280, rowY);
+  }
+}
+
 function startGame() {
   stats = { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0 };
+  postdocCount = 0;
+  jobMarketPassed = null;
+  playerAppearance = randomAppearance();
+
+  // Start name input
+  gameState = 'enterName';
+  nameInputActive = true;
+  nameChars = playerName ? playerName.split('') : [];
+  window.addEventListener('keydown', handleNameInput);
+}
+
+function startGameAfterName() {
+  fetchLeaderboard();
   initLevel(0);
 }
 
@@ -2332,3 +3041,4 @@ gameLoop();
 </script>
 </body>
 </html>
+
