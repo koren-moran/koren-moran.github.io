@@ -9,9 +9,6 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
-<!DOCTYPE html>
-<html lang="en">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Tenure Track Bros.</title>
@@ -28,9 +25,10 @@ body {
   overflow: hidden;
 }
 canvas {
-  border: 4px solid #e94560;
-  border-radius: 8px;
-  box-shadow: 0 0 40px rgba(233, 69, 96, 0.3), 0 0 80px rgba(233, 69, 96, 0.1);
+  border: 3px solid #e94560;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(233, 69, 96, 0.4), 0 0 60px rgba(233, 69, 96, 0.15), 0 0 120px rgba(233, 69, 96, 0.05), inset 0 0 30px rgba(0,0,0,0.1);
+  image-rendering: auto;
 }
 </style>
 </head>
@@ -108,6 +106,114 @@ function lerpColor(a, b, t) {
   const rg = Math.round(ag + (bg - ag) * t);
   const rb = Math.round(ab + (bb - ab) * t);
   return `rgb(${rr},${rg},${rb})`;
+}
+
+// ============================================================
+// CONTOUR / OUTLINE SYSTEM
+// ============================================================
+// Draw an outline around any shape by rendering it offset in 8 directions
+function withOutline(drawFn, outlineColor, thickness) {
+  const t = thickness || 2;
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+  const offsets = [[-t,0],[t,0],[0,-t],[0,t],[-t,-t],[t,-t],[-t,t],[t,t]];
+  for (const [ox, oy] of offsets) {
+    ctx.save();
+    ctx.translate(ox, oy);
+    drawFn(true); // true = outline pass
+    ctx.restore();
+  }
+  drawFn(false); // false = normal pass
+  ctx.restore();
+}
+
+// Offscreen buffer for outline rendering (stamp-based approach)
+let outlineCanvas, outlineCtx;
+function ensureOutlineBuffer() {
+  if (!outlineCanvas) {
+    outlineCanvas = document.createElement('canvas');
+    outlineCanvas.width = 128;
+    outlineCanvas.height = 128;
+    outlineCtx = outlineCanvas.getContext('2d');
+  }
+}
+
+// Draw a sprite with a colored outline via offscreen stamp
+function drawWithOutline(x, y, w, h, drawFn, outlineColor, thickness) {
+  ensureOutlineBuffer();
+  const pad = (thickness || 2) + 2;
+  const bw = w + pad * 2;
+  const bh = h + pad * 2;
+  // Resize buffer if needed
+  if (outlineCanvas.width < bw || outlineCanvas.height < bh) {
+    outlineCanvas.width = Math.max(outlineCanvas.width, bw + 16);
+    outlineCanvas.height = Math.max(outlineCanvas.height, bh + 16);
+  }
+  outlineCtx.clearRect(0, 0, bw + 4, bh + 4);
+  // Draw sprite into buffer
+  outlineCtx.save();
+  outlineCtx.translate(pad - x, pad - y);
+  const origCtx = ctx;
+  ctx = outlineCtx;
+  drawFn();
+  ctx = origCtx;
+  outlineCtx.restore();
+  // Draw expanded outline
+  const t = thickness || 2;
+  ctx.save();
+  ctx.globalAlpha = 1;
+  // Render outline color behind
+  ctx.globalCompositeOperation = 'source-over';
+  const offsets = [[-t,0],[t,0],[0,-t],[0,t]];
+  for (const [ox, oy] of offsets) {
+    ctx.drawImage(outlineCanvas, 0, 0, bw, bh, x - pad + ox, y - pad + oy, bw, bh);
+  }
+  // Tint the outline copies
+  ctx.globalCompositeOperation = 'source-atop';
+  // (Simple approach: draw the original on top, outline stays as-is from the sprite colors)
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(outlineCanvas, 0, 0, bw, bh, x - pad, y - pad, bw, bh);
+  ctx.restore();
+}
+
+// Darken a hex color for outlines
+function darkenColor(hex, amount) {
+  const h = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, ((h >> 16) & 0xff) - amount);
+  const g = Math.max(0, ((h >> 8) & 0xff) - amount);
+  const b = Math.max(0, (h & 0xff) - amount);
+  return `rgb(${r},${g},${b})`;
+}
+
+// Lighten a hex color for highlights
+function lightenColor(hex, amount) {
+  const h = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, ((h >> 16) & 0xff) + amount);
+  const g = Math.min(255, ((h >> 8) & 0xff) + amount);
+  const b = Math.min(255, (h & 0xff) + amount);
+  return `rgb(${r},${g},${b})`;
+}
+
+// Draw inner highlight (rim light) on a rounded rect
+function drawInnerHighlight(x, y, w, h, r) {
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  drawRoundRect(x + 1, y + 1, w - 2, h * 0.4, r);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Draw a drop shadow under a sprite area
+function drawDropShadow(x, y, w, h) {
+  const grad = ctx.createRadialGradient(x + w / 2, y + h + 2, 1, x + w / 2, y + h + 2, w * 0.7);
+  grad.addColorStop(0, 'rgba(0,0,0,0.25)');
+  grad.addColorStop(0.6, 'rgba(0,0,0,0.08)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  drawEllipse(x + w / 2, y + h + 2, w * 0.6, 5);
+  ctx.fill();
 }
 
 // ============================================================
@@ -332,29 +438,49 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   const bounce = Math.sin(frame * Math.PI / 2) * 2;
   const drawY = y - Math.abs(bounce);
 
-  // Soft shadow with gradient
-  const shadowGrad = ctx.createRadialGradient(x + w / 2, y + h, 1, x + w / 2, y + h, w / 2);
-  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+  // Soft shadow with gradient (larger, more realistic)
+  const shadowGrad = ctx.createRadialGradient(x + w / 2, y + h + 2, 1, x + w / 2, y + h + 2, w * 0.7);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.3)');
+  shadowGrad.addColorStop(0.5, 'rgba(0,0,0,0.12)');
   shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = shadowGrad;
-  drawEllipse(x + w / 2, y + h, w / 2, 5);
+  drawEllipse(x + w / 2, y + h + 2, w * 0.65, 6);
   ctx.fill();
 
-  // Body (round, chibi style)
+  // Body (round, chibi style) with contour
   const app = playerAppearance;
+
+  // Body outline (dark contour)
+  ctx.fillStyle = powered ? '#8B6914' : darkenColor(app.jacket.main, 80);
+  drawRoundRect(x + 2, drawY + 13, w - 4, h - 16, 6);
+  ctx.fill();
+
+  // Body fill with gradient
   const bodyGrad = ctx.createLinearGradient(x, drawY + 14, x + w, drawY + 14);
   if (powered) {
     bodyGrad.addColorStop(0, '#FFD700');
+    bodyGrad.addColorStop(0.5, '#FFE44D');
     bodyGrad.addColorStop(1, '#FFA000');
   } else {
-    bodyGrad.addColorStop(0, app.jacket.main);
-    bodyGrad.addColorStop(1, lerpColor(app.jacket.main, '#000000', 0.2));
+    bodyGrad.addColorStop(0, lightenColor(app.jacket.main, 20));
+    bodyGrad.addColorStop(0.5, app.jacket.main);
+    bodyGrad.addColorStop(1, lerpColor(app.jacket.main, '#000000', 0.25));
   }
   ctx.fillStyle = bodyGrad;
   drawRoundRect(x + 3, drawY + 14, w - 6, h - 18, 5);
   ctx.fill();
 
-  // Elbow patches (cute detail)
+  // Body highlight (rim light top)
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  drawRoundRect(x + 5, drawY + 15, w - 10, 4, 3);
+  ctx.fill();
+
+  // Elbow patches (cute detail) with contour
+  ctx.fillStyle = powered ? '#8B6914' : darkenColor(app.jacket.patch, 40);
+  drawCircle(x + 4, drawY + 22, 4);
+  ctx.fill();
+  drawCircle(x + w - 4, drawY + 22, 4);
+  ctx.fill();
   ctx.fillStyle = powered ? '#ffcc02' : app.jacket.patch;
   drawCircle(x + 4, drawY + 22, 3);
   ctx.fill();
@@ -376,27 +502,57 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   const leftLegX = x + 6 + Math.sin(legPhase) * 2;
   const rightLegX = x + w - 10 - Math.sin(legPhase) * 2;
 
-  // Legs
+  // Legs with contour
+  ctx.fillStyle = '#1a2530';
+  drawRoundRect(leftLegX - 1, drawY + h - 11, 8, 10, 3);
+  ctx.fill();
+  drawRoundRect(rightLegX - 1, drawY + h - 11, 8, 10, 3);
+  ctx.fill();
   ctx.fillStyle = '#37474f';
   drawRoundRect(leftLegX, drawY + h - 10, 6, 8, 2);
   ctx.fill();
   drawRoundRect(rightLegX, drawY + h - 10, 6, 8, 2);
   ctx.fill();
+  // Leg highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(leftLegX + 1, drawY + h - 9, 2, 5);
+  ctx.fillRect(rightLegX + 1, drawY + h - 9, 2, 5);
 
-  // Shoes
+  // Shoes with contour
+  ctx.fillStyle = '#2a1a10';
+  drawRoundRect(leftLegX - 2, drawY + h - 5, 10, 6, 3);
+  ctx.fill();
+  drawRoundRect(rightLegX - 2, drawY + h - 5, 10, 6, 3);
+  ctx.fill();
   ctx.fillStyle = '#4e342e';
   drawRoundRect(leftLegX - 1, drawY + h - 4, 8, 4, 2);
   ctx.fill();
   drawRoundRect(rightLegX - 1, drawY + h - 4, 8, 4, 2);
   ctx.fill();
+  // Shoe highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  drawRoundRect(leftLegX, drawY + h - 4, 5, 1.5, 1);
+  ctx.fill();
+  drawRoundRect(rightLegX, drawY + h - 4, 5, 1.5, 1);
+  ctx.fill();
 
-  // Head (big, cute, round)
+  // Head (big, cute, round) with contour
   const headY = drawY - 2;
-  const headGrad = ctx.createRadialGradient(x + w / 2, headY + 7, 2, x + w / 2, headY + 7, 13);
-  headGrad.addColorStop(0, app.skin.base);
+  // Head outline
+  ctx.fillStyle = darkenColor(app.skin.shadow, 60);
+  drawRoundRect(x + 1, headY - 1, w - 2, 20, 9);
+  ctx.fill();
+  // Head fill
+  const headGrad = ctx.createRadialGradient(x + w / 2 - 2, headY + 5, 2, x + w / 2, headY + 7, 13);
+  headGrad.addColorStop(0, lightenColor(app.skin.base, 15));
+  headGrad.addColorStop(0.6, app.skin.base);
   headGrad.addColorStop(1, app.skin.shadow);
   ctx.fillStyle = headGrad;
   drawRoundRect(x + 2, headY, w - 4, 18, 8);
+  ctx.fill();
+  // Head specular highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  drawEllipse(x + w / 2 - 2, headY + 4, 5, 3);
   ctx.fill();
 
   // Anime blush marks (horizontal lines)
@@ -608,25 +764,38 @@ function drawEnemy(e, x, y) {
     x = 0;
   }
 
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  drawEllipse(x + e.w / 2, y + e.h + 2, e.w / 2.5, 3);
+  // Shadow (richer, larger)
+  const eShadowGrad = ctx.createRadialGradient(x + e.w / 2, y + e.h + 2, 1, x + e.w / 2, y + e.h + 2, e.w * 0.55);
+  eShadowGrad.addColorStop(0, 'rgba(0,0,0,0.25)');
+  eShadowGrad.addColorStop(0.6, 'rgba(0,0,0,0.08)');
+  eShadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = eShadowGrad;
+  drawEllipse(x + e.w / 2, y + e.h + 2, e.w / 2.2, 4);
   ctx.fill();
 
   switch (e.type) {
     case 'reviewer2': {
-      // Cute angry blob with anime features
+      // Cute angry blob with anime features + contour
+      // Dark contour outline
+      ctx.fillStyle = '#7f0000';
+      drawRoundRect(x, dy + 1, e.w, e.h - 2, 13);
+      ctx.fill();
       // Body glow
       ctx.shadowColor = '#ef5350';
       ctx.shadowBlur = 6;
       const grad = ctx.createRadialGradient(x + e.w / 2, dy + 6, 3, x + e.w / 2, dy + 14, 18);
-      grad.addColorStop(0, '#ff7070');
-      grad.addColorStop(0.6, '#ef5350');
+      grad.addColorStop(0, '#ff8a80');
+      grad.addColorStop(0.4, '#ff7070');
+      grad.addColorStop(0.7, '#ef5350');
       grad.addColorStop(1, '#b71c1c');
       ctx.fillStyle = grad;
       drawRoundRect(x + 1, dy + 2, e.w - 2, e.h - 4, 12);
       ctx.fill();
       ctx.shadowBlur = 0;
+      // Body highlight (rim light)
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      drawRoundRect(x + 4, dy + 4, e.w - 8, 6, 6);
+      ctx.fill();
 
       // Angry eyebrows (thicker, more manga)
       ctx.strokeStyle = '#1a1a1a';
@@ -1116,129 +1285,215 @@ function drawCollectible(type, x, y, w, h) {
 
   switch (type) {
     case 'publication': {
-      // Glowing paper/scroll
+      // Glowing paper/scroll with contour
       ctx.shadowColor = '#fff';
       ctx.shadowBlur = 8 * glow * 2;
 
-      ctx.fillStyle = '#fff';
+      // Paper contour
+      ctx.fillStyle = '#90a4ae';
+      drawRoundRect(x + 2, y, w - 4, h, 4);
+      ctx.fill();
+      // Paper fill
+      const paperGrad = ctx.createLinearGradient(x + 3, y + 1, x + w - 3, y + h - 1);
+      paperGrad.addColorStop(0, '#ffffff');
+      paperGrad.addColorStop(1, '#eceff1');
+      ctx.fillStyle = paperGrad;
       drawRoundRect(x + 3, y + 1, w - 6, h - 2, 3);
       ctx.fill();
 
       ctx.shadowBlur = 0;
 
+      // Corner fold
+      ctx.fillStyle = '#cfd8dc';
+      ctx.beginPath();
+      ctx.moveTo(x + w - 7, y + 1);
+      ctx.lineTo(x + w - 3, y + 5);
+      ctx.lineTo(x + w - 7, y + 5);
+      ctx.closePath();
+      ctx.fill();
+
       // Lines of text
-      ctx.fillStyle = '#90a4ae';
+      ctx.fillStyle = '#78909c';
       for (let i = 0; i < 3; i++) {
         drawRoundRect(x + 6, y + 5 + i * 4, w - 12 - (i === 2 ? 4 : 0), 2, 1);
         ctx.fill();
       }
 
-      // Star on paper
+      // Star on paper with contour
+      ctx.fillStyle = '#f57f17';
+      drawStar(x + w / 2, y + h - 5, 4, 5, 2.5);
+      ctx.fill();
       ctx.fillStyle = '#ffd54f';
       drawStar(x + w / 2, y + h - 5, 4, 4, 2);
+      ctx.fill();
+      // Star highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      drawStar(x + w / 2 - 0.5, y + h - 5.5, 4, 2, 1);
       ctx.fill();
       break;
     }
 
     case 'grant': {
-      // Shiny money bag
+      // Shiny money bag with contour
       ctx.shadowColor = '#ffd54f';
       ctx.shadowBlur = 10 * glow * 2;
 
-      const grad = ctx.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, 12);
-      grad.addColorStop(0, '#66bb6a');
+      // Bag contour
+      ctx.fillStyle = '#1b5e20';
+      drawRoundRect(x + 2, y + 3, w - 4, h - 3, 7);
+      ctx.fill();
+      // Bag fill
+      const grad = ctx.createRadialGradient(x + w / 2 - 2, y + h / 2 - 2, 2, x + w / 2, y + h / 2, 12);
+      grad.addColorStop(0, '#81c784');
+      grad.addColorStop(0.5, '#66bb6a');
       grad.addColorStop(1, '#2e7d32');
       ctx.fillStyle = grad;
       drawRoundRect(x + 3, y + 4, w - 6, h - 5, 6);
       ctx.fill();
+      // Bag highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      drawRoundRect(x + 5, y + 5, w - 12, 5, 4);
+      ctx.fill();
 
       ctx.shadowBlur = 0;
 
-      // Bag top
+      // Bag top with contour
+      ctx.fillStyle = '#1b5e20';
+      drawEllipse(x + w / 2, y + 5, 7, 4);
+      ctx.fill();
       ctx.fillStyle = '#43a047';
       drawEllipse(x + w / 2, y + 5, 6, 3);
       ctx.fill();
 
-      // Dollar sign
+      // Dollar sign with outline
+      ctx.fillStyle = '#1b5e20';
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('$', x + w / 2 + 0.5, y + h - 3.5);
       ctx.fillStyle = '#ffd54f';
       ctx.font = 'bold 14px monospace';
-      ctx.textAlign = 'center';
       ctx.fillText('$', x + w / 2, y + h - 4);
       ctx.textAlign = 'left';
 
-      // Sparkle
+      // Multiple sparkles
       ctx.fillStyle = '#fff';
       drawStar(x + w - 4, y + 3, 4, 3, 1.5);
+      ctx.fill();
+      drawStar(x + 3, y + h - 4, 4, 2, 1);
       ctx.fill();
       break;
     }
 
     case 'citation': {
-      // Glowing star
+      // Glowing star with contour
       ctx.shadowColor = '#4fc3f7';
       ctx.shadowBlur = 12 * glow * 2;
 
+      // Star contour
+      ctx.fillStyle = '#01579b';
+      drawStar(x + w / 2, y + h / 2, 5, 11.5, 5.5);
+      ctx.fill();
+
       const grad = ctx.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, 10);
       grad.addColorStop(0, '#e1f5fe');
-      grad.addColorStop(1, '#29b6f6');
+      grad.addColorStop(0.5, '#4fc3f7');
+      grad.addColorStop(1, '#0277bd');
       ctx.fillStyle = grad;
       drawStar(x + w / 2, y + h / 2, 5, 10, 5);
       ctx.fill();
 
       ctx.shadowBlur = 0;
 
-      // Inner star
-      ctx.fillStyle = '#fff';
+      // Inner star with glow
+      ctx.fillStyle = '#e1f5fe';
       drawStar(x + w / 2, y + h / 2, 5, 5, 2.5);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      drawStar(x + w / 2, y + h / 2, 5, 3, 1.5);
       ctx.fill();
       break;
     }
 
     case 'coffee': {
-      // Cute coffee cup
+      // Cute coffee cup with contour
       ctx.shadowColor = '#ff6f00';
       ctx.shadowBlur = 8 * glow * 2;
 
+      // Cup contour
+      ctx.fillStyle = '#3e2723';
+      drawRoundRect(x + 3, y + 5, w - 6, h - 6, 5);
+      ctx.fill();
       // Cup body
-      const cupGrad = ctx.createLinearGradient(x + 4, y, x + 4, y + h);
-      cupGrad.addColorStop(0, '#8d6e63');
+      const cupGrad = ctx.createLinearGradient(x + 4, y + 6, x + 4, y + h);
+      cupGrad.addColorStop(0, '#a1887f');
+      cupGrad.addColorStop(0.3, '#8d6e63');
       cupGrad.addColorStop(1, '#5d4037');
       ctx.fillStyle = cupGrad;
       drawRoundRect(x + 4, y + 6, w - 8, h - 8, 4);
       ctx.fill();
+      // Cup highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      drawRoundRect(x + 5, y + 7, 4, h - 12, 3);
+      ctx.fill();
 
       ctx.shadowBlur = 0;
 
-      // Cup rim
-      ctx.fillStyle = '#bcaaa4';
+      // Cup rim with contour
+      ctx.fillStyle = '#795548';
+      drawRoundRect(x + 2, y + 4, w - 4, 6, 3);
+      ctx.fill();
+      ctx.fillStyle = '#d7ccc8';
       drawRoundRect(x + 3, y + 5, w - 6, 4, 2);
+      ctx.fill();
+      // Rim highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      drawRoundRect(x + 4, y + 5.5, w - 10, 1.5, 1);
       ctx.fill();
 
       // Coffee inside
-      ctx.fillStyle = '#4e342e';
+      ctx.fillStyle = '#3e2723';
       drawRoundRect(x + 5, y + 7, w - 10, 4, 2);
       ctx.fill();
+      // Coffee surface highlight
+      ctx.fillStyle = 'rgba(255,200,150,0.15)';
+      drawEllipse(x + w / 2, y + 8.5, 4, 1.5);
+      ctx.fill();
 
-      // Handle
+      // Handle with contour
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(x + w - 4, y + 14, 4, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
       ctx.strokeStyle = '#8d6e63';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(x + w - 4, y + 14, 4, -Math.PI / 2, Math.PI / 2);
       ctx.stroke();
 
-      // Steam (animated)
-      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-      ctx.lineWidth = 1.5;
+      // Steam (animated, smoother)
       for (let i = 0; i < 3; i++) {
         const sx2 = x + 8 + i * 4;
         const t = levelTimer * 0.08 + i * 1.2;
+        // Steam glow
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(sx2, y + 4);
+        ctx.quadraticCurveTo(sx2 + Math.sin(t) * 3, y - 2, sx2 + Math.sin(t + 1) * 2, y - 6);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(sx2, y + 4);
         ctx.quadraticCurveTo(sx2 + Math.sin(t) * 3, y - 2, sx2 + Math.sin(t + 1) * 2, y - 6);
         ctx.stroke();
       }
 
-      // Heart on cup
+      // Heart on cup with outline
+      ctx.fillStyle = '#b71c1c';
+      ctx.font = '9px serif';
+      ctx.fillText('\u2665', x + 8.5, y + 18.5);
       ctx.fillStyle = '#ef5350';
       ctx.font = '8px serif';
       ctx.fillText('\u2665', x + 9, y + 18);
@@ -1648,15 +1903,34 @@ function drawBackground(ci) {
         const bsx = ((bwx + offset) % (GAME_W + 200)) - 100;
         const seed = (i * 13 + 7) % 6;
         if (seed < 2) {
-          // Campus tree (keep some greenery)
+          // Campus tree with depth and contour
+          // Trunk contour
+          ctx.fillStyle = darkenColor(theme.treeTrunk, 30);
+          ctx.fillRect(bsx + 5, baseY - 6, 6, 17);
           ctx.fillStyle = theme.treeTrunk;
           ctx.fillRect(bsx + 6, baseY - 5, 4, 15);
+          // Trunk bark detail
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.fillRect(bsx + 7, baseY - 3, 1, 10);
+          // Foliage contour (behind)
+          ctx.fillStyle = darkenColor(theme.treeColor, 40);
+          drawCircle(bsx + 8, baseY - 10, 11.5);
+          ctx.fill();
+          drawCircle(bsx + 3, baseY - 5, 8.5);
+          ctx.fill();
+          drawCircle(bsx + 14, baseY - 6, 9.5);
+          ctx.fill();
+          // Foliage
           ctx.fillStyle = theme.treeColor;
           drawCircle(bsx + 8, baseY - 10, 10);
           ctx.fill();
           drawCircle(bsx + 3, baseY - 5, 7);
           ctx.fill();
           drawCircle(bsx + 14, baseY - 6, 8);
+          ctx.fill();
+          // Foliage highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.06)';
+          drawCircle(bsx + 6, baseY - 13, 5);
           ctx.fill();
         } else if (seed === 2) {
           // Lamp post
@@ -1712,22 +1986,62 @@ function drawTiles() {
 
       if (tile === 1) {
         const isTop = getTile(tx, ty - 1) !== 1;
+        const isLeftEmpty = getTile(tx - 1, ty) !== 1;
+        const isRightEmpty = getTile(tx + 1, ty) !== 1;
+        const isBotEmpty = getTile(tx, ty + 1) !== 1;
 
         if (isTop) {
           // Grass top with gradient
           const grassGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
           grassGrad.addColorStop(0, theme.grass);
-          grassGrad.addColorStop(0.3, theme.grassDark);
-          grassGrad.addColorStop(1, theme.dirt);
+          grassGrad.addColorStop(0.25, theme.grassDark);
+          grassGrad.addColorStop(0.5, theme.dirt);
+          grassGrad.addColorStop(1, theme.dirtDark);
           ctx.fillStyle = grassGrad;
           drawRoundRect(sx - 0.5, sy, TILE + 1, TILE, 0);
           ctx.fill();
+
+          // Grass contour line (top edge)
+          ctx.strokeStyle = darkenColor(theme.grassDark, 40);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(sx - 0.5, sy + 1);
+          // Wavy grass edge contour
+          for (let gx = 0; gx <= TILE; gx += 4) {
+            const gy = sy + 1 + Math.sin((tx * TILE + gx) * 0.15) * 1.5;
+            ctx.lineTo(sx + gx, gy);
+          }
+          ctx.stroke();
+
+          // Edge contour lines (sides)
+          if (isLeftEmpty) {
+            ctx.strokeStyle = darkenColor(theme.dirt, 30);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sx + 0.5, sy);
+            ctx.lineTo(sx + 0.5, sy + TILE);
+            ctx.stroke();
+          }
+          if (isRightEmpty) {
+            ctx.strokeStyle = darkenColor(theme.dirt, 30);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sx + TILE - 0.5, sy);
+            ctx.lineTo(sx + TILE - 0.5, sy + TILE);
+            ctx.stroke();
+          }
 
           // Lush anime grass blades (more, varied)
           for (let i = 0; i < 7; i++) {
             const gx = sx + 1 + i * 4.5 + Math.sin(tx * 3 + i) * 1.5;
             const gh = 3 + Math.sin(tx * 2 + i * 1.5) * 2.5 + (i % 2) * 1.5;
-            // Darker blade behind
+            // Darker blade behind (with contour)
+            ctx.fillStyle = darkenColor(theme.grassDark, 30);
+            ctx.beginPath();
+            ctx.moveTo(gx - 1, sy);
+            ctx.quadraticCurveTo(gx + 0.5 + Math.sin(levelTimer * 0.02 + i) * 0.8, sy - gh * 0.6, gx + 1, sy - gh - 2);
+            ctx.lineTo(gx + 3, sy);
+            ctx.fill();
             ctx.fillStyle = theme.grassDark;
             ctx.beginPath();
             ctx.moveTo(gx - 0.5, sy);
@@ -1742,16 +2056,29 @@ function drawTiles() {
             ctx.lineTo(gx + 3, sy);
             ctx.fill();
           }
-          // Highlight on grass top
-          ctx.fillStyle = 'rgba(255,255,255,0.08)';
-          ctx.fillRect(sx, sy, TILE, 3);
+          // Highlight on grass top (wider, softer)
+          const topHighlight = ctx.createLinearGradient(sx, sy, sx, sy + 5);
+          topHighlight.addColorStop(0, 'rgba(255,255,255,0.12)');
+          topHighlight.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = topHighlight;
+          ctx.fillRect(sx, sy, TILE, 5);
+
+          // Dirt band detail
+          ctx.fillStyle = 'rgba(0,0,0,0.05)';
+          ctx.fillRect(sx, sy + TILE * 0.6, TILE, 2);
 
           // Anime-style flowers (more elaborate)
           if ((tx * 7 + ty * 13) % 9 === 0) {
             const flowerColor = theme.flowerColors[(tx * 3 + ty) % theme.flowerColors.length];
             const fx = sx + 10 + (tx % 3) * 5;
             const fy = sy - 3;
-            // Stem
+            // Stem with contour
+            ctx.strokeStyle = '#2e7d32';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(fx + 2, fy + 5);
+            ctx.quadraticCurveTo(fx + 1, fy + 2, fx + 2, fy);
+            ctx.stroke();
             ctx.strokeStyle = '#4caf50';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
@@ -1759,76 +2086,184 @@ function drawTiles() {
             ctx.quadraticCurveTo(fx + 1, fy + 2, fx + 2, fy);
             ctx.stroke();
             // Small leaf
+            ctx.fillStyle = '#2e7d32';
+            ctx.beginPath();
+            ctx.ellipse(fx + 4, fy + 3, 2.8, 1.5, 0.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.fillStyle = '#66bb6a';
             ctx.beginPath();
             ctx.ellipse(fx + 4, fy + 3, 2, 1, 0.5, 0, Math.PI * 2);
             ctx.fill();
-            // Petals (5 pointed flower)
+            // Petals (5 pointed flower) with contour
             for (let p = 0; p < 5; p++) {
               const pa = p * Math.PI * 2 / 5 - Math.PI / 2;
+              const px2 = fx + 2 + Math.cos(pa) * 2.5;
+              const py2 = fy - 1 + Math.sin(pa) * 2.5;
+              ctx.fillStyle = darkenColor(flowerColor, 50);
+              drawCircle(px2, py2, 2.5);
+              ctx.fill();
               ctx.fillStyle = flowerColor;
-              drawCircle(fx + 2 + Math.cos(pa) * 2.5, fy - 1 + Math.sin(pa) * 2.5, 2);
+              drawCircle(px2, py2, 2);
               ctx.fill();
             }
             // Center
+            ctx.fillStyle = '#f57f17';
+            drawCircle(fx + 2, fy - 1, 2.2);
+            ctx.fill();
             ctx.fillStyle = '#fff9c4';
-            drawCircle(fx + 2, fy - 1, 1.8);
+            drawCircle(fx + 2, fy - 1, 1.6);
             ctx.fill();
             // Tiny sparkle
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             drawCircle(fx + 1, fy - 2, 0.8);
             ctx.fill();
           }
         } else {
-          // Underground dirt
+          // Underground dirt with richer texture
           const dirtGrad = ctx.createLinearGradient(sx, sy, sx, sy + TILE);
           dirtGrad.addColorStop(0, theme.dirt);
           dirtGrad.addColorStop(1, theme.dirtDark);
           ctx.fillStyle = dirtGrad;
           ctx.fillRect(sx, sy, TILE, TILE);
 
-          // Dirt texture (pebbles)
-          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          // Edge contour lines
+          if (isLeftEmpty) {
+            ctx.strokeStyle = darkenColor(theme.dirtDark, 25);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sx + 0.5, sy);
+            ctx.lineTo(sx + 0.5, sy + TILE);
+            ctx.stroke();
+            // Inner light edge
+            ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+            ctx.beginPath();
+            ctx.moveTo(sx + 2, sy);
+            ctx.lineTo(sx + 2, sy + TILE);
+            ctx.stroke();
+          }
+          if (isRightEmpty) {
+            ctx.strokeStyle = darkenColor(theme.dirtDark, 25);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sx + TILE - 0.5, sy);
+            ctx.lineTo(sx + TILE - 0.5, sy + TILE);
+            ctx.stroke();
+          }
+          if (isBotEmpty) {
+            ctx.strokeStyle = darkenColor(theme.dirtDark, 25);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy + TILE - 0.5);
+            ctx.lineTo(sx + TILE, sy + TILE - 0.5);
+            ctx.stroke();
+          }
+
+          // Dirt texture (pebbles with contour)
           if ((tx + ty) % 3 === 0) {
-            drawCircle(sx + 8, sy + 12, 3);
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            drawCircle(sx + 8, sy + 12, 3.5);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            drawCircle(sx + 7.5, sy + 11, 2);
             ctx.fill();
           }
           if ((tx + ty) % 5 === 1) {
-            drawCircle(sx + 22, sy + 20, 2);
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            drawCircle(sx + 22, sy + 20, 2.5);
             ctx.fill();
           }
+          // Cross-hatch dirt texture
+          if ((tx + ty) % 4 === 0) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(sx + 4, sy + 4);
+            ctx.lineTo(sx + 12, sy + 14);
+            ctx.moveTo(sx + 18, sy + 8);
+            ctx.lineTo(sx + 28, sy + 22);
+            ctx.stroke();
+          }
+          // Subtle horizontal sediment line
+          ctx.fillStyle = 'rgba(0,0,0,0.03)';
+          ctx.fillRect(sx, sy + 15 + (tx % 3) * 4, TILE, 1);
         }
       } else if (tile === 2) {
-        // Platform - cute wooden plank style
+        // Platform - wooden plank with contour and depth
+        // Shadow underneath
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        drawRoundRect(sx, sy + 3, TILE, 10, 3);
+        ctx.fill();
+
+        // Contour outline
+        ctx.fillStyle = darkenColor(theme.platform, 40);
+        drawRoundRect(sx - 2, sy - 1, TILE + 4, 12, 5);
+        ctx.fill();
+
+        // Platform fill
         const platGrad = ctx.createLinearGradient(sx, sy, sx, sy + 10);
-        platGrad.addColorStop(0, theme.platformTop);
+        platGrad.addColorStop(0, lightenColor(theme.platformTop, 10));
+        platGrad.addColorStop(0.3, theme.platformTop);
         platGrad.addColorStop(1, theme.platform);
         ctx.fillStyle = platGrad;
         drawRoundRect(sx - 1, sy, TILE + 2, 10, 4);
         ctx.fill();
 
-        // Wood grain
-        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        // Top highlight line
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(sx + 4, sy + 3);
-        ctx.lineTo(sx + TILE - 4, sy + 3);
-        ctx.moveTo(sx + 2, sy + 6);
-        ctx.lineTo(sx + TILE - 2, sy + 6);
+        ctx.moveTo(sx + 3, sy + 1.5);
+        ctx.lineTo(sx + TILE - 3, sy + 1.5);
         ctx.stroke();
 
-        // Cute bracket supports
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.fillRect(sx + 4, sy + 9, 3, 6);
-        ctx.fillRect(sx + TILE - 7, sy + 9, 3, 6);
+        // Wood grain (more detail)
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + 3, sy + 3);
+        ctx.lineTo(sx + TILE - 3, sy + 3);
+        ctx.moveTo(sx + 5, sy + 5.5);
+        ctx.lineTo(sx + TILE - 5, sy + 5.5);
+        ctx.moveTo(sx + 2, sy + 7.5);
+        ctx.lineTo(sx + TILE - 2, sy + 7.5);
+        ctx.stroke();
 
-        // Books on platform (random decoration)
+        // Nail/rivet details
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        drawCircle(sx + 4, sy + 5, 1.2);
+        ctx.fill();
+        drawCircle(sx + TILE - 4, sy + 5, 1.2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        drawCircle(sx + 3.7, sy + 4.5, 0.6);
+        ctx.fill();
+        drawCircle(sx + TILE - 4.3, sy + 4.5, 0.6);
+        ctx.fill();
+
+        // Bracket supports (with contour)
+        ctx.fillStyle = darkenColor(theme.platform, 35);
+        drawRoundRect(sx + 3, sy + 9, 5, 8, 1);
+        ctx.fill();
+        drawRoundRect(sx + TILE - 8, sy + 9, 5, 8, 1);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(sx + 4, sy + 10, 3, 6);
+        ctx.fillRect(sx + TILE - 7, sy + 10, 3, 6);
+
+        // Books on platform (random decoration) with contour
         if ((tx + ty * 3) % 5 === 0) {
           const bookColors = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726'];
           for (let i = 0; i < 3; i++) {
+            // Book contour
+            ctx.fillStyle = darkenColor(bookColors[(tx + i) % bookColors.length], 50);
+            drawRoundRect(sx + 2 + i * 8, sy - 7 - i, 9, 8 + i, 2);
+            ctx.fill();
             ctx.fillStyle = bookColors[(tx + i) % bookColors.length];
             drawRoundRect(sx + 3 + i * 8, sy - 6 - i, 7, 6 + i, 1);
             ctx.fill();
+            // Book spine highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.fillRect(sx + 4 + i * 8, sy - 5 - i, 2, 4 + i);
           }
         }
       }
@@ -1844,54 +2279,95 @@ function drawSigns() {
     const sx = s.x - camera.x;
     const sy = s.y - camera.y;
 
-    // Post
+    // Post with contour
+    ctx.fillStyle = '#4e342e';
+    drawRoundRect(sx + 10, sy - 21, 8, 36, 3);
+    ctx.fill();
     ctx.fillStyle = '#8d6e63';
     drawRoundRect(sx + 11, sy - 20, 6, 34, 2);
     ctx.fill();
+    // Post highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(sx + 12, sy - 18, 2, 30);
 
-    // Sign board
+    // Sign board with contour
+    ctx.fillStyle = '#5d4037';
+    drawRoundRect(sx - 19, sy - 36, 66, 24, 6);
+    ctx.fill();
     const signGrad = ctx.createLinearGradient(sx - 18, sy - 35, sx - 18, sy - 12);
-    signGrad.addColorStop(0, '#ffe0b2');
+    signGrad.addColorStop(0, '#ffe8cc');
+    signGrad.addColorStop(0.5, '#ffe0b2');
     signGrad.addColorStop(1, '#ffcc80');
     ctx.fillStyle = signGrad;
     drawRoundRect(sx - 18, sy - 35, 64, 22, 5);
     ctx.fill();
+    // Sign highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    drawRoundRect(sx - 16, sy - 34, 60, 6, 4);
+    ctx.fill();
 
     // Border
-    ctx.strokeStyle = '#8d6e63';
+    ctx.strokeStyle = '#6d4c41';
     ctx.lineWidth = 2;
     drawRoundRect(sx - 18, sy - 35, 64, 22, 5);
     ctx.stroke();
 
-    // Icon on sign
+    // Icon on sign with glow
+    ctx.shadowColor = '#ef5350';
+    ctx.shadowBlur = 4;
     ctx.fillStyle = '#ef5350';
-    ctx.font = '9px monospace';
+    ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('!', sx + 14, sy - 19);
+    ctx.shadowBlur = 0;
     ctx.textAlign = 'left';
 
     // Tooltip when close
     if (s.showText) {
+      ctx.font = 'bold 11px monospace';
       const tw = ctx.measureText(s.text).width + 30;
+      const bubbleX = sx - tw / 2 + 14;
+      const bubbleY = sy - 74;
+
+      // Speech bubble shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      drawRoundRect(bubbleX + 2, bubbleY + 3, tw, 32, 8);
+      ctx.fill();
+
+      // Speech bubble border
+      ctx.fillStyle = 'rgba(255,213,79,0.15)';
+      drawRoundRect(bubbleX - 1, bubbleY - 1, tw + 2, 34, 9);
+      ctx.fill();
 
       // Speech bubble
-      ctx.fillStyle = 'rgba(30,30,50,0.92)';
-      drawRoundRect(sx - tw / 2 + 14, sy - 72, tw, 32, 8);
+      const bubbleGrad = ctx.createLinearGradient(bubbleX, bubbleY, bubbleX, bubbleY + 32);
+      bubbleGrad.addColorStop(0, 'rgba(35,35,60,0.95)');
+      bubbleGrad.addColorStop(1, 'rgba(25,25,45,0.95)');
+      ctx.fillStyle = bubbleGrad;
+      drawRoundRect(bubbleX, bubbleY, tw, 32, 8);
       ctx.fill();
 
       // Bubble tail
       ctx.beginPath();
-      ctx.moveTo(sx + 10, sy - 40);
+      ctx.moveTo(sx + 10, sy - 42);
       ctx.lineTo(sx + 14, sy - 34);
-      ctx.lineTo(sx + 18, sy - 40);
+      ctx.lineTo(sx + 18, sy - 42);
       ctx.closePath();
       ctx.fill();
 
-      // Text
-      ctx.fillStyle = '#ffd54f';
-      ctx.font = 'bold 11px monospace';
+      // Bubble highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      drawRoundRect(bubbleX + 3, bubbleY + 2, tw - 6, 12, 6);
+      ctx.fill();
+
+      // Text with outline
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
       ctx.textAlign = 'center';
-      ctx.fillText(s.text, sx + 14, sy - 52);
+      ctx.strokeText(s.text, sx + 14, sy - 54);
+      ctx.fillStyle = '#ffd54f';
+      ctx.fillText(s.text, sx + 14, sy - 54);
       ctx.textAlign = 'left';
     }
   }
@@ -1905,22 +2381,46 @@ function drawFlag() {
   const sx = flagObj.x - camera.x;
   const sy = flagObj.y - camera.y;
 
-  // Pole with gradient
-  const poleGrad = ctx.createLinearGradient(sx + 14, sy - 50, sx + 18, sy - 50);
-  poleGrad.addColorStop(0, '#e0e0e0');
+  // Pole with contour and gradient
+  ctx.fillStyle = '#616161';
+  drawRoundRect(sx + 12, sy - 51, 7, TILE * 3 + 52, 3);
+  ctx.fill();
+  const poleGrad = ctx.createLinearGradient(sx + 13, sy - 50, sx + 18, sy - 50);
+  poleGrad.addColorStop(0, '#f5f5f5');
+  poleGrad.addColorStop(0.3, '#e0e0e0');
   poleGrad.addColorStop(1, '#9e9e9e');
   ctx.fillStyle = poleGrad;
   drawRoundRect(sx + 13, sy - 50, 5, TILE * 3 + 50, 2);
   ctx.fill();
+  // Pole specular
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(sx + 14, sy - 48, 1.5, TILE * 3 + 46);
 
-  // Ball on top
+  // Ball on top with contour
+  ctx.fillStyle = flagObj.reached ? '#f57f17' : '#757575';
+  drawCircle(sx + 15.5, sy - 52, 6);
+  ctx.fill();
   ctx.fillStyle = flagObj.reached ? '#ffd54f' : '#e0e0e0';
   drawCircle(sx + 15.5, sy - 52, 5);
   ctx.fill();
+  // Ball highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  drawCircle(sx + 14, sy - 53.5, 2);
+  ctx.fill();
 
-  // Flag cloth with wave
+  // Flag cloth with wave and contour
   const flagColor = flagObj.reached ? '#ffd54f' : '#ef5350';
+  const flagOutline = flagObj.reached ? '#c6a700' : '#b71c1c';
   const wave = Math.sin(levelTimer * 0.06) * 4;
+  // Flag outline
+  ctx.fillStyle = flagOutline;
+  ctx.beginPath();
+  ctx.moveTo(sx + 17, sy - 46);
+  ctx.quadraticCurveTo(sx + 38 + wave, sy - 41 + wave * 0.5, sx + 57, sy - 35 + wave);
+  ctx.quadraticCurveTo(sx + 38 + wave * 0.7, sy - 27, sx + 17, sy - 19);
+  ctx.closePath();
+  ctx.fill();
+  // Flag fill
   ctx.fillStyle = flagColor;
   ctx.beginPath();
   ctx.moveTo(sx + 18, sy - 45);
@@ -1928,11 +2428,24 @@ function drawFlag() {
   ctx.quadraticCurveTo(sx + 38 + wave * 0.7, sy - 28, sx + 18, sy - 20);
   ctx.closePath();
   ctx.fill();
+  // Flag highlight stripe
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(sx + 18, sy - 44);
+  ctx.quadraticCurveTo(sx + 38 + wave, sy - 40 + wave * 0.5, sx + 50, sy - 37 + wave);
+  ctx.quadraticCurveTo(sx + 38 + wave * 0.7, sy - 35, sx + 18, sy - 37);
+  ctx.closePath();
+  ctx.fill();
 
-  // Text on flag
-  ctx.fillStyle = '#fff';
+  // Text on flag with outline
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
   ctx.font = 'bold 9px monospace';
-  ctx.fillText(currentLevel === 5 ? 'TENURE!' : 'NEXT', sx + 24, sy - 30);
+  const flagText = currentLevel === 5 ? 'TENURE!' : 'NEXT';
+  ctx.strokeText(flagText, sx + 24, sy - 30);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(flagText, sx + 24, sy - 30);
 
   // Sparkles when reached
   if (flagObj.reached) {
@@ -1951,50 +2464,95 @@ function drawFlag() {
 // HUD DRAWING
 // ============================================================
 function drawHUD() {
-  // Background bar with gradient
-  const hudGrad = ctx.createLinearGradient(0, 0, 0, 42);
-  hudGrad.addColorStop(0, 'rgba(20,20,40,0.9)');
-  hudGrad.addColorStop(1, 'rgba(20,20,40,0.7)');
+  // HUD background with glass effect
+  const hudGrad = ctx.createLinearGradient(0, 0, 0, 46);
+  hudGrad.addColorStop(0, 'rgba(15,12,30,0.92)');
+  hudGrad.addColorStop(0.5, 'rgba(20,18,40,0.88)');
+  hudGrad.addColorStop(1, 'rgba(15,12,30,0.85)');
   ctx.fillStyle = hudGrad;
-  drawRoundRect(4, 4, GAME_W - 8, 38, 8);
+  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1;
-  drawRoundRect(4, 4, GAME_W - 8, 38, 8);
+  // HUD top highlight (glass effect)
+  const hudHighlight = ctx.createLinearGradient(0, 4, 0, 24);
+  hudHighlight.addColorStop(0, 'rgba(255,255,255,0.06)');
+  hudHighlight.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hudHighlight;
+  drawRoundRect(6, 5, GAME_W - 12, 18, 8);
+  ctx.fill();
+
+  // HUD border (subtle colored glow)
+  ctx.strokeStyle = 'rgba(233,69,96,0.25)';
+  ctx.lineWidth = 1.5;
+  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
   ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  drawRoundRect(5, 5, GAME_W - 10, 38, 9);
+  ctx.stroke();
+
+  // Divider lines between sections
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  for (const divX of [105, 215, 320]) {
+    ctx.beginPath();
+    ctx.moveTo(divX, 10);
+    ctx.lineTo(divX, 38);
+    ctx.stroke();
+  }
 
   ctx.font = 'bold 11px monospace';
 
-  // Lives with hearts
-  ctx.fillStyle = '#ef5350';
+  // Lives with hearts (with glow)
   for (let i = 0; i < stats.lives; i++) {
+    // Heart glow
+    ctx.shadowColor = '#ef5350';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#ef5350';
     ctx.font = '14px serif';
     ctx.fillText('\u2665', 14 + i * 18, 24);
+    ctx.shadowBlur = 0;
   }
 
-  // Publications
+  // Publications with icon
   ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = '#b0bec5';
+  ctx.fillText('PUB', 14, 36);
   ctx.fillStyle = '#fff';
-  ctx.fillText(`Pubs: ${stats.publications}`, 14, 36);
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText(`${stats.publications}`, 44, 36);
 
-  // Grants
+  // Grants with icon-like label
+  ctx.fillStyle = '#4caf50';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText('GRANT', 115, 22);
   ctx.fillStyle = '#66bb6a';
-  ctx.fillText(`Grants: ${stats.grants}`, 115, 24);
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`${stats.grants}`, 165, 22);
 
   // Citations
+  ctx.fillStyle = '#29b6f6';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText('CITE', 115, 36);
   ctx.fillStyle = '#4fc3f7';
-  ctx.fillText(`Cites: ${stats.citations}`, 115, 36);
-
-  // h-index (prominent)
-  ctx.fillStyle = '#ffd54f';
   ctx.font = 'bold 12px monospace';
-  ctx.fillText(`h=${stats.hIndex}`, 225, 24);
+  ctx.fillText(`${stats.citations}`, 148, 36);
 
-  // Score
+  // h-index (prominent with glow)
+  ctx.shadowColor = '#ffd54f';
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 14px monospace';
+  ctx.fillText(`h=${stats.hIndex}`, 225, 26);
+  ctx.shadowBlur = 0;
+
+  // Score with counter style
+  ctx.fillStyle = '#78909c';
+  ctx.font = 'bold 8px monospace';
+  ctx.fillText('SCORE', 225, 37);
   ctx.fillStyle = '#ffa726';
-  ctx.font = 'bold 10px monospace';
-  ctx.fillText(`Score: ${stats.score}`, 225, 36);
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText(`${stats.score}`, 262, 37);
 
   // Coffee indicator
   if (player && player.powered) {
@@ -3013,6 +3571,15 @@ function draw() {
   // Background
   drawBackground(ci);
 
+  // Ambient light layer (subtle atmospheric depth)
+  const ambientGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
+  ambientGrad.addColorStop(0, 'rgba(255,255,255,0.02)');
+  ambientGrad.addColorStop(0.4, 'rgba(255,255,255,0)');
+  ambientGrad.addColorStop(0.8, 'rgba(0,0,0,0.03)');
+  ambientGrad.addColorStop(1, 'rgba(0,0,0,0.08)');
+  ctx.fillStyle = ambientGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
   // Floating petals & sparkles (behind tiles)
   updateAndDrawPetals();
 
@@ -3036,31 +3603,50 @@ function draw() {
     drawEnemy(e, e.x - camera.x, e.y - camera.y);
   }
 
-  // Fireballs
+  // Fireballs (enhanced with trails and glow)
   for (const fb of fireballs) {
     const fbsx = fb.x - camera.x;
     const fbsy = fb.y - camera.y;
     const rot = levelTimer * 0.3;
+
+    // Outer glow halo
+    const haloGrad = ctx.createRadialGradient(fbsx + fb.w / 2, fbsy + fb.h / 2, 2, fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
+    haloGrad.addColorStop(0, 'rgba(255,152,0,0.3)');
+    haloGrad.addColorStop(0.5, 'rgba(255,87,34,0.1)');
+    haloGrad.addColorStop(1, 'rgba(255,87,34,0)');
+    ctx.fillStyle = haloGrad;
+    drawCircle(fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
+    ctx.fill();
+
+    // Trail particles (behind)
+    const dir = fb.vx > 0 ? -1 : 1;
+    for (let ti = 0; ti < 4; ti++) {
+      const trailAlpha = 0.4 - ti * 0.1;
+      ctx.globalAlpha = trailAlpha;
+      ctx.fillStyle = ti < 2 ? '#ff9800' : '#ff5722';
+      drawCircle(fbsx + fb.w / 2 + dir * (ti * 4 + 3), fbsy + fb.h / 2 + Math.sin(levelTimer * 0.5 + ti) * 2, 3 - ti * 0.5);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
     ctx.save();
     ctx.translate(fbsx + fb.w / 2, fbsy + fb.h / 2);
     ctx.rotate(rot);
     // Fireball glow
     ctx.shadowColor = '#ff5722';
-    ctx.shadowBlur = 8;
-    const fbGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 6);
-    fbGrad.addColorStop(0, '#fff9c4');
-    fbGrad.addColorStop(0.4, '#ff9800');
+    ctx.shadowBlur = 12;
+    const fbGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 7);
+    fbGrad.addColorStop(0, '#ffffff');
+    fbGrad.addColorStop(0.2, '#fff9c4');
+    fbGrad.addColorStop(0.5, '#ff9800');
     fbGrad.addColorStop(1, '#ff5722');
     ctx.fillStyle = fbGrad;
-    drawCircle(0, 0, 6);
+    drawCircle(0, 0, 7);
     ctx.fill();
     ctx.shadowBlur = 0;
-    // Trail particles
-    ctx.fillStyle = '#ff5722';
-    drawCircle(-3, -2, 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffa726';
-    drawCircle(2, 3, 1.5);
+    // Inner bright core
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    drawCircle(0, 0, 2.5);
     ctx.fill();
     ctx.restore();
   }
@@ -3079,39 +3665,93 @@ function draw() {
   // Flag
   drawFlag();
 
-  // Particles (with glow)
+  // Particles (with glow and trails)
   for (const p of particles) {
     const alpha = p.life / (p.maxLife || 50);
+    const px = p.x - camera.x;
+    const py = p.y - camera.y;
+    // Particle glow halo
+    ctx.globalAlpha = alpha * 0.3;
+    ctx.fillStyle = p.color;
+    if (p.type === 'star') {
+      drawCircle(px, py, p.size * 2);
+      ctx.fill();
+    } else {
+      drawCircle(px, py, p.size * alpha * 2);
+      ctx.fill();
+    }
+    // Particle core
     ctx.globalAlpha = alpha;
     ctx.fillStyle = p.color;
     if (p.type === 'star') {
-      drawStar(p.x - camera.x, p.y - camera.y, 4, p.size, p.size * 0.4);
+      drawStar(px, py, 4, p.size, p.size * 0.4);
+      ctx.fill();
+      // White center
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      drawCircle(px, py, p.size * 0.3);
       ctx.fill();
     } else {
-      drawCircle(p.x - camera.x, p.y - camera.y, p.size * alpha);
+      drawCircle(px, py, p.size * alpha);
+      ctx.fill();
+      // Bright core
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      drawCircle(px, py, p.size * alpha * 0.4);
       ctx.fill();
     }
   }
   ctx.globalAlpha = 1;
 
-  // Floating texts
+  // Floating texts (with outline for readability)
   for (const ft of floatingTexts) {
     const alpha = ft.life / 60;
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = ft.color;
-    ctx.font = `bold ${Math.round(12 * ft.scale)}px monospace`;
+    const fontSize = Math.round(12 * ft.scale);
+    ctx.font = `bold ${fontSize}px monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(ft.text, ft.x - camera.x + 12, ft.y - camera.y);
+    const ftx = ft.x - camera.x + 12;
+    const fty = ft.y - camera.y;
+    // Text outline
+    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(ft.text, ftx, fty);
+    // Text fill
+    ctx.fillStyle = ft.color;
+    ctx.fillText(ft.text, ftx, fty);
+    // Text glow
+    ctx.shadowColor = ft.color;
+    ctx.shadowBlur = 6;
+    ctx.fillText(ft.text, ftx, fty);
+    ctx.shadowBlur = 0;
     ctx.textAlign = 'left';
   }
   ctx.globalAlpha = 1;
 
-  // Subtle vignette (anime cinematic look)
-  const vigGrad = ctx.createRadialGradient(GAME_W / 2, GAME_H / 2, GAME_W * 0.35, GAME_W / 2, GAME_H / 2, GAME_W * 0.7);
+  // Cinematic vignette (stronger, more professional)
+  const vigGrad = ctx.createRadialGradient(GAME_W / 2, GAME_H / 2, GAME_W * 0.3, GAME_W / 2, GAME_H / 2, GAME_W * 0.65);
   vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
-  vigGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+  vigGrad.addColorStop(0.7, 'rgba(0,0,0,0.05)');
+  vigGrad.addColorStop(1, 'rgba(0,0,0,0.22)');
   ctx.fillStyle = vigGrad;
   ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // Subtle scanline effect (CRT/retro touch - lightweight)
+  ctx.globalAlpha = 0.025;
+  ctx.fillStyle = '#000';
+  for (let sl = 0; sl < GAME_H; sl += 4) {
+    ctx.fillRect(0, sl, GAME_W, 1);
+  }
+  ctx.globalAlpha = 1;
+
+  // Chromatic aberration hint on edges (very subtle)
+  ctx.globalAlpha = 0.02;
+  ctx.globalCompositeOperation = 'screen';
+  ctx.fillStyle = '#ff0000';
+  ctx.fillRect(0, 0, 3, GAME_H);
+  ctx.fillStyle = '#0000ff';
+  ctx.fillRect(GAME_W - 3, 0, 3, GAME_H);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
 
   // HUD
   drawHUD();
@@ -3122,25 +3762,56 @@ function draw() {
   if (gameState === 'levelComplete') drawLevelComplete();
   if (gameState === 'jobMarketCheck') drawJobMarketResult();
 
-  // Message popup
+  // Message popup (polished)
   if (currentMessage) {
     const alpha = messageTimer > 160 ? (180 - messageTimer) / 20 : messageTimer < 20 ? messageTimer / 20 : 1;
     ctx.globalAlpha = alpha;
+    ctx.font = 'bold 12px monospace';
 
-    const tw = ctx.measureText(currentMessage).width + 40;
-    ctx.fillStyle = 'rgba(20,20,40,0.9)';
-    drawRoundRect(GAME_W / 2 - tw / 2, GAME_H - 75, tw, 34, 10);
+    const tw = ctx.measureText(currentMessage).width + 50;
+    const mx = GAME_W / 2 - tw / 2;
+    const my = GAME_H - 78;
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    drawRoundRect(mx + 2, my + 3, tw, 36, 12);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(255,213,79,0.4)';
-    ctx.lineWidth = 1;
-    drawRoundRect(GAME_W / 2 - tw / 2, GAME_H - 75, tw, 34, 10);
+    // Background gradient
+    const msgGrad = ctx.createLinearGradient(mx, my, mx, my + 36);
+    msgGrad.addColorStop(0, 'rgba(25,20,50,0.95)');
+    msgGrad.addColorStop(1, 'rgba(15,12,35,0.95)');
+    ctx.fillStyle = msgGrad;
+    drawRoundRect(mx, my, tw, 36, 12);
+    ctx.fill();
+
+    // Top highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    drawRoundRect(mx + 3, my + 1, tw - 6, 14, 10);
+    ctx.fill();
+
+    // Animated border glow
+    const borderAlpha = 0.3 + Math.sin(levelTimer * 0.1) * 0.15;
+    ctx.strokeStyle = `rgba(255,213,79,${borderAlpha})`;
+    ctx.lineWidth = 1.5;
+    drawRoundRect(mx, my, tw, 36, 12);
     ctx.stroke();
 
-    ctx.fillStyle = '#ffd54f';
-    ctx.font = 'bold 12px monospace';
+    // Corner accent dots
+    ctx.fillStyle = `rgba(255,213,79,${borderAlpha * 0.7})`;
+    drawCircle(mx + 8, my + 18, 2);
+    ctx.fill();
+    drawCircle(mx + tw - 8, my + 18, 2);
+    ctx.fill();
+
+    // Text with outline
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
     ctx.textAlign = 'center';
-    ctx.fillText(currentMessage, GAME_W / 2, GAME_H - 53);
+    ctx.strokeText(currentMessage, GAME_W / 2, GAME_H - 55);
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillText(currentMessage, GAME_W / 2, GAME_H - 55);
     ctx.textAlign = 'left';
     ctx.globalAlpha = 1;
   }
