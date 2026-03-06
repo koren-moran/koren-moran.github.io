@@ -9,6 +9,9 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Tenure Track Bros.</title>
@@ -329,9 +332,12 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   const bounce = Math.sin(frame * Math.PI / 2) * 2;
   const drawY = y - Math.abs(bounce);
 
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.15)';
-  drawEllipse(x + w / 2, y + h, w / 2.2, 4);
+  // Soft shadow with gradient
+  const shadowGrad = ctx.createRadialGradient(x + w / 2, y + h, 1, x + w / 2, y + h, w / 2);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.2)');
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = shadowGrad;
+  drawEllipse(x + w / 2, y + h, w / 2, 5);
   ctx.fill();
 
   // Body (round, chibi style)
@@ -393,68 +399,130 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
   drawRoundRect(x + 2, headY, w - 4, 18, 8);
   ctx.fill();
 
-  // Blush circles
+  // Anime blush marks (horizontal lines)
   ctx.fillStyle = app.skin.blush;
-  drawCircle(x + 5, headY + 11, 3);
+  drawEllipse(x + 5, headY + 11, 3.5, 2);
   ctx.fill();
-  drawCircle(x + w - 5, headY + 11, 3);
+  drawEllipse(x + w - 5, headY + 11, 3.5, 2);
   ctx.fill();
+  // Subtle diagonal blush lines (manga style)
+  ctx.strokeStyle = app.skin.blush;
+  ctx.lineWidth = 0.6;
+  for (let bl = 0; bl < 3; bl++) {
+    ctx.beginPath();
+    ctx.moveTo(x + 3 + bl * 1.8, headY + 10);
+    ctx.lineTo(x + 4.5 + bl * 1.8, headY + 12);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + w - 7 + bl * 1.8, headY + 10);
+    ctx.lineTo(x + w - 5.5 + bl * 1.8, headY + 12);
+    ctx.stroke();
+  }
 
   // Hair
   drawHairStyle(app.hairStyle, app.hair, x, headY, w);
 
-  // Glasses
-  ctx.strokeStyle = '#37474f';
-  ctx.lineWidth = 1.5;
-  // Left lens
-  drawRoundRect(x + 5, headY + 5, 7, 6, 2);
-  ctx.stroke();
-  // Right lens
-  drawRoundRect(x + w - 12, headY + 5, 7, 6, 2);
-  ctx.stroke();
-  // Bridge
-  ctx.beginPath();
-  ctx.moveTo(x + 12, headY + 8);
-  ctx.lineTo(x + w - 12, headY + 8);
-  ctx.stroke();
+  // Anime-style big eyes
+  const eyeL = x + 7;
+  const eyeR = x + w - 11;
+  const eyeY = headY + 7;
 
-  // Lens glare
-  ctx.fillStyle = 'rgba(200,230,255,0.4)';
-  ctx.fillRect(x + 6, headY + 6, 3, 2);
-  ctx.fillRect(x + w - 11, headY + 6, 3, 2);
-
-  // Eyes behind glasses
   if (isDead) {
-    ctx.strokeStyle = '#333';
+    // Spiral/swirl dead eyes (manga style)
+    ctx.strokeStyle = '#555';
     ctx.lineWidth = 1.5;
-    // X eyes
-    for (const ex of [x + 8, x + w - 10]) {
+    for (const ex of [eyeL + 2, eyeR + 2]) {
       ctx.beginPath();
-      ctx.moveTo(ex, headY + 7); ctx.lineTo(ex + 3, headY + 10);
-      ctx.moveTo(ex + 3, headY + 7); ctx.lineTo(ex, headY + 10);
+      for (let a = 0; a < Math.PI * 3; a += 0.2) {
+        const sr = a * 0.7;
+        const sx2 = ex + Math.cos(a) * sr;
+        const sy2 = eyeY + 1 + Math.sin(a) * sr;
+        a === 0 ? ctx.moveTo(sx2, sy2) : ctx.lineTo(sx2, sy2);
+      }
       ctx.stroke();
     }
   } else {
-    ctx.fillStyle = '#333';
-    drawCircle(x + 9, headY + 8, 1.5);
-    ctx.fill();
-    drawCircle(x + w - 9, headY + 8, 1.5);
-    ctx.fill();
+    // Big anime eyes with gradient iris and multiple highlights
+    for (const ex of [eyeL, eyeR]) {
+      // Eye white (larger, rounder)
+      ctx.fillStyle = '#fff';
+      drawEllipse(ex + 2, eyeY + 1, 4.5, 4);
+      ctx.fill();
+
+      // Iris gradient
+      const irisGrad = ctx.createRadialGradient(ex + 2, eyeY + 1, 0.5, ex + 2, eyeY + 1, 3.5);
+      irisGrad.addColorStop(0, '#5c3310');
+      irisGrad.addColorStop(0.5, '#3e2723');
+      irisGrad.addColorStop(1, '#1a1a2e');
+      ctx.fillStyle = irisGrad;
+      drawEllipse(ex + 2, eyeY + 1, 3.2, 3);
+      ctx.fill();
+
+      // Pupil
+      ctx.fillStyle = '#000';
+      drawCircle(ex + 2, eyeY + 1.5, 1.5);
+      ctx.fill();
+
+      // Big highlight (top-left)
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      drawCircle(ex + 0.8, eyeY - 0.5, 1.4);
+      ctx.fill();
+
+      // Small highlight (bottom-right)
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      drawCircle(ex + 3, eyeY + 2, 0.7);
+      ctx.fill();
+
+      // Subtle color reflection
+      ctx.fillStyle = 'rgba(120,200,255,0.2)';
+      drawCircle(ex + 1, eyeY + 2, 0.8);
+      ctx.fill();
+    }
+
+    // Thin upper eyelash lines (manga style)
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(eyeL - 1.5, eyeY - 2);
+    ctx.quadraticCurveTo(eyeL + 2, eyeY - 3.5, eyeL + 5.5, eyeY - 1.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(eyeR - 1.5, eyeY - 1.5);
+    ctx.quadraticCurveTo(eyeR + 2, eyeY - 3.5, eyeR + 5.5, eyeY - 2);
+    ctx.stroke();
   }
+
+  // Glasses (thinner, more stylish)
+  ctx.strokeStyle = 'rgba(55,71,79,0.6)';
+  ctx.lineWidth = 1;
+  drawRoundRect(x + 4, headY + 4, 9, 7, 3);
+  ctx.stroke();
+  drawRoundRect(x + w - 13, headY + 4, 9, 7, 3);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x + 13, headY + 7);
+  ctx.lineTo(x + w - 13, headY + 7);
+  ctx.stroke();
 
   // Mouth
   if (isDead) {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1.5;
+    // Wavy distress mouth
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(x + 9, headY + 14);
-    ctx.lineTo(x + w - 9, headY + 14);
+    ctx.quadraticCurveTo(x + 11, headY + 15, x + w / 2, headY + 13.5);
+    ctx.quadraticCurveTo(x + w - 11, headY + 15, x + w - 9, headY + 14);
     ctx.stroke();
   } else {
-    ctx.fillStyle = '#333';
+    // Cute cat-mouth (anime :3 style)
+    ctx.strokeStyle = '#5d4037';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(x + w / 2, headY + 13, 3, 0, Math.PI);
-    ctx.fill();
+    ctx.moveTo(x + w / 2 - 3, headY + 13);
+    ctx.quadraticCurveTo(x + w / 2 - 1, headY + 15, x + w / 2, headY + 13.5);
+    ctx.quadraticCurveTo(x + w / 2 + 1, headY + 15, x + w / 2 + 3, headY + 13);
+    ctx.stroke();
   }
 
   // Flame aura
@@ -475,24 +543,51 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
     ctx.shadowBlur = 0;
   }
 
-  // Power-up glow
+  // Power-up glow (anime aura)
   if (powered) {
+    // Outer aura ring
     ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 15;
-    ctx.strokeStyle = `rgba(255,215,0,${0.4 + Math.sin(levelTimer * 0.15) * 0.2})`;
-    ctx.lineWidth = 2;
-    drawRoundRect(x - 1, drawY - 4, w + 2, h + 6, 8);
-    ctx.stroke();
+    ctx.shadowBlur = 20;
+    const auraAlpha = 0.3 + Math.sin(levelTimer * 0.15) * 0.15;
+    const auraGrad = ctx.createRadialGradient(x + w / 2, drawY + h / 2, 5, x + w / 2, drawY + h / 2, w + 5);
+    auraGrad.addColorStop(0, `rgba(255,215,0,${auraAlpha})`);
+    auraGrad.addColorStop(0.6, `rgba(255,235,59,${auraAlpha * 0.3})`);
+    auraGrad.addColorStop(1, 'rgba(255,215,0,0)');
+    ctx.fillStyle = auraGrad;
+    drawCircle(x + w / 2, drawY + h / 2, w + 5);
+    ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Sparkles
-    for (let i = 0; i < 3; i++) {
-      const sx2 = x + Math.sin(levelTimer * 0.1 + i * 2.1) * (w / 2 + 5) + w / 2;
-      const sy2 = drawY + Math.cos(levelTimer * 0.13 + i * 1.7) * (h / 2 + 3) + h / 2 - 4;
+    // Anime sparkles (rotating around character)
+    for (let i = 0; i < 5; i++) {
+      const angle = levelTimer * 0.08 + i * Math.PI * 2 / 5;
+      const sparkDist = w / 2 + 6 + Math.sin(levelTimer * 0.12 + i) * 3;
+      const sx2 = x + w / 2 + Math.cos(angle) * sparkDist;
+      const sy2 = drawY + h / 2 + Math.sin(angle) * (h / 2 + 4);
       ctx.fillStyle = '#FFD700';
-      drawStar(sx2, sy2, 4, 4, 2);
+      drawStar(sx2, sy2, 4, 3, 1.2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      drawStar(sx2, sy2, 4, 1.5, 0.6);
       ctx.fill();
     }
+  }
+
+  // Manga speed lines when moving fast
+  if (player && Math.abs(player.vx) > 2.5 && !isDead) {
+    const dir = player.vx > 0 ? -1 : 1;
+    ctx.globalAlpha = Math.min(Math.abs(player.vx) / 6, 0.4);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      const lx = x + (dir > 0 ? w + 2 : -2) + dir * (i * 4);
+      const ly = drawY + 5 + i * 7;
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(lx + dir * (8 + Math.random() * 6), ly);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 
   ctx.restore();
@@ -520,43 +615,83 @@ function drawEnemy(e, x, y) {
 
   switch (e.type) {
     case 'reviewer2': {
-      // Cute angry mushroom-like blob
-      const grad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 3, x + e.w / 2, dy + 12, 18);
-      grad.addColorStop(0, '#ef5350');
-      grad.addColorStop(1, '#c62828');
+      // Cute angry blob with anime features
+      // Body glow
+      ctx.shadowColor = '#ef5350';
+      ctx.shadowBlur = 6;
+      const grad = ctx.createRadialGradient(x + e.w / 2, dy + 6, 3, x + e.w / 2, dy + 14, 18);
+      grad.addColorStop(0, '#ff7070');
+      grad.addColorStop(0.6, '#ef5350');
+      grad.addColorStop(1, '#b71c1c');
       ctx.fillStyle = grad;
-      drawRoundRect(x + 1, dy + 2, e.w - 2, e.h - 4, 10);
+      drawRoundRect(x + 1, dy + 2, e.w - 2, e.h - 4, 12);
       ctx.fill();
+      ctx.shadowBlur = 0;
 
-      // Angry eyebrows
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
+      // Angry eyebrows (thicker, more manga)
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(x + 5, dy + 10);
-      ctx.lineTo(x + 12, dy + 12);
-      ctx.moveTo(x + e.w - 5, dy + 10);
-      ctx.lineTo(x + e.w - 12, dy + 12);
+      ctx.moveTo(x + 4, dy + 9);
+      ctx.lineTo(x + 13, dy + 12);
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + e.w - 4, dy + 9);
+      ctx.lineTo(x + e.w - 13, dy + 12);
+      ctx.stroke();
+      ctx.lineCap = 'butt';
 
-      // Eyes (big white circles with pupils)
+      // Big anime eyes
+      for (const ex of [x + 9, x + e.w - 9]) {
+        ctx.fillStyle = '#fff';
+        drawEllipse(ex, dy + 15, 5.5, 5);
+        ctx.fill();
+        // Red iris (angry!)
+        const iGrad = ctx.createRadialGradient(ex, dy + 15, 0.5, ex, dy + 15, 3.5);
+        iGrad.addColorStop(0, '#ff1744');
+        iGrad.addColorStop(1, '#880e4f');
+        ctx.fillStyle = iGrad;
+        drawCircle(ex + 0.5, dy + 15.5, 3);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        drawCircle(ex + 0.5, dy + 15.5, 1.5);
+        ctx.fill();
+        // Highlights
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        drawCircle(ex - 1.2, dy + 13.8, 1.3);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCircle(ex + 1.5, dy + 16.5, 0.6);
+        ctx.fill();
+      }
+
+      // Angry fanged mouth
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.moveTo(x + 8, dy + 22);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 18, x + e.w - 8, dy + 22);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 25, x + 8, dy + 22);
+      ctx.fill();
+      // Fangs
       ctx.fillStyle = '#fff';
-      drawCircle(x + 9, dy + 14, 5);
+      ctx.beginPath();
+      ctx.moveTo(x + 10, dy + 22);
+      ctx.lineTo(x + 12, dy + 24);
+      ctx.lineTo(x + 14, dy + 22);
       ctx.fill();
-      drawCircle(x + e.w - 9, dy + 14, 5);
-      ctx.fill();
-      ctx.fillStyle = '#333';
-      drawCircle(x + 10, dy + 14, 2.5);
-      ctx.fill();
-      drawCircle(x + e.w - 8, dy + 14, 2.5);
+      ctx.beginPath();
+      ctx.moveTo(x + e.w - 14, dy + 22);
+      ctx.lineTo(x + e.w - 12, dy + 24);
+      ctx.lineTo(x + e.w - 10, dy + 22);
       ctx.fill();
 
-      // Angry mouth
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(x + 9, dy + 22);
-      ctx.quadraticCurveTo(x + e.w / 2, dy + 19, x + e.w - 9, dy + 22);
-      ctx.stroke();
+      // Blush marks (even angry chars get blush in manga)
+      ctx.fillStyle = 'rgba(255,100,100,0.25)';
+      drawEllipse(x + 4, dy + 18, 3, 1.5);
+      ctx.fill();
+      drawEllipse(x + e.w - 4, dy + 18, 3, 1.5);
+      ctx.fill();
 
       // Label
       ctx.fillStyle = '#fff';
@@ -598,80 +733,116 @@ function drawEnemy(e, x, y) {
       ctx.closePath();
       ctx.fill();
 
-      // Eyes (beady, annoyed)
-      ctx.fillStyle = '#333';
-      drawCircle(x + e.w / 2 - 4, dy + 5, 2);
-      ctx.fill();
-      drawCircle(x + e.w / 2 + 4, dy + 5, 2);
-      ctx.fill();
+      // Anime eyes (annoyed half-closed)
+      for (const bex of [x + e.w / 2 - 4, x + e.w / 2 + 4]) {
+        ctx.fillStyle = '#fff';
+        drawEllipse(bex, dy + 5, 3.5, 2.5);
+        ctx.fill();
+        ctx.fillStyle = '#333';
+        drawCircle(bex, dy + 5.5, 1.8);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        drawCircle(bex - 0.8, dy + 4.5, 0.8);
+        ctx.fill();
+        // Half-lid (annoyed look)
+        ctx.fillStyle = ba.skin.shadow;
+        ctx.fillRect(bex - 4, dy + 1, 8, 3);
+      }
 
-      // Flat mouth
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 1.5;
+      // Flat annoyed mouth
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(x + e.w / 2 - 3, dy + 10);
-      ctx.lineTo(x + e.w / 2 + 3, dy + 10);
+      ctx.lineTo(x + e.w / 2 + 3, dy + 10.5);
       ctx.stroke();
 
-      // Briefcase
+      // Briefcase with shine
       ctx.fillStyle = '#5d4037';
       drawRoundRect(x + e.w - 2, dy + e.h - 14, 8, 10, 2);
       ctx.fill();
       ctx.fillStyle = '#ffd54f';
       ctx.fillRect(x + e.w + 1, dy + e.h - 11, 4, 1);
+      // Briefcase shine
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(x + e.w - 1, dy + e.h - 13, 3, 4);
       break;
     }
 
     case 'imposter': {
-      // Ghostly translucent figure
-      const alpha = 0.45 + Math.sin(levelTimer * 0.08) * 0.2;
+      // Anime ghost / yokai style
+      const alpha = 0.5 + Math.sin(levelTimer * 0.08) * 0.2;
+
+      // Ethereal glow behind
+      ctx.shadowColor = '#ce93d8';
+      ctx.shadowBlur = 12;
+      ctx.globalAlpha = alpha * 0.3;
+      ctx.fillStyle = '#e1bee7';
+      drawCircle(x + e.w / 2, dy + e.h / 2, 18);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
       ctx.globalAlpha = alpha;
 
-      const grad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 3, x + e.w / 2, dy + e.h / 2, 18);
-      grad.addColorStop(0, '#ce93d8');
+      const grad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 3, x + e.w / 2, dy + e.h / 2, 20);
+      grad.addColorStop(0, '#e1bee7');
+      grad.addColorStop(0.5, '#ce93d8');
       grad.addColorStop(1, '#7b1fa2');
       ctx.fillStyle = grad;
 
-      // Ghost body
+      // Ghost body with flowing shape
       ctx.beginPath();
       ctx.moveTo(x + 3, dy + e.h);
       ctx.lineTo(x + 3, dy + 8);
-      ctx.quadraticCurveTo(x + e.w / 2, dy - 4, x + e.w - 3, dy + 8);
+      ctx.quadraticCurveTo(x + e.w / 2, dy - 6, x + e.w - 3, dy + 8);
       ctx.lineTo(x + e.w - 3, dy + e.h);
-      // Wavy bottom
       for (let i = 0; i < 4; i++) {
         const wx = x + 3 + i * ((e.w - 6) / 4);
         const wx2 = x + 3 + (i + 0.5) * ((e.w - 6) / 4);
         const wx3 = x + 3 + (i + 1) * ((e.w - 6) / 4);
-        ctx.quadraticCurveTo(wx2, dy + e.h + 5, wx3, dy + e.h);
+        const waveOff = Math.sin(levelTimer * 0.1 + i) * 2;
+        ctx.quadraticCurveTo(wx2, dy + e.h + 6 + waveOff, wx3, dy + e.h);
       }
       ctx.closePath();
       ctx.fill();
 
-      // Spooky eyes
-      ctx.fillStyle = '#fff';
-      drawEllipse(x + 8, dy + 12, 5, 6);
-      ctx.fill();
-      drawEllipse(x + e.w - 8, dy + 12, 5, 6);
-      ctx.fill();
-      ctx.fillStyle = '#4a148c';
-      drawCircle(x + 9, dy + 13, 2.5);
-      ctx.fill();
-      drawCircle(x + e.w - 7, dy + 13, 2.5);
-      ctx.fill();
+      // Large anime ghost eyes
+      for (const gex of [x + 8, x + e.w - 8]) {
+        ctx.fillStyle = '#fff';
+        drawEllipse(gex, dy + 12, 5.5, 6.5);
+        ctx.fill();
+        // Purple iris
+        const giGrad = ctx.createRadialGradient(gex, dy + 13, 0.5, gex, dy + 13, 3.5);
+        giGrad.addColorStop(0, '#9c27b0');
+        giGrad.addColorStop(1, '#4a148c');
+        ctx.fillStyle = giGrad;
+        drawCircle(gex + 0.5, dy + 13, 3);
+        ctx.fill();
+        ctx.fillStyle = '#1a0533';
+        drawCircle(gex + 0.5, dy + 13.5, 1.5);
+        ctx.fill();
+        // Big highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        drawCircle(gex - 1.5, dy + 11, 1.5);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCircle(gex + 1.5, dy + 14.5, 0.7);
+        ctx.fill();
+      }
 
-      // Open mouth
+      // Small surprised mouth
       ctx.fillStyle = '#4a148c';
-      drawEllipse(x + e.w / 2, dy + 22, 4, 3);
+      drawEllipse(x + e.w / 2, dy + 22, 3, 3.5);
       ctx.fill();
 
       ctx.globalAlpha = 1;
 
-      // Label floats
-      ctx.globalAlpha = alpha * 0.8;
+      // Floating "fraud?" text with anime wobble
+      ctx.globalAlpha = alpha * 0.7;
       ctx.fillStyle = '#e1bee7';
-      ctx.font = '7px monospace';
-      ctx.fillText('fraud?', x + 2, dy - 2);
+      ctx.font = 'italic 7px monospace';
+      const textWobble = Math.sin(levelTimer * 0.12) * 3;
+      ctx.fillText('fraud?', x + 2 + textWobble, dy - 4);
       ctx.globalAlpha = 1;
       break;
     }
@@ -773,23 +944,45 @@ function drawEnemy(e, x, y) {
 
     case 'dean': {
       const da = e.appearance || { skin: SKIN_TONES[0], hair: '#9e9e9e' };
-      // Large imposing figure
-      // Robe
-      const robeGrad = ctx.createLinearGradient(x, dy + 20, x, dy + e.h);
-      robeGrad.addColorStop(0, '#880e4f');
-      robeGrad.addColorStop(1, '#4a0028');
+
+      // Menacing aura (anime boss glow)
+      ctx.shadowColor = '#880e4f';
+      ctx.shadowBlur = 15;
+      const dAuraAlpha = 0.15 + Math.sin(levelTimer * 0.08) * 0.08;
+      const dAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 10, x + e.w / 2, dy + e.h / 2, 40);
+      dAuraGrad.addColorStop(0, `rgba(136,14,79,${dAuraAlpha})`);
+      dAuraGrad.addColorStop(1, 'rgba(136,14,79,0)');
+      ctx.fillStyle = dAuraGrad;
+      drawCircle(x + e.w / 2, dy + e.h / 2, 40);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Robe with richer gradient
+      const robeGrad = ctx.createLinearGradient(x, dy + 20, x + e.w, dy + e.h);
+      robeGrad.addColorStop(0, '#ad1457');
+      robeGrad.addColorStop(0.5, '#880e4f');
+      robeGrad.addColorStop(1, '#3c0020');
       ctx.fillStyle = robeGrad;
       drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
       ctx.fill();
 
-      // Gold trim
+      // Gold trim with glow
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 4;
       ctx.strokeStyle = '#ffd54f';
       ctx.lineWidth = 2;
       drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
       ctx.stroke();
+      // Gold epaulettes
+      ctx.fillStyle = '#ffd54f';
+      drawCircle(x + 8, dy + 22, 4);
+      ctx.fill();
+      drawCircle(x + e.w - 8, dy + 22, 4);
+      ctx.fill();
+      ctx.shadowBlur = 0;
 
       // Head
-      const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 12, 3, x + e.w / 2, dy + 12, 14);
+      const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 10, 3, x + e.w / 2, dy + 12, 14);
       headGrad2.addColorStop(0, da.skin.base);
       headGrad2.addColorStop(1, da.skin.shadow);
       ctx.fillStyle = headGrad2;
@@ -803,21 +996,55 @@ function drawEnemy(e, x, y) {
       drawRoundRect(x + e.w - 13, dy + 10, 5, 10, 2);
       ctx.fill();
 
-      // Monocle
-      ctx.strokeStyle = '#ffd54f';
+      // Anime eyes for the Dean (intimidating)
+      for (const dex of [x + e.w / 2 - 5, x + e.w / 2 + 6]) {
+        ctx.fillStyle = '#fff';
+        drawEllipse(dex, dy + 10, 4.5, 4);
+        ctx.fill();
+        // Piercing dark iris
+        const diGrad = ctx.createRadialGradient(dex, dy + 10, 0.5, dex, dy + 10, 3);
+        diGrad.addColorStop(0, '#4a148c');
+        diGrad.addColorStop(1, '#1a0533');
+        ctx.fillStyle = diGrad;
+        drawCircle(dex, dy + 10.5, 2.8);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        drawCircle(dex, dy + 10.5, 1.3);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        drawCircle(dex - 1, dy + 9.2, 1.1);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,200,200,0.4)';
+        drawCircle(dex + 1, dy + 11.5, 0.6);
+        ctx.fill();
+      }
+
+      // Sharp eyebrows
+      ctx.strokeStyle = '#1a0533';
       ctx.lineWidth = 2;
-      drawCircle(x + e.w / 2 + 6, dy + 10, 5);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2 - 10, dy + 5);
+      ctx.lineTo(x + e.w / 2 - 2, dy + 7);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 + 6, dy + 15);
-      ctx.lineTo(x + e.w / 2 + 6, dy + 22);
+      ctx.moveTo(x + e.w / 2 + 13, dy + 5);
+      ctx.lineTo(x + e.w / 2 + 3, dy + 7);
       ctx.stroke();
+      ctx.lineCap = 'butt';
 
-      // Eyes
-      ctx.fillStyle = '#333';
-      drawCircle(x + e.w / 2 - 5, dy + 10, 2);
-      ctx.fill();
-      drawCircle(x + e.w / 2 + 6, dy + 10, 2);
+      // Monocle (fancier)
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 1.5;
+      drawCircle(x + e.w / 2 + 6, dy + 10, 5.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + e.w / 2 + 6, dy + 15.5);
+      ctx.quadraticCurveTo(x + e.w / 2 + 8, dy + 20, x + e.w / 2 + 6, dy + 24);
+      ctx.stroke();
+      // Monocle glint
+      ctx.fillStyle = 'rgba(255,255,200,0.3)';
+      drawCircle(x + e.w / 2 + 4, dy + 8, 1.5);
       ctx.fill();
 
       // Stern frown
@@ -873,6 +1100,19 @@ function drawEnemy(e, x, y) {
 // ============================================================
 function drawCollectible(type, x, y, w, h) {
   const glow = 0.3 + Math.sin(levelTimer * 0.1) * 0.15;
+
+  // Anime sparkle ring around all collectibles
+  const cx0 = x + w / 2, cy0 = y + h / 2;
+  for (let i = 0; i < 3; i++) {
+    const angle = levelTimer * 0.06 + i * Math.PI * 2 / 3;
+    const dist = 14 + Math.sin(levelTimer * 0.1 + i) * 2;
+    const sx = cx0 + Math.cos(angle) * dist;
+    const sy = cy0 + Math.sin(angle) * (dist * 0.6);
+    const sparkAlpha = 0.5 + Math.sin(levelTimer * 0.12 + i * 2) * 0.3;
+    ctx.fillStyle = `rgba(255,255,230,${sparkAlpha})`;
+    drawStar(sx, sy, 4, 2.5, 1);
+    ctx.fill();
+  }
 
   switch (type) {
     case 'publication': {
@@ -1113,10 +1353,12 @@ function drawStar(cx, cy, spikes, outerR, innerR) {
 // ============================================================
 let clouds = [];
 let bgDecor = [];
+let sakuraPetals = [];
 
 function initBackgroundDecor() {
   clouds = [];
   bgDecor = [];
+  sakuraPetals = [];
   for (let i = 0; i < 15; i++) {
     clouds.push({
       x: Math.random() * 3000,
@@ -1127,14 +1369,70 @@ function initBackgroundDecor() {
       layer: Math.random() < 0.5 ? 0 : 1,
     });
   }
+  // Floating sakura/sparkle petals
+  for (let i = 0; i < 25; i++) {
+    sakuraPetals.push({
+      x: Math.random() * GAME_W,
+      y: Math.random() * GAME_H,
+      vx: 0.2 + Math.random() * 0.5,
+      vy: 0.3 + Math.random() * 0.4,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.08,
+      size: 2 + Math.random() * 3,
+      wobble: Math.random() * Math.PI * 2,
+      type: Math.random() < 0.6 ? 'petal' : 'sparkle',
+    });
+  }
   // Background flowers/decorations
   for (let i = 0; i < 40; i++) {
     bgDecor.push({
       x: Math.random() * 4000,
-      type: Math.floor(Math.random() * 3), // flower, mushroom, bush
+      type: Math.floor(Math.random() * 3),
       colorIdx: Math.floor(Math.random() * 4),
       size: 0.6 + Math.random() * 0.6,
     });
+  }
+}
+
+function drawSakuraPetal(px, py, size, rot) {
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.rotate(rot);
+  ctx.fillStyle = 'rgba(255,183,197,0.7)';
+  ctx.beginPath();
+  ctx.moveTo(0, -size);
+  ctx.bezierCurveTo(size * 0.8, -size * 0.5, size * 0.8, size * 0.5, 0, size * 0.3);
+  ctx.bezierCurveTo(-size * 0.8, size * 0.5, -size * 0.8, -size * 0.5, 0, -size);
+  ctx.fill();
+  // Subtle center line
+  ctx.strokeStyle = 'rgba(255,130,160,0.3)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -size * 0.8);
+  ctx.lineTo(0, size * 0.2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function updateAndDrawPetals() {
+  for (const p of sakuraPetals) {
+    p.wobble += 0.03;
+    p.x += p.vx + Math.sin(p.wobble) * 0.5;
+    p.y += p.vy;
+    p.rot += p.rotSpeed;
+    // Wrap around screen
+    if (p.x > GAME_W + 10) p.x = -10;
+    if (p.y > GAME_H + 10) { p.y = -10; p.x = Math.random() * GAME_W; }
+
+    if (p.type === 'petal') {
+      drawSakuraPetal(p.x, p.y, p.size, p.rot);
+    } else {
+      // Anime sparkle (4-pointed star)
+      const sparkAlpha = 0.4 + Math.sin(levelTimer * 0.1 + p.wobble) * 0.3;
+      ctx.fillStyle = `rgba(255,255,230,${sparkAlpha})`;
+      drawStar(p.x, p.y, 4, p.size, p.size * 0.3);
+      ctx.fill();
+    }
   }
 }
 
@@ -1148,34 +1446,81 @@ function drawBackground(ci) {
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, GAME_W, GAME_H);
 
-  // Sun/Moon
+  // Sun/Moon (anime style with lens flare / glow)
   if (ci < 5) {
-    // Sun
-    const sunGrad = ctx.createRadialGradient(650, 60, 10, 650, 60, 50);
-    sunGrad.addColorStop(0, 'rgba(255,245,157,1)');
-    sunGrad.addColorStop(0.5, 'rgba(255,241,118,0.5)');
+    // Sun with anime-style rays
+    const sunX = 650, sunY = 60;
+    // Outer glow
+    const outerGlow = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, 120);
+    outerGlow.addColorStop(0, 'rgba(255,245,157,0.25)');
+    outerGlow.addColorStop(1, 'rgba(255,241,118,0)');
+    ctx.fillStyle = outerGlow;
+    drawCircle(sunX, sunY, 120);
+    ctx.fill();
+    // Soft rays (anime light streaks)
+    ctx.globalAlpha = 0.08;
+    for (let i = 0; i < 8; i++) {
+      const angle = i * Math.PI / 4 + levelTimer * 0.003;
+      ctx.fillStyle = '#fff9c4';
+      ctx.beginPath();
+      ctx.moveTo(sunX, sunY);
+      ctx.lineTo(sunX + Math.cos(angle - 0.05) * 200, sunY + Math.sin(angle - 0.05) * 200);
+      ctx.lineTo(sunX + Math.cos(angle + 0.05) * 200, sunY + Math.sin(angle + 0.05) * 200);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // Sun body
+    const sunGrad = ctx.createRadialGradient(sunX, sunY, 5, sunX, sunY, 40);
+    sunGrad.addColorStop(0, 'rgba(255,255,240,1)');
+    sunGrad.addColorStop(0.3, 'rgba(255,245,157,0.8)');
+    sunGrad.addColorStop(0.7, 'rgba(255,241,118,0.3)');
     sunGrad.addColorStop(1, 'rgba(255,241,118,0)');
     ctx.fillStyle = sunGrad;
-    drawCircle(650, 60, 50);
+    drawCircle(sunX, sunY, 40);
     ctx.fill();
-    ctx.fillStyle = '#fff9c4';
-    drawCircle(650, 60, 20);
+    ctx.fillStyle = '#fffde7';
+    drawCircle(sunX, sunY, 15);
+    ctx.fill();
+    // Lens flare dots
+    ctx.fillStyle = 'rgba(255,255,200,0.15)';
+    drawCircle(sunX - 60, sunY + 40, 12);
+    ctx.fill();
+    drawCircle(sunX - 100, sunY + 70, 6);
     ctx.fill();
   } else {
-    // Moon for final level
-    const moonGrad = ctx.createRadialGradient(650, 60, 5, 650, 60, 30);
-    moonGrad.addColorStop(0, 'rgba(255,255,255,0.95)');
-    moonGrad.addColorStop(1, 'rgba(200,180,255,0.3)');
-    ctx.fillStyle = moonGrad;
-    drawCircle(650, 60, 30);
+    // Moon with anime crescent glow
+    const moonX = 650, moonY = 60;
+    // Outer aura
+    const moonAura = ctx.createRadialGradient(moonX, moonY, 10, moonX, moonY, 80);
+    moonAura.addColorStop(0, 'rgba(200,180,255,0.25)');
+    moonAura.addColorStop(1, 'rgba(100,80,180,0)');
+    ctx.fillStyle = moonAura;
+    drawCircle(moonX, moonY, 80);
     ctx.fill();
-    // Stars
-    for (let i = 0; i < 30; i++) {
-      ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.sin(levelTimer * 0.05 + i) * 0.3})`;
+    // Moon body
+    const moonGrad = ctx.createRadialGradient(moonX - 5, moonY - 5, 2, moonX, moonY, 25);
+    moonGrad.addColorStop(0, 'rgba(255,255,255,0.98)');
+    moonGrad.addColorStop(0.7, 'rgba(220,210,255,0.8)');
+    moonGrad.addColorStop(1, 'rgba(180,160,230,0.3)');
+    ctx.fillStyle = moonGrad;
+    drawCircle(moonX, moonY, 25);
+    ctx.fill();
+    // Anime-style twinkling stars
+    for (let i = 0; i < 40; i++) {
+      const twinkle = 0.2 + Math.sin(levelTimer * 0.06 + i * 1.7) * 0.4;
+      if (twinkle < 0.1) continue;
+      ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
       const sx2 = (i * 137 + 20) % GAME_W;
-      const sy2 = (i * 73 + 10) % 150;
-      drawCircle(sx2, sy2, 1 + (i % 3) * 0.5);
-      ctx.fill();
+      const sy2 = (i * 73 + 10) % 160;
+      if (i % 5 === 0) {
+        // 4-pointed star sparkle
+        drawStar(sx2, sy2, 4, 2 + (i % 3), 0.8);
+        ctx.fill();
+      } else {
+        drawCircle(sx2, sy2, 0.8 + (i % 3) * 0.4);
+        ctx.fill();
+      }
     }
   }
 
@@ -1187,13 +1532,25 @@ function drawBackground(ci) {
     const sx = c.x - camera.x * (c.layer === 0 ? 0.05 : 0.1);
     const screenX = ((sx % (GAME_W + c.w + 100)) + GAME_W + c.w + 100) % (GAME_W + c.w + 100) - c.w - 50;
 
-    ctx.fillStyle = theme.cloudColor;
-    // Fluffy cloud shape
-    drawEllipse(screenX + c.w * 0.5, c.y, c.w * 0.5, c.h * 0.5);
+    // Anime-style puffy cloud with soft gradient
+    const cGrad = ctx.createRadialGradient(screenX + c.w * 0.5, c.y - 2, c.w * 0.1, screenX + c.w * 0.5, c.y + 5, c.w * 0.55);
+    cGrad.addColorStop(0, 'rgba(255,255,255,' + (c.layer === 0 ? '0.95' : '0.7') + ')');
+    cGrad.addColorStop(1, theme.cloudColor);
+    ctx.fillStyle = cGrad;
+    // Multi-blob puffy shape
+    drawEllipse(screenX + c.w * 0.5, c.y, c.w * 0.5, c.h * 0.48);
     ctx.fill();
-    drawEllipse(screenX + c.w * 0.3, c.y + 3, c.w * 0.35, c.h * 0.4);
+    drawEllipse(screenX + c.w * 0.25, c.y + 3, c.w * 0.32, c.h * 0.38);
     ctx.fill();
-    drawEllipse(screenX + c.w * 0.7, c.y + 2, c.w * 0.35, c.h * 0.38);
+    drawEllipse(screenX + c.w * 0.75, c.y + 2, c.w * 0.33, c.h * 0.4);
+    ctx.fill();
+    drawEllipse(screenX + c.w * 0.15, c.y + 1, c.w * 0.22, c.h * 0.3);
+    ctx.fill();
+    drawEllipse(screenX + c.w * 0.85, c.y + 1, c.w * 0.2, c.h * 0.28);
+    ctx.fill();
+    // Soft highlight on top
+    ctx.fillStyle = 'rgba(255,255,255,' + (c.layer === 0 ? '0.3' : '0.15') + ')';
+    drawEllipse(screenX + c.w * 0.4, c.y - c.h * 0.15, c.w * 0.3, c.h * 0.2);
     ctx.fill();
   }
 
@@ -1366,32 +1723,60 @@ function drawTiles() {
           drawRoundRect(sx - 0.5, sy, TILE + 1, TILE, 0);
           ctx.fill();
 
-          // Grass blades on top
-          ctx.fillStyle = theme.grass;
-          for (let i = 0; i < 5; i++) {
-            const gx = sx + 3 + i * 6 + Math.sin(tx * 3 + i) * 2;
-            const gh = 4 + Math.sin(tx * 2 + i * 1.5) * 2;
+          // Lush anime grass blades (more, varied)
+          for (let i = 0; i < 7; i++) {
+            const gx = sx + 1 + i * 4.5 + Math.sin(tx * 3 + i) * 1.5;
+            const gh = 3 + Math.sin(tx * 2 + i * 1.5) * 2.5 + (i % 2) * 1.5;
+            // Darker blade behind
+            ctx.fillStyle = theme.grassDark;
+            ctx.beginPath();
+            ctx.moveTo(gx - 0.5, sy);
+            ctx.quadraticCurveTo(gx + 0.5 + Math.sin(levelTimer * 0.02 + i) * 0.8, sy - gh * 0.6, gx + 1, sy - gh - 1);
+            ctx.lineTo(gx + 2.5, sy);
+            ctx.fill();
+            // Lighter blade in front
+            ctx.fillStyle = theme.grass;
             ctx.beginPath();
             ctx.moveTo(gx, sy);
-            ctx.lineTo(gx + 1.5, sy - gh);
+            ctx.quadraticCurveTo(gx + 1 + Math.sin(levelTimer * 0.02 + i) * 0.5, sy - gh * 0.6, gx + 1.5, sy - gh);
             ctx.lineTo(gx + 3, sy);
             ctx.fill();
           }
+          // Highlight on grass top
+          ctx.fillStyle = 'rgba(255,255,255,0.08)';
+          ctx.fillRect(sx, sy, TILE, 3);
 
-          // Occasional flower on grass
-          if ((tx * 7 + ty * 13) % 11 === 0) {
+          // Anime-style flowers (more elaborate)
+          if ((tx * 7 + ty * 13) % 9 === 0) {
             const flowerColor = theme.flowerColors[(tx * 3 + ty) % theme.flowerColors.length];
             const fx = sx + 10 + (tx % 3) * 5;
-            const fy = sy - 2;
+            const fy = sy - 3;
             // Stem
+            ctx.strokeStyle = '#4caf50';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(fx + 2, fy + 5);
+            ctx.quadraticCurveTo(fx + 1, fy + 2, fx + 2, fy);
+            ctx.stroke();
+            // Small leaf
             ctx.fillStyle = '#66bb6a';
-            ctx.fillRect(fx + 1, fy, 2, 5);
-            // Petals
-            ctx.fillStyle = flowerColor;
-            drawCircle(fx + 2, fy - 1, 3);
+            ctx.beginPath();
+            ctx.ellipse(fx + 4, fy + 3, 2, 1, 0.5, 0, Math.PI * 2);
             ctx.fill();
+            // Petals (5 pointed flower)
+            for (let p = 0; p < 5; p++) {
+              const pa = p * Math.PI * 2 / 5 - Math.PI / 2;
+              ctx.fillStyle = flowerColor;
+              drawCircle(fx + 2 + Math.cos(pa) * 2.5, fy - 1 + Math.sin(pa) * 2.5, 2);
+              ctx.fill();
+            }
+            // Center
             ctx.fillStyle = '#fff9c4';
-            drawCircle(fx + 2, fy - 1, 1.5);
+            drawCircle(fx + 2, fy - 1, 1.8);
+            ctx.fill();
+            // Tiny sparkle
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            drawCircle(fx + 1, fy - 2, 0.8);
             ctx.fill();
           }
         } else {
@@ -2628,6 +3013,9 @@ function draw() {
   // Background
   drawBackground(ci);
 
+  // Floating petals & sparkles (behind tiles)
+  updateAndDrawPetals();
+
   // Tiles
   drawTiles();
 
@@ -2717,6 +3105,13 @@ function draw() {
     ctx.textAlign = 'left';
   }
   ctx.globalAlpha = 1;
+
+  // Subtle vignette (anime cinematic look)
+  const vigGrad = ctx.createRadialGradient(GAME_W / 2, GAME_H / 2, GAME_W * 0.35, GAME_W / 2, GAME_H / 2, GAME_W * 0.7);
+  vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  vigGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+  ctx.fillStyle = vigGrad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
 
   // HUD
   drawHUD();
