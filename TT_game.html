@@ -9,7 +9,6 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Tenure Track Bros.</title>
@@ -1702,17 +1701,44 @@ function generateLevel(levelIdx) {
     ['reviewer2', 'committee', 'bureaucrat'],  // Job Market
     ['reviewer2', 'bureaucrat', 'teaching'],
     ['bureaucrat', 'teaching', 'committee'],
-    ['reviewer2', 'bureaucrat', 'dean']
+    ['reviewer2', 'bureaucrat', 'committee']
   ];
 
+  // Collect platform info for enemy spawning
+  const platforms = [];
+  for (let row = 0; row < groundY; row++) {
+    let start = -1;
+    for (let col = 0; col < w; col++) {
+      if (tiles[row][col] === 2) {
+        if (start === -1) start = col;
+      } else {
+        if (start !== -1) { platforms.push({ y: row, x1: start, x2: col - 1 }); start = -1; }
+      }
+    }
+    if (start !== -1) platforms.push({ y: row, x1: start, x2: w - 1 });
+  }
+
   const enemyCount = 5 + levelIdx * 3;
-  for (let i = 0; i < enemyCount; i++) {
+  const platformEnemyCount = platforms.length > 0 ? Math.floor(enemyCount * 0.4) : 0;
+  const groundEnemyCount = enemyCount - platformEnemyCount;
+
+  for (let i = 0; i < groundEnemyCount; i++) {
     const ex = 10 + Math.floor(Math.random() * (w - 15));
     if (tiles[groundY][ex] === 1) {
       const types = enemyTypes[levelIdx];
       const eType = types[Math.floor(Math.random() * types.length)];
       entities.push({ type: eType, x: ex, y: groundY - 1.5, patrolRange: 2 + Math.floor(Math.random() * 3) });
     }
+  }
+
+  for (let i = 0; i < platformEnemyCount; i++) {
+    const plat = platforms[Math.floor(Math.random() * platforms.length)];
+    const platWidth = plat.x2 - plat.x1 + 1;
+    const ex = plat.x1 + Math.floor(Math.random() * platWidth);
+    const types = enemyTypes[levelIdx];
+    const eType = types[Math.floor(Math.random() * types.length)];
+    const patrol = Math.min(2 + Math.floor(Math.random() * 2), Math.floor(platWidth / 2));
+    entities.push({ type: eType, x: ex, y: plat.y - 1.5, patrolRange: patrol });
   }
 
   // Signs
@@ -2305,6 +2331,10 @@ function update() {
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
             spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
             showMessage('You defeated the Dean! Tenure is yours!');
+            // Trigger win
+            gameState = 'levelComplete';
+            winTimer = 180;
+            if (flagObj) flagObj.reached = true;
           } else {
             showMessage(`Dean HP: ${e.hp}/${e.maxHp} - Keep jumping!`);
           }
@@ -2374,6 +2404,10 @@ function update() {
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
             spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
             showMessage('You defeated the Dean! Tenure is yours!');
+            // Trigger win
+            gameState = 'levelComplete';
+            winTimer = 180;
+            if (flagObj) flagObj.reached = true;
           }
         } else {
           e.alive = false;
