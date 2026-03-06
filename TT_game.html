@@ -1197,46 +1197,139 @@ function drawBackground(ci) {
     ctx.fill();
   }
 
-  // Rolling hills (3 layers of parallax)
+  // Academic campus skyline (parallax layers)
   for (let layer = 2; layer >= 0; layer--) {
     const parallax = 0.08 + layer * 0.06;
     const offset = -camera.x * parallax;
     const hillColor = [theme.bgHill3, theme.bgHill2, theme.bgHill1][layer];
     const baseY = GAME_H - 40 - layer * 40;
 
+    // Ground strip
     ctx.fillStyle = hillColor;
-    ctx.beginPath();
-    ctx.moveTo(0, GAME_H);
-    for (let px = -10; px <= GAME_W + 10; px += 5) {
-      const worldX = px - offset;
-      const hy = baseY - Math.sin(worldX * 0.008 + layer * 2) * (30 + layer * 15)
-                       - Math.sin(worldX * 0.003 + layer) * (20 + layer * 10);
-      ctx.lineTo(px, hy);
-    }
-    ctx.lineTo(GAME_W + 10, GAME_H);
-    ctx.closePath();
-    ctx.fill();
+    ctx.fillRect(0, baseY + 10, GAME_W, GAME_H - baseY);
 
-    // Trees on hills
-    if (layer <= 1) {
-      for (let i = 0; i < 12; i++) {
-        const treeWorldX = i * 150 + layer * 60 + 30;
-        const treeSX = ((treeWorldX + offset) % (GAME_W + 200)) - 100;
-        const treeBaseY = baseY - Math.sin((treeSX - offset) * 0.008 + layer * 2) * (30 + layer * 15)
-                                - Math.sin((treeSX - offset) * 0.003 + layer) * (20 + layer * 10);
-
-        // Tree trunk
-        ctx.fillStyle = theme.treeTrunk;
-        ctx.fillRect(treeSX + 6, treeBaseY - 15, 4, 15);
-
-        // Tree crown (cute round)
-        ctx.fillStyle = theme.treeColor;
-        drawCircle(treeSX + 8, treeBaseY - 20, 10 + layer * 3);
-        ctx.fill();
-        drawCircle(treeSX + 3, treeBaseY - 15, 7 + layer * 2);
-        ctx.fill();
-        drawCircle(treeSX + 14, treeBaseY - 16, 8 + layer * 2);
-        ctx.fill();
+    // Campus buildings on each layer
+    if (layer === 2) {
+      // Farthest layer: large silhouette buildings (library, admin tower)
+      const bldgColor = hillColor;
+      for (let i = 0; i < 8; i++) {
+        const bwx = i * 200 + 30;
+        const bsx = ((bwx + offset) % (GAME_W + 300)) - 150;
+        const seed = (i * 7 + 3) % 5;
+        ctx.fillStyle = bldgColor;
+        if (seed < 2) {
+          // Tall library tower
+          const bh = 55 + (i % 3) * 15;
+          ctx.fillRect(bsx, baseY + 10 - bh, 30, bh);
+          // Dome/cap
+          ctx.beginPath();
+          ctx.arc(bsx + 15, baseY + 10 - bh, 15, Math.PI, 0);
+          ctx.fill();
+        } else if (seed < 4) {
+          // Wide lecture hall
+          const bh = 30 + (i % 3) * 10;
+          ctx.fillRect(bsx, baseY + 10 - bh, 50, bh);
+          // Triangular roof
+          ctx.beginPath();
+          ctx.moveTo(bsx - 3, baseY + 10 - bh);
+          ctx.lineTo(bsx + 25, baseY + 10 - bh - 15);
+          ctx.lineTo(bsx + 53, baseY + 10 - bh);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          // Clock tower
+          const bh = 70 + (i % 2) * 20;
+          ctx.fillRect(bsx + 5, baseY + 10 - bh, 16, bh);
+          ctx.fillRect(bsx - 2, baseY + 10 - 25, 30, 25);
+          // Clock face
+          ctx.fillStyle = 'rgba(255,255,200,0.15)';
+          drawCircle(bsx + 13, baseY + 10 - bh + 10, 6);
+          ctx.fill();
+        }
+      }
+    } else if (layer === 1) {
+      // Mid layer: medium buildings with windows
+      for (let i = 0; i < 10; i++) {
+        const bwx = i * 160 + 50;
+        const bsx = ((bwx + offset) % (GAME_W + 250)) - 120;
+        const seed = (i * 11 + 5) % 4;
+        ctx.fillStyle = hillColor;
+        if (seed < 2) {
+          // Office building
+          const bh = 40 + (i % 4) * 10;
+          const bw = 28 + (i % 3) * 8;
+          ctx.fillRect(bsx, baseY + 10 - bh, bw, bh);
+          // Windows
+          ctx.fillStyle = 'rgba(255,255,200,0.15)';
+          for (let wy = 0; wy < 3; wy++) {
+            for (let wx = 0; wx < 3; wx++) {
+              ctx.fillRect(bsx + 4 + wx * 9, baseY + 10 - bh + 6 + wy * 12, 5, 6);
+            }
+          }
+        } else if (seed === 2) {
+          // Greenhouse / lab with glass roof
+          const bh = 30;
+          ctx.fillRect(bsx, baseY + 10 - bh, 35, bh);
+          ctx.fillStyle = 'rgba(200,255,200,0.1)';
+          ctx.beginPath();
+          ctx.moveTo(bsx, baseY + 10 - bh);
+          ctx.quadraticCurveTo(bsx + 17, baseY + 10 - bh - 18, bsx + 35, baseY + 10 - bh);
+          ctx.fill();
+        } else {
+          // Bookstore / small campus building
+          const bh = 25;
+          ctx.fillRect(bsx, baseY + 10 - bh, 25, bh);
+          // Awning
+          ctx.fillStyle = 'rgba(255,200,150,0.12)';
+          ctx.fillRect(bsx - 2, baseY + 10 - bh, 29, 4);
+        }
+      }
+    } else {
+      // Closest layer: detailed foreground elements
+      for (let i = 0; i < 14; i++) {
+        const bwx = i * 120 + 20;
+        const bsx = ((bwx + offset) % (GAME_W + 200)) - 100;
+        const seed = (i * 13 + 7) % 6;
+        if (seed < 2) {
+          // Campus tree (keep some greenery)
+          ctx.fillStyle = theme.treeTrunk;
+          ctx.fillRect(bsx + 6, baseY - 5, 4, 15);
+          ctx.fillStyle = theme.treeColor;
+          drawCircle(bsx + 8, baseY - 10, 10);
+          ctx.fill();
+          drawCircle(bsx + 3, baseY - 5, 7);
+          ctx.fill();
+          drawCircle(bsx + 14, baseY - 6, 8);
+          ctx.fill();
+        } else if (seed === 2) {
+          // Lamp post
+          ctx.fillStyle = hillColor;
+          ctx.fillRect(bsx + 7, baseY - 10, 2, 20);
+          ctx.fillStyle = 'rgba(255,255,180,0.2)';
+          drawCircle(bsx + 8, baseY - 13, 4);
+          ctx.fill();
+        } else if (seed === 3) {
+          // Bench
+          ctx.fillStyle = hillColor;
+          ctx.fillRect(bsx, baseY + 5, 20, 3);
+          ctx.fillRect(bsx + 2, baseY + 5, 2, 6);
+          ctx.fillRect(bsx + 16, baseY + 5, 2, 6);
+        } else if (seed === 4) {
+          // Bike rack
+          ctx.strokeStyle = hillColor;
+          ctx.lineWidth = 1;
+          for (let b = 0; b < 3; b++) {
+            ctx.beginPath();
+            ctx.arc(bsx + 5 + b * 7, baseY + 5, 4, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        } else {
+          // Campus sign / bulletin board
+          ctx.fillStyle = hillColor;
+          ctx.fillRect(bsx + 3, baseY - 5, 2, 14);
+          ctx.fillRect(bsx + 15, baseY - 5, 2, 14);
+          ctx.fillRect(bsx, baseY - 8, 20, 8);
+        }
       }
     }
   }
