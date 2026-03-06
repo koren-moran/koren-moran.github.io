@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+      <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2VTLVLV9QM');
+  </script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Tenure Track Bros.</title>
@@ -22,16 +31,6 @@ canvas {
   box-shadow: 0 0 40px rgba(233, 69, 96, 0.3), 0 0 80px rgba(233, 69, 96, 0.1);
 }
 </style>
-    <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-2VTLVLV9QM');
-  </script>
-
-
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -216,6 +215,35 @@ function randomAppearance() {
 }
 
 let playerAppearance = randomAppearance();
+
+// Avatar customization state
+let customizing = false;
+let customCategory = 0; // 0=skin, 1=hair color, 2=hair style, 3=jacket, 4=tie
+let customIndices = { skin: 0, hair: 0, hairStyle: 0, jacket: 0, tie: 0 };
+const CUSTOM_CATEGORIES = ['Skin', 'Hair Color', 'Hair Style', 'Jacket', 'Tie'];
+const CUSTOM_ARRAYS = [SKIN_TONES, HAIR_COLORS, HAIR_STYLES, JACKET_COLORS, TIE_COLORS];
+const CUSTOM_KEYS = ['skin', 'hair', 'hairStyle', 'jacket', 'tie'];
+
+function applyCustomAppearance() {
+  playerAppearance = {
+    skin: SKIN_TONES[customIndices.skin],
+    hair: HAIR_COLORS[customIndices.hair],
+    hairStyle: HAIR_STYLES[customIndices.hairStyle],
+    jacket: JACKET_COLORS[customIndices.jacket],
+    tie: TIE_COLORS[customIndices.tie],
+  };
+}
+
+function randomizeCustomIndices() {
+  customIndices.skin = Math.floor(Math.random() * SKIN_TONES.length);
+  customIndices.hair = Math.floor(Math.random() * HAIR_COLORS.length);
+  customIndices.hairStyle = Math.floor(Math.random() * HAIR_STYLES.length);
+  customIndices.jacket = Math.floor(Math.random() * JACKET_COLORS.length);
+  customIndices.tie = Math.floor(Math.random() * TIE_COLORS.length);
+  applyCustomAppearance();
+}
+// Init with random
+randomizeCustomIndices();
 
 function drawHairStyle(style, color, x, headY, w) {
   ctx.fillStyle = color;
@@ -428,6 +456,24 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
     ctx.beginPath();
     ctx.arc(x + w / 2, headY + 13, 3, 0, Math.PI);
     ctx.fill();
+  }
+
+  // Flame aura
+  if (player && player.hasFlame) {
+    ctx.shadowColor = '#ff5722';
+    ctx.shadowBlur = 10;
+    // Flame particles around player
+    for (let i = 0; i < 4; i++) {
+      const fx = x + w / 2 + Math.sin(levelTimer * 0.12 + i * 1.6) * (w / 2 + 4);
+      const fy = drawY + h - 4 + Math.cos(levelTimer * 0.15 + i * 2.1) * 6 - 8;
+      const fGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, 4);
+      fGrad.addColorStop(0, 'rgba(255,235,59,0.8)');
+      fGrad.addColorStop(1, 'rgba(255,87,34,0)');
+      ctx.fillStyle = fGrad;
+      drawCircle(fx, fy, 4);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
   }
 
   // Power-up glow
@@ -959,6 +1005,92 @@ function drawCollectible(type, x, y, w, h) {
       ctx.fillText('\u2665', x + 9, y + 18);
       break;
     }
+
+    case 'heart': {
+      // Extra life heart
+      ctx.shadowColor = '#ef5350';
+      ctx.shadowBlur = 12 * glow * 2;
+
+      const pulse = 1 + Math.sin(levelTimer * 0.15) * 0.1;
+      const cx = x + w / 2;
+      const cy = y + h / 2 + 2;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(pulse, pulse);
+
+      // Heart shape
+      const heartGrad = ctx.createRadialGradient(0, -2, 2, 0, 0, 12);
+      heartGrad.addColorStop(0, '#ff6b81');
+      heartGrad.addColorStop(1, '#c0392b');
+      ctx.fillStyle = heartGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, 4);
+      ctx.bezierCurveTo(-2, 2, -8, -2, -8, -5);
+      ctx.bezierCurveTo(-8, -9, -4, -10, 0, -7);
+      ctx.bezierCurveTo(4, -10, 8, -9, 8, -5);
+      ctx.bezierCurveTo(8, -2, 2, 2, 0, 4);
+      ctx.fill();
+
+      // Shine
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      drawCircle(-3, -6, 2);
+      ctx.fill();
+
+      ctx.restore();
+      ctx.shadowBlur = 0;
+
+      // +1 UP label
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('+1UP', cx, y + h + 2);
+      ctx.textAlign = 'left';
+      break;
+    }
+
+    case 'flame': {
+      // Fire flower power-up (tenure flame)
+      ctx.shadowColor = '#ff5722';
+      ctx.shadowBlur = 12 * glow * 2;
+
+      const flameX = x + w / 2;
+      const flameY = y + h / 2;
+      const flicker = Math.sin(levelTimer * 0.2) * 2;
+
+      // Flame base (pot/pedestal)
+      ctx.fillStyle = '#795548';
+      drawRoundRect(x + 6, y + h - 8, w - 12, 8, 3);
+      ctx.fill();
+      ctx.fillStyle = '#ffd54f';
+      drawRoundRect(x + 7, y + h - 9, w - 14, 3, 2);
+      ctx.fill();
+
+      // Flame body
+      const fGrad = ctx.createLinearGradient(flameX, y + 2, flameX, y + h - 6);
+      fGrad.addColorStop(0, '#ff5722');
+      fGrad.addColorStop(0.4, '#ff9800');
+      fGrad.addColorStop(0.8, '#ffeb3b');
+      fGrad.addColorStop(1, '#fff9c4');
+      ctx.fillStyle = fGrad;
+      ctx.beginPath();
+      ctx.moveTo(flameX, y + 2 + flicker);
+      ctx.bezierCurveTo(flameX - 7, y + 6, flameX - 9, y + h - 10, flameX - 5, y + h - 8);
+      ctx.lineTo(flameX + 5, y + h - 8);
+      ctx.bezierCurveTo(flameX + 9, y + h - 10, flameX + 7, y + 6, flameX, y + 2 + flicker);
+      ctx.fill();
+
+      // Inner flame
+      ctx.fillStyle = '#fff9c4';
+      ctx.beginPath();
+      ctx.moveTo(flameX, y + 8 + flicker);
+      ctx.bezierCurveTo(flameX - 3, y + 12, flameX - 3, y + h - 12, flameX, y + h - 10);
+      ctx.bezierCurveTo(flameX + 3, y + h - 12, flameX + 3, y + 12, flameX, y + 8 + flicker);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      break;
+    }
   }
 }
 
@@ -1403,6 +1535,22 @@ function drawHUD() {
     ctx.fill();
   }
 
+  // Flame indicator
+  if (player && player.hasFlame) {
+    const flameHudX = player.powered ? 430 : 330;
+    ctx.fillStyle = '#ff5722';
+    ctx.font = 'bold 11px monospace';
+    const flameBar = Math.ceil(player.flameTimer / 60);
+    ctx.fillText(`FLAME ${flameBar}s [F]`, flameHudX, 24);
+
+    ctx.fillStyle = 'rgba(255,87,34,0.3)';
+    drawRoundRect(flameHudX, 28, 80, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ff5722';
+    drawRoundRect(flameHudX, 28, 80 * (player.flameTimer / 600), 6, 3);
+    ctx.fill();
+  }
+
   // Level name (right side)
   ctx.fillStyle = '#b0bec5';
   ctx.font = '9px monospace';
@@ -1525,10 +1673,10 @@ function generateLevel(levelIdx) {
       }
     }
     if (Math.random() < 0.7) {
-      const collectTypes = ['publication', 'grant', 'citation', 'coffee'];
-      const weights = levelIdx === 0 ? [0.5, 0.1, 0.3, 0.1] :
-                      levelIdx === 1 ? [0.4, 0.2, 0.2, 0.2] :
-                      [0.3, 0.3, 0.2, 0.2];
+      const collectTypes = ['publication', 'grant', 'citation', 'coffee', 'heart', 'flame'];
+      const weights = levelIdx === 0 ? [0.45, 0.1, 0.25, 0.1, 0.05, 0.05] :
+                      levelIdx === 1 ? [0.35, 0.18, 0.18, 0.15, 0.07, 0.07] :
+                      [0.25, 0.25, 0.18, 0.15, 0.07, 0.10];
       let r = Math.random(), cumul = 0, cType = 'publication';
       for (let ci = 0; ci < collectTypes.length; ci++) {
         cumul += weights[ci];
@@ -1605,6 +1753,7 @@ let collectibles = [];
 let signs = [];
 let particles = [];
 let floatingTexts = [];
+let fireballs = [];
 let flagObj = null;
 
 let stats = {
@@ -1633,6 +1782,7 @@ function initLevel(idx) {
   signs = [];
   particles = [];
   floatingTexts = [];
+  fireballs = [];
   flagObj = null;
   messageQueue = [];
   currentMessage = null;
@@ -1656,7 +1806,10 @@ function initLevel(idx) {
           hasDoubleJumped: false,
           jumpBuffer: 0,
           coyoteTime: 0,
-          wasOnGround: false
+          wasOnGround: false,
+          hasFlame: false,
+          flameTimer: 0,
+          fireCooldown: 0
         };
         break;
       case 'flag':
@@ -1666,6 +1819,8 @@ function initLevel(idx) {
       case 'grant':
       case 'citation':
       case 'coffee':
+      case 'heart':
+      case 'flame':
         collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
         break;
       case 'reviewer2':
@@ -1880,12 +2035,62 @@ function update() {
 
   if (gameState === 'gameWin') {
     winTimer--;
-    if (winTimer <= 0) gameState = 'menu';
+    // Wait for keypress (after a brief delay to prevent accidental skip)
+    if (winTimer <= 0 && (justPressed['Space'] || justPressed['Enter'])) {
+      gameState = 'menu';
+    }
     for (const key in justPressed) delete justPressed[key];
     return;
   }
 
   if (gameState === 'enterName' || gameState === 'showLeaderboard') {
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'menu') {
+    if (customizing) {
+      if (justPressed['ArrowUp'] || justPressed['KeyW']) {
+        customCategory = (customCategory - 1 + CUSTOM_CATEGORIES.length) % CUSTOM_CATEGORIES.length;
+      }
+      if (justPressed['ArrowDown'] || justPressed['KeyS']) {
+        customCategory = (customCategory + 1) % CUSTOM_CATEGORIES.length;
+      }
+      if (justPressed['ArrowLeft'] || justPressed['KeyA']) {
+        const key = CUSTOM_KEYS[customCategory];
+        const len = CUSTOM_ARRAYS[customCategory].length;
+        customIndices[key] = (customIndices[key] - 1 + len) % len;
+        applyCustomAppearance();
+      }
+      if (justPressed['ArrowRight'] || justPressed['KeyD']) {
+        const key = CUSTOM_KEYS[customCategory];
+        const len = CUSTOM_ARRAYS[customCategory].length;
+        customIndices[key] = (customIndices[key] + 1) % len;
+        applyCustomAppearance();
+      }
+      if (justPressed['KeyR']) {
+        randomizeCustomIndices();
+      }
+      if (justPressed['Space'] || justPressed['Enter']) {
+        customizing = false;
+        startGame();
+      }
+      if (justPressed['Escape']) {
+        customizing = false;
+      }
+    } else {
+      if (justPressed['Space']) {
+        startGame();
+      }
+      if (justPressed['KeyC']) {
+        customizing = true;
+        customCategory = 0;
+      }
+      if (justPressed['KeyL']) {
+        gameState = 'showLeaderboard';
+        fetchLeaderboard();
+      }
+    }
     for (const key in justPressed) delete justPressed[key];
     return;
   }
@@ -1960,6 +2165,29 @@ function update() {
     if (player.invTimer <= 0) player.invincible = false;
   }
 
+  // Flame power-up timer
+  if (player.hasFlame) {
+    player.flameTimer--;
+    if (player.flameTimer <= 0) player.hasFlame = false;
+  }
+  if (player.fireCooldown > 0) player.fireCooldown--;
+
+  // Shoot fireball with F key
+  if (player.hasFlame && (justPressed['KeyF'] || justPressed['KeyX']) && player.fireCooldown <= 0) {
+    player.fireCooldown = 20;
+    const dir = player.facingRight ? 1 : -1;
+    fireballs.push({
+      x: player.x + (dir > 0 ? player.w : -8),
+      y: player.y + player.h / 2 - 4,
+      vx: dir * 7,
+      vy: 0,
+      w: 12, h: 12,
+      life: 120,
+      bounces: 0
+    });
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ff5722', 4);
+  }
+
   const result = moveEntity(player, 0.5);
   if (result === 'fell') {
     playerDie('Fell into industry...');
@@ -2012,6 +2240,21 @@ function update() {
           spawnParticles(c.x + 12, cy + 12, '#8d6e63', 15);
           spawnFloatingText(c.x, cy, 'CAFFEINE!', '#ff6f00');
           showMessage('Coffee power! Speed boost!');
+          break;
+        case 'heart':
+          stats.lives++;
+          stats.score += 300;
+          spawnParticles(c.x + 12, cy + 12, '#ef5350', 15);
+          spawnFloatingText(c.x, cy, '+1 UP!', '#ef5350');
+          showMessage('Extra life! Your CV impressed someone!');
+          break;
+        case 'flame':
+          player.hasFlame = true;
+          player.flameTimer = 600; // 10 seconds
+          stats.score += 250;
+          spawnParticles(c.x + 12, cy + 12, '#ff5722', 20);
+          spawnFloatingText(c.x, cy, 'TENURE FLAME!', '#ff5722');
+          showMessage('Tenure Flame! Press F to throw fireballs!');
           break;
       }
     }
@@ -2093,6 +2336,56 @@ function update() {
   }
 
   enemies = enemies.filter(e => e.alive || !e.isProjectile);
+
+  // Fireballs
+  for (const fb of fireballs) {
+    fb.x += fb.vx;
+    fb.vy += 0.25;
+    fb.y += fb.vy;
+    fb.life--;
+
+    // Bounce off ground
+    const fbTileX = Math.floor((fb.x + fb.w / 2) / TILE);
+    const fbTileY = Math.floor((fb.y + fb.h) / TILE);
+    if (isSolid(fbTileX, fbTileY) || isPlatform(fbTileX, fbTileY)) {
+      fb.vy = -5;
+      fb.bounces++;
+      if (fb.bounces > 3) fb.life = 0;
+    }
+    // Hit wall
+    if (isSolid(Math.floor(fb.x / TILE), Math.floor((fb.y + fb.h / 2) / TILE)) ||
+        isSolid(Math.floor((fb.x + fb.w) / TILE), Math.floor((fb.y + fb.h / 2) / TILE))) {
+      fb.life = 0;
+      spawnParticles(fb.x, fb.y, '#ff5722', 6);
+    }
+
+    // Hit enemies
+    for (const e of enemies) {
+      if (!e.alive) continue;
+      if (rectCollide(fb, e)) {
+        fb.life = 0;
+        spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 12);
+        if (e.type === 'dean') {
+          e.hp--;
+          spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
+          if (e.hp <= 0) {
+            e.alive = false;
+            stats.score += 5000;
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
+            spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
+            showMessage('You defeated the Dean! Tenure is yours!');
+          }
+        } else {
+          e.alive = false;
+          stats.score += 200;
+          spawnFloatingText(e.x, e.y, '+200', '#ff5722');
+        }
+      }
+    }
+
+    if (fb.y > level.height * TILE) fb.life = 0;
+  }
+  fireballs = fireballs.filter(fb => fb.life > 0);
 
   // Flag
   if (flagObj && !flagObj.reached && rectCollide(player, flagObj)) {
@@ -2210,6 +2503,35 @@ function draw() {
   for (const e of enemies) {
     if (!e.alive) continue;
     drawEnemy(e, e.x - camera.x, e.y - camera.y);
+  }
+
+  // Fireballs
+  for (const fb of fireballs) {
+    const fbsx = fb.x - camera.x;
+    const fbsy = fb.y - camera.y;
+    const rot = levelTimer * 0.3;
+    ctx.save();
+    ctx.translate(fbsx + fb.w / 2, fbsy + fb.h / 2);
+    ctx.rotate(rot);
+    // Fireball glow
+    ctx.shadowColor = '#ff5722';
+    ctx.shadowBlur = 8;
+    const fbGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 6);
+    fbGrad.addColorStop(0, '#fff9c4');
+    fbGrad.addColorStop(0.4, '#ff9800');
+    fbGrad.addColorStop(1, '#ff5722');
+    ctx.fillStyle = fbGrad;
+    drawCircle(0, 0, 6);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // Trail particles
+    ctx.fillStyle = '#ff5722';
+    drawCircle(-3, -2, 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffa726';
+    drawCircle(2, 3, 1.5);
+    ctx.fill();
+    ctx.restore();
   }
 
   // Player
@@ -2331,23 +2653,73 @@ function drawMenu() {
   ctx.font = '13px monospace';
   ctx.fillText('A Platformer Parody of Academic Life', GAME_W / 2, 172);
 
-  // Character preview (animated)
-  drawPlayer(GAME_W / 2 - 13, 195, 26, 32, Math.floor(Date.now() / 250) % 4, true, false, false);
+  // Character preview (animated, larger)
+  if (customizing) {
+    // Customization panel
+    ctx.fillStyle = 'rgba(10,10,30,0.85)';
+    drawRoundRect(GAME_W / 2 - 200, 185, 400, 190, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#e94560';
+    ctx.lineWidth = 2;
+    drawRoundRect(GAME_W / 2 - 200, 185, 400, 190, 10);
+    ctx.stroke();
 
-  // Start prompt
-  const blink = Math.sin(t * 4) > 0;
-  if (blink) {
-    ctx.fillStyle = '#e94560';
-    ctx.font = 'bold 16px monospace';
-    ctx.fillText('PRESS SPACE TO START', GAME_W / 2, 275);
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText('CUSTOMIZE YOUR ACADEMIC', GAME_W / 2, 208);
+
+    // Character preview (big)
+    drawPlayer(GAME_W / 2 - 13, 218, 26, 32, Math.floor(Date.now() / 250) % 4, true, false, false);
+
+    // Category selection
+    for (let i = 0; i < CUSTOM_CATEGORIES.length; i++) {
+      const catY = 265 + i * 20;
+      const isSelected = customCategory === i;
+      ctx.fillStyle = isSelected ? '#ffd54f' : '#78909c';
+      ctx.font = isSelected ? 'bold 11px monospace' : '11px monospace';
+
+      const key = CUSTOM_KEYS[i];
+      const arr = CUSTOM_ARRAYS[i];
+      const idx = customIndices[key];
+      let valueName;
+      if (key === 'skin') valueName = ['Light', 'Light-Med', 'Medium', 'Med-Dark', 'Dark', 'Deep'][idx];
+      else if (key === 'hair') valueName = ['Dk Brown', 'Black', 'Brown', 'Lt Brown', 'Auburn', 'Blonde', 'Dk Gray', 'Silver', 'Green', 'Purple'][idx];
+      else if (key === 'hairStyle') valueName = HAIR_STYLES[idx];
+      else if (key === 'jacket') valueName = ['Tweed', 'Charcoal', 'Navy', 'Plum', 'Teal', 'Burgundy', 'Dark'][idx];
+      else valueName = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Cyan'][idx];
+
+      ctx.fillText(`${isSelected ? '>' : ' '} ${CUSTOM_CATEGORIES[i]}: < ${valueName} >`, GAME_W / 2, catY);
+    }
+
+    ctx.fillStyle = '#b0bec5';
+    ctx.font = '9px monospace';
+    ctx.fillText('Up/Down: category  |  Left/Right: change  |  R: random  |  SPACE: start', GAME_W / 2, 370);
+  } else {
+    drawPlayer(GAME_W / 2 - 13, 195, 26, 32, Math.floor(Date.now() / 250) % 4, true, false, false);
+
+    // Start prompt
+    const blink = Math.sin(t * 4) > 0;
+    if (blink) {
+      ctx.fillStyle = '#e94560';
+      ctx.font = 'bold 16px monospace';
+      ctx.fillText('PRESS SPACE TO START', GAME_W / 2, 275);
+    }
+
+    // Controls
+    ctx.fillStyle = '#78909c';
+    ctx.font = '11px monospace';
+    ctx.fillText('Arrow Keys / WASD to Move | Space: Jump (x2!)', GAME_W / 2, 305);
+    ctx.fillText('F: Throw Fireball | Jump on enemies', GAME_W / 2, 323);
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('C: Customize Character', GAME_W / 2, 346);
   }
 
-  // Controls
-  ctx.fillStyle = '#78909c';
-  ctx.font = '11px monospace';
-  ctx.fillText('Arrow Keys / WASD to Move', GAME_W / 2, 310);
-  ctx.fillText('Space to Jump (x2 for Double Jump!)', GAME_W / 2, 328);
-  ctx.fillText('Jump on enemies to defeat them', GAME_W / 2, 346);
+  if (customizing) {
+    // Don't show level path / legend when customizing
+    ctx.textAlign = 'left';
+    return;
+  }
 
   // Level path
   ctx.font = '10px monospace';
@@ -2428,15 +2800,6 @@ function drawMenu() {
 
   ctx.textAlign = 'left';
 
-  if (keys['Space']) {
-    startGame();
-    keys['Space'] = false;
-  }
-  if (keys['KeyL']) {
-    keys['KeyL'] = false;
-    gameState = 'showLeaderboard';
-    fetchLeaderboard();
-  }
 }
 
 // ============================================================
@@ -2585,72 +2948,137 @@ function drawWinScreen() {
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, GAME_W, GAME_H);
 
-  // Confetti
-  for (let i = 0; i < 60; i++) {
-    ctx.fillStyle = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ffd54f'][i % 6];
-    const cx = Math.sin(t * 1.5 + i * 1.3) * 350 + GAME_W / 2;
-    const cy = (Date.now() * 0.06 + i * 80) % (GAME_H + 20) - 10;
+  // Confetti (lots of it!)
+  for (let i = 0; i < 80; i++) {
+    const colors = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ffd54f', '#e91e63', '#00bcd4'];
+    ctx.fillStyle = colors[i % colors.length];
+    const cx = Math.sin(t * 1.5 + i * 1.3) * 380 + GAME_W / 2;
+    const cy = (Date.now() * 0.05 + i * 60) % (GAME_H + 20) - 10;
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(t * 2 + i);
-    ctx.fillRect(-4, -2, 8, 4);
+    if (i % 3 === 0) {
+      drawStar(0, 0, 4, 4, 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(-4, -2, 8, 4);
+    }
     ctx.restore();
+  }
+
+  // Fireworks bursts
+  for (let i = 0; i < 5; i++) {
+    const burstT = (t * 0.7 + i * 1.3) % 3;
+    if (burstT < 1.5) {
+      const bx = 100 + (i * 173) % (GAME_W - 200);
+      const by = 40 + (i * 97) % 100;
+      const burstR = burstT * 30;
+      const alpha = 1 - burstT / 1.5;
+      for (let j = 0; j < 8; j++) {
+        const angle = j * Math.PI / 4;
+        ctx.fillStyle = `rgba(${150 + i * 20}, ${100 + j * 20}, ${255 - i * 30}, ${alpha})`;
+        drawCircle(bx + Math.cos(angle) * burstR, by + Math.sin(angle) * burstR, 3 * alpha);
+        ctx.fill();
+      }
+    }
   }
 
   ctx.textAlign = 'center';
 
   // Glow behind title
-  ctx.fillStyle = 'rgba(255,213,79,0.1)';
-  drawCircle(GAME_W / 2, 80, 60 + Math.sin(t * 2) * 10);
+  ctx.fillStyle = `rgba(255,213,79,${0.1 + Math.sin(t * 2) * 0.05})`;
+  drawCircle(GAME_W / 2, 55, 70 + Math.sin(t * 2) * 10);
   ctx.fill();
 
   ctx.fillStyle = '#ffd54f';
   ctx.font = 'bold 36px monospace';
-  ctx.fillText('CONGRATULATIONS!', GAME_W / 2, 80);
+  ctx.fillText('CONGRATULATIONS!', GAME_W / 2, 55);
 
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 20px monospace';
-  ctx.fillText('You achieved TENURE!', GAME_W / 2, 125);
+  ctx.fillText('You achieved TENURE!', GAME_W / 2, 90);
 
-  // Character celebration
-  drawPlayer(GAME_W / 2 - 13, 140, 26, 32, Math.floor(Date.now() / 200) % 4, true, true, false);
+  // Character celebration (bouncing with crown/cap)
+  const charY = 100 + Math.sin(t * 3) * 5;
+  drawPlayer(GAME_W / 2 - 13, charY, 26, 32, Math.floor(Date.now() / 150) % 4, true, true, false);
 
+  // Graduation cap above character
+  ctx.fillStyle = '#333';
+  ctx.fillRect(GAME_W / 2 - 12, charY - 8, 24, 4);
+  ctx.fillRect(GAME_W / 2 - 5, charY - 14, 10, 6);
+  ctx.fillStyle = '#ffd54f';
+  ctx.fillRect(GAME_W / 2 - 1, charY - 15, 2, 8);
+  drawCircle(GAME_W / 2, charY - 16, 2);
+  ctx.fill();
+
+  // Left column: funny rewards
   ctx.fillStyle = '#e94560';
-  ctx.font = '13px monospace';
-  ctx.fillText('After years of sacrifice, you can finally...', GAME_W / 2, 200);
+  ctx.font = '11px monospace';
+  ctx.fillText('Now you can finally...', GAME_W / 4, 155);
 
   const rewards = [
-    'Attend even MORE committee meetings!',
-    'Mentor the next generation of sufferers!',
-    'Finally buy that house (in this economy?)',
-    'Start worrying about Full Professor now!',
-    'Update your email signature with pride!',
+    'Attend MORE committee meetings!',
+    'Mentor the next generation!',
+    'Worry about Full Professor!',
+    'Update your email signature!',
   ];
   for (let i = 0; i < rewards.length; i++) {
     ctx.fillStyle = i % 2 === 0 ? '#e94560' : '#ffd54f';
-    ctx.font = 'bold 13px monospace';
-    ctx.fillText(rewards[i], GAME_W / 2, 230 + i * 24);
+    ctx.font = '10px monospace';
+    ctx.fillText(rewards[i], GAME_W / 4, 175 + i * 18);
   }
 
-  ctx.fillStyle = '#78909c';
-  ctx.font = '11px monospace';
-  ctx.fillText(`Final Stats: Pubs ${stats.publications} | Grants ${stats.grants} | Citations ${stats.citations} | h-index ${stats.hIndex}`, GAME_W / 2, 370);
-  ctx.fillText(`Score: ${stats.score}`, GAME_W / 2, 390);
-  if (leaderboardRank) {
-    ctx.fillStyle = '#ffd54f';
-    ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 410);
-  }
+  // Stats box
+  ctx.fillStyle = 'rgba(10,10,30,0.7)';
+  drawRoundRect(30, 260, GAME_W / 2 - 50, 80, 6);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,213,79,0.3)';
+  ctx.lineWidth = 1;
+  drawRoundRect(30, 260, GAME_W / 2 - 50, 80, 6);
+  ctx.stroke();
 
-  ctx.fillStyle = '#546e7a';
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText('FINAL STATS', GAME_W / 4, 280);
+  ctx.fillStyle = '#fff';
   ctx.font = '10px monospace';
-  const blink = Math.sin(t * 4) > 0;
-  if (blink) ctx.fillText('Press SPACE to play again (just like real academia)', GAME_W / 2, 445);
-  ctx.textAlign = 'left';
+  ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}`, GAME_W / 4, 298);
+  ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
+  ctx.fillStyle = '#ffa726';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`Score: ${stats.score}`, GAME_W / 4, 332);
 
-  if (keys['Space']) {
-    gameState = 'menu';
-    keys['Space'] = false;
+  // Right column: leaderboard
+  if (leaderboardData.length > 0) {
+    drawMiniLeaderboard(GAME_W / 2 + 20, 155, 8);
   }
+  if (leaderboardRank) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W * 3 / 4, 340);
+  }
+
+  // Bottom prompt
+  ctx.textAlign = 'center';
+  if (winTimer <= 0) {
+    const blink = Math.sin(t * 4) > 0;
+    if (blink) {
+      ctx.fillStyle = '#78909c';
+      ctx.font = '11px monospace';
+      ctx.fillText('Press SPACE to play again (just like real academia)', GAME_W / 2, GAME_H - 30);
+    }
+  } else {
+    ctx.fillStyle = '#546e7a';
+    ctx.font = '10px monospace';
+    ctx.fillText('Celebrating...', GAME_W / 2, GAME_H - 30);
+  }
+
+  ctx.fillStyle = '#37474f';
+  ctx.font = '8px monospace';
+  ctx.fillText('"The real tenure was the papers we published along the way"', GAME_W / 2, GAME_H - 10);
+
+  ctx.textAlign = 'left';
 }
 
 // ============================================================
@@ -3014,7 +3442,7 @@ function startGame() {
   stats = { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0 };
   postdocCount = 0;
   jobMarketPassed = null;
-  playerAppearance = randomAppearance();
+  // playerAppearance is already set by customization or random default
 
   // Start name input
   gameState = 'enterName';
@@ -3041,4 +3469,3 @@ gameLoop();
 </script>
 </body>
 </html>
-
