@@ -3650,10 +3650,10 @@ function generateLevel(levelIdx) {
   const enemyTypes = [
     ['reviewer2', 'imposter'],
     ['reviewer2', 'imposter', 'bureaucrat'],
-    ['reviewer2', 'committee', 'bureaucrat', 'rival'],  // Job Market
-    ['reviewer2', 'bureaucrat', 'teaching', 'rival'],
-    ['bureaucrat', 'teaching', 'committee', 'rival'],
-    ['reviewer2', 'bureaucrat', 'committee', 'rival']
+    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival'],  // Job Market
+    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival'],
+    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival'],
+    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival']
   ];
 
   // Collect platform info for enemy spawning
