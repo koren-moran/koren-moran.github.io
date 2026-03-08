@@ -66,16 +66,16 @@ window.addEventListener('keyup', e => { keys[e.code] = false; e.preventDefault()
 // KEY BINDINGS
 // ============================================================
 let keyBindings = {
-  p1_left:  ['ArrowLeft', 'KeyA'],
-  p1_right: ['ArrowRight', 'KeyD'],
-  p1_jump:  ['ArrowUp', 'KeyW', 'Space'],
-  p1_fire:  ['KeyF', 'KeyX'],
-  p1_potion:['KeyQ'],
-  p2_left:  ['KeyJ'],
-  p2_right: ['KeyL'],
-  p2_jump:  ['KeyI', 'KeyU'],
-  p2_fire:  ['KeyH'],
-  p2_potion:['KeyO'],
+  p1_left:  ['ArrowLeft'],
+  p1_right: ['ArrowRight'],
+  p1_jump:  ['ArrowUp', 'Space'],
+  p1_fire:  ['Period'],
+  p1_potion:['Comma'],
+  p2_left:  ['KeyA'],
+  p2_right: ['KeyD'],
+  p2_jump:  ['KeyW'],
+  p2_fire:  ['KeyE'],
+  p2_potion:['KeyQ'],
 };
 const BINDABLE_ACTIONS = ['p1_left','p1_right','p1_jump','p1_fire','p1_potion','p2_left','p2_right','p2_jump','p2_fire','p2_potion'];
 const ACTION_LABELS = {
@@ -3312,13 +3312,14 @@ function drawFlag() {
 // HUD DRAWING
 // ============================================================
 function drawHUD() {
+  const hudH = twoPlayerMode ? 62 : 40;
   // HUD background with glass effect
-  const hudGrad = ctx.createLinearGradient(0, 0, 0, 46);
+  const hudGrad = ctx.createLinearGradient(0, 0, 0, hudH + 6);
   hudGrad.addColorStop(0, 'rgba(15,12,30,0.92)');
   hudGrad.addColorStop(0.5, 'rgba(20,18,40,0.88)');
   hudGrad.addColorStop(1, 'rgba(15,12,30,0.85)');
   ctx.fillStyle = hudGrad;
-  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
+  drawRoundRect(4, 4, GAME_W - 8, hudH, 10);
   ctx.fill();
 
   // HUD top highlight (glass effect)
@@ -3332,171 +3333,260 @@ function drawHUD() {
   // HUD border (subtle colored glow)
   ctx.strokeStyle = 'rgba(233,69,96,0.25)';
   ctx.lineWidth = 1.5;
-  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
-  ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1;
-  drawRoundRect(5, 5, GAME_W - 10, 38, 9);
+  drawRoundRect(4, 4, GAME_W - 8, hudH, 10);
   ctx.stroke();
 
-  // Divider lines between sections
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1;
-  for (const divX of [105, 215, 320]) {
-    ctx.beginPath();
-    ctx.moveTo(divX, 10);
-    ctx.lineTo(divX, 38);
-    ctx.stroke();
-  }
-
-  ctx.font = 'bold 11px monospace';
-
-  // Lives with hearts (with glow)
-  for (let i = 0; i < stats.lives; i++) {
-    // Heart glow
-    ctx.shadowColor = '#ef5350';
-    ctx.shadowBlur = 4;
-    ctx.fillStyle = '#ef5350';
-    ctx.font = '14px serif';
-    ctx.fillText('\u2665', 14 + i * 18, 24);
-    ctx.shadowBlur = 0;
-  }
-
-  // Publications with icon
-  ctx.font = 'bold 10px monospace';
-  ctx.fillStyle = '#b0bec5';
-  ctx.fillText('PUB', 14, 36);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 11px monospace';
-  ctx.fillText(`${stats.publications}`, 44, 36);
-
-  // Grants with icon-like label
-  ctx.fillStyle = '#4caf50';
-  ctx.font = 'bold 9px monospace';
-  ctx.fillText('GRANT', 115, 22);
-  ctx.fillStyle = '#66bb6a';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText(`${stats.grants}`, 165, 22);
-
-  // Citations
-  ctx.fillStyle = '#29b6f6';
-  ctx.font = 'bold 9px monospace';
-  ctx.fillText('CITE', 115, 36);
-  ctx.fillStyle = '#4fc3f7';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText(`${stats.citations}`, 148, 36);
-
-  // h-index (prominent with glow)
-  ctx.shadowColor = '#ffd54f';
-  ctx.shadowBlur = 6;
-  ctx.fillStyle = '#ffd54f';
-  ctx.font = 'bold 14px monospace';
-  ctx.fillText(`h=${stats.hIndex}`, 225, 26);
-  ctx.shadowBlur = 0;
-
-  // Mentored count
-  ctx.fillStyle = '#66bb6a';
-  ctx.font = 'bold 9px monospace';
-  ctx.fillText('MENT', 185, 36);
-  ctx.fillStyle = '#81c784';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText(`${stats.mentored}`, 215, 36);
-
-  // Score with counter style
-  ctx.fillStyle = '#78909c';
-  ctx.font = 'bold 8px monospace';
-  ctx.fillText('SCORE', 225, 37);
-  ctx.fillStyle = '#ffa726';
-  ctx.font = 'bold 11px monospace';
-  ctx.fillText(`${stats.score}`, 262, 37);
-
-  // Mentoring timer indicator
-  if (player && player.mentoring) {
-    const mentorSecs = Math.ceil(player.mentoringTimer / 60);
-    const mentorColor = mentorSecs <= 5 ? '#ef5350' : '#66bb6a';
-    ctx.fillStyle = mentorColor;
-    ctx.font = 'bold 11px monospace';
-    ctx.fillText(`MENTOR ${mentorSecs}s`, 330, 24);
-    // Mentoring timer bar
-    ctx.fillStyle = 'rgba(102,187,106,0.3)';
-    drawRoundRect(330, 28, 80, 6, 3);
-    ctx.fill();
-    ctx.fillStyle = mentorColor;
-    drawRoundRect(330, 28, 80 * (player.mentoringTimer / 900), 6, 3);
-    ctx.fill();
-    // Headbutt indicator
-    if (player.headbutting) {
-      ctx.fillStyle = '#ff5722';
-      ctx.font = 'bold 10px monospace';
-      ctx.fillText('HEADBUTT!', 330, 42);
-    }
-  }
-
-  // Coffee indicator
-  if (player && player.powered) {
-    ctx.fillStyle = '#ff6f00';
-    ctx.font = 'bold 11px monospace';
-    const coffeeBar = Math.ceil(player.powerTimer / 60);
-    ctx.fillText(`CAFFEINE ${coffeeBar}s`, 330, 24);
-
-    // Coffee bar
-    ctx.fillStyle = 'rgba(255,111,0,0.3)';
-    drawRoundRect(330, 28, 80, 6, 3);
-    ctx.fill();
-    ctx.fillStyle = '#ff6f00';
-    drawRoundRect(330, 28, 80 * (player.powerTimer / 300), 6, 3);
-    ctx.fill();
-  }
-
-  // Flame indicator
-  if (player && player.hasFlame) {
-    const flameHudX = player.powered ? 430 : 330;
-    ctx.fillStyle = '#ff5722';
-    ctx.font = 'bold 11px monospace';
-    const flameBar = Math.ceil(player.flameTimer / 60);
-    ctx.fillText(`FLAME ${flameBar}s [F]`, flameHudX, 24);
-
-    ctx.fillStyle = 'rgba(255,87,34,0.3)';
-    drawRoundRect(flameHudX, 28, 80, 6, 3);
-    ctx.fill();
-    ctx.fillStyle = '#ff5722';
-    drawRoundRect(flameHudX, 28, 80 * (player.flameTimer / 900), 6, 3);
-    ctx.fill();
-  }
-
-  // Mentor's Wrath magic meter (Golden Axe style potion stacking)
-  if (stats.potions > 0 || magicActive) {
-    const potHudX = 330;
-    const potHudY = player && (player.powered || player.hasFlame) ? 38 : 24;
-    // Draw potion bottles as icons (like Golden Axe magic bar)
-    ctx.fillStyle = '#9c27b0';
-    ctx.font = 'bold 9px monospace';
-    ctx.fillText('WRATH', potHudX, potHudY - 2);
-    for (let pi = 0; pi < Math.min(stats.potions, 8); pi++) {
-      const px = potHudX + pi * 12;
-      // Mini potion bottle icon
-      ctx.fillStyle = pi < 1 ? '#ce93d8' : pi < 2 ? '#ab47bc' : pi < 3 ? '#9c27b0' : '#7b1fa2';
-      drawRoundRect(px, potHudY + 1, 8, 10, 2);
-      ctx.fill();
-      ctx.fillStyle = '#e1bee7';
-      drawRoundRect(px + 2, potHudY - 1, 4, 4, 1);
-      ctx.fill();
-    }
-    if (stats.potions > 8) {
-      ctx.fillStyle = '#ce93d8';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText(`+${stats.potions - 8}`, potHudX + 100, potHudY + 8);
-    }
-    ctx.fillStyle = '#78909c';
-    ctx.font = '7px monospace';
-    ctx.fillText('[Q]', potHudX + Math.min(stats.potions, 8) * 12 + 4, potHudY + 8);
-  }
-
-  // Two-player indicator
   if (twoPlayerMode) {
-    ctx.fillStyle = '#42a5f5';
+    // ===== TWO-PLAYER HUD =====
+    // Divider between P1 and P2 rows
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(10, 34);
+    ctx.lineTo(GAME_W - 10, 34);
+    ctx.stroke();
+
+    // Helper to draw one player's stats row
+    function drawPlayerRow(st, label, color, baseY, pl, prefix) {
+      // Player label
+      ctx.fillStyle = color;
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(label, 12, baseY);
+
+      // Lives (hearts)
+      ctx.shadowColor = '#ef5350';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = '#ef5350';
+      ctx.font = '11px serif';
+      for (let i = 0; i < Math.min(st.lives, 5); i++) {
+        ctx.fillText('\u2665', 32 + i * 13, baseY);
+      }
+      if (st.lives > 5) {
+        ctx.fillStyle = '#ef5350';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`+${st.lives - 5}`, 32 + 5 * 13, baseY);
+      }
+      ctx.shadowBlur = 0;
+
+      // Pub
+      ctx.fillStyle = '#b0bec5';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('PUB', 105, baseY);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(`${st.publications}`, 130, baseY);
+
+      // Grant
+      ctx.fillStyle = '#66bb6a';
+      ctx.fillText('G', 152, baseY);
+      ctx.fillStyle = '#81c784';
+      ctx.fillText(`${st.grants}`, 160, baseY);
+
+      // Cite
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fillText('C', 180, baseY);
+      ctx.fillText(`${st.citations}`, 188, baseY);
+
+      // h-index
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`h=${st.hIndex}`, 210, baseY);
+
+      // Mentored
+      ctx.fillStyle = '#81c784';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText(`M${st.mentored}`, 250, baseY);
+
+      // Score
+      ctx.fillStyle = '#ffa726';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${st.score}`, 280, baseY);
+
+      // Potions
+      if (st.potions > 0) {
+        ctx.fillStyle = '#ce93d8';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`POT:${st.potions}`, 330, baseY);
+      }
+
+      // Power-up indicators
+      let indX = 380;
+      if (pl && pl.powered) {
+        ctx.fillStyle = '#ff6f00';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`CAF ${Math.ceil(pl.powerTimer / 60)}s`, indX, baseY);
+        indX += 50;
+      }
+      if (pl && pl.hasFlame) {
+        ctx.fillStyle = '#ff5722';
+        ctx.font = 'bold 8px monospace';
+        const fKey = keyName(keyBindings[prefix + '_fire'][0]);
+        ctx.fillText(`FLM ${Math.ceil(pl.flameTimer / 60)}s [${fKey}]`, indX, baseY);
+        indX += 70;
+      }
+      if (pl && pl.mentoring) {
+        ctx.fillStyle = '#66bb6a';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`MENT ${Math.ceil(pl.mentoringTimer / 60)}s`, indX, baseY);
+      }
+    }
+
+    drawPlayerRow(p1Stats, 'P1', '#fff', 24, player, 'p1');
+    drawPlayerRow(p2Stats, 'P2', '#42a5f5', 46, player2, 'p2');
+
+    // Swap indicator
+    if (swappedControls) {
+      ctx.fillStyle = '#ffa726';
+      ctx.font = 'bold 7px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('\u21C4 SWAPPED', GAME_W - 14, 56);
+      ctx.textAlign = 'left';
+    }
+  } else {
+    // ===== SINGLE-PLAYER HUD =====
+    // Divider lines between sections
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (const divX of [105, 215, 320]) {
+      ctx.beginPath();
+      ctx.moveTo(divX, 10);
+      ctx.lineTo(divX, 38);
+      ctx.stroke();
+    }
+
+    ctx.font = 'bold 11px monospace';
+
+    // Lives with hearts (with glow)
+    for (let i = 0; i < stats.lives; i++) {
+      ctx.shadowColor = '#ef5350';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#ef5350';
+      ctx.font = '14px serif';
+      ctx.fillText('\u2665', 14 + i * 18, 24);
+      ctx.shadowBlur = 0;
+    }
+
+    // Publications
+    ctx.font = 'bold 10px monospace';
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillText('PUB', 14, 36);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(`${stats.publications}`, 44, 36);
+
+    // Grants
+    ctx.fillStyle = '#4caf50';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('GRANT', 115, 22);
+    ctx.fillStyle = '#66bb6a';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`${stats.grants}`, 165, 22);
+
+    // Citations
+    ctx.fillStyle = '#29b6f6';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('CITE', 115, 36);
+    ctx.fillStyle = '#4fc3f7';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`${stats.citations}`, 148, 36);
+
+    // h-index
+    ctx.shadowColor = '#ffd54f';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText(`h=${stats.hIndex}`, 225, 26);
+    ctx.shadowBlur = 0;
+
+    // Mentored
+    ctx.fillStyle = '#66bb6a';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('MENT', 185, 36);
+    ctx.fillStyle = '#81c784';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`${stats.mentored}`, 215, 36);
+
+    // Score
+    ctx.fillStyle = '#78909c';
     ctx.font = 'bold 8px monospace';
-    ctx.fillText('2P', 90, 22);
+    ctx.fillText('SCORE', 225, 37);
+    ctx.fillStyle = '#ffa726';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(`${stats.score}`, 262, 37);
+
+    // Mentoring timer
+    if (player && player.mentoring) {
+      const mentorSecs = Math.ceil(player.mentoringTimer / 60);
+      const mentorColor = mentorSecs <= 5 ? '#ef5350' : '#66bb6a';
+      ctx.fillStyle = mentorColor;
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(`MENTOR ${mentorSecs}s`, 330, 24);
+      ctx.fillStyle = 'rgba(102,187,106,0.3)';
+      drawRoundRect(330, 28, 80, 6, 3);
+      ctx.fill();
+      ctx.fillStyle = mentorColor;
+      drawRoundRect(330, 28, 80 * (player.mentoringTimer / 900), 6, 3);
+      ctx.fill();
+      if (player.headbutting) {
+        ctx.fillStyle = '#ff5722';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('HEADBUTT!', 330, 42);
+      }
+    }
+
+    // Coffee indicator
+    if (player && player.powered) {
+      ctx.fillStyle = '#ff6f00';
+      ctx.font = 'bold 11px monospace';
+      const coffeeBar = Math.ceil(player.powerTimer / 60);
+      ctx.fillText(`CAFFEINE ${coffeeBar}s`, 330, 24);
+      ctx.fillStyle = 'rgba(255,111,0,0.3)';
+      drawRoundRect(330, 28, 80, 6, 3);
+      ctx.fill();
+      ctx.fillStyle = '#ff6f00';
+      drawRoundRect(330, 28, 80 * (player.powerTimer / 300), 6, 3);
+      ctx.fill();
+    }
+
+    // Flame indicator
+    if (player && player.hasFlame) {
+      const flameHudX = player.powered ? 430 : 330;
+      ctx.fillStyle = '#ff5722';
+      ctx.font = 'bold 11px monospace';
+      const flameBar = Math.ceil(player.flameTimer / 60);
+      ctx.fillText(`FLAME ${flameBar}s [${keyName(keyBindings.p1_fire[0])}]`, flameHudX, 24);
+      ctx.fillStyle = 'rgba(255,87,34,0.3)';
+      drawRoundRect(flameHudX, 28, 80, 6, 3);
+      ctx.fill();
+      ctx.fillStyle = '#ff5722';
+      drawRoundRect(flameHudX, 28, 80 * (player.flameTimer / 900), 6, 3);
+      ctx.fill();
+    }
+
+    // Potion meter
+    if (stats.potions > 0 || magicActive) {
+      const potHudX = 330;
+      const potHudY = player && (player.powered || player.hasFlame) ? 38 : 24;
+      ctx.fillStyle = '#9c27b0';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText('WRATH', potHudX, potHudY - 2);
+      for (let pi = 0; pi < Math.min(stats.potions, 8); pi++) {
+        const px = potHudX + pi * 12;
+        ctx.fillStyle = pi < 1 ? '#ce93d8' : pi < 2 ? '#ab47bc' : pi < 3 ? '#9c27b0' : '#7b1fa2';
+        drawRoundRect(px, potHudY + 1, 8, 10, 2);
+        ctx.fill();
+        ctx.fillStyle = '#e1bee7';
+        drawRoundRect(px + 2, potHudY - 1, 4, 4, 1);
+        ctx.fill();
+      }
+      if (stats.potions > 8) {
+        ctx.fillStyle = '#ce93d8';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(`+${stats.potions - 8}`, potHudX + 100, potHudY + 8);
+      }
+      ctx.fillStyle = '#78909c';
+      ctx.font = '7px monospace';
+      ctx.fillText(`[${keyName(keyBindings.p1_potion[0])}]`, potHudX + Math.min(stats.potions, 8) * 12 + 4, potHudY + 8);
+    }
   }
 
   // Level name (right side)
@@ -3779,10 +3869,37 @@ let stats = {
   hIndex: 0, lives: 3, coffee: 0, score: 0, potions: 0, mentored: 0,
 };
 
+function newStats() {
+  return { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0, potions: 0, mentored: 0 };
+}
+let p1Stats = newStats();
+let p2Stats = newStats();
+
+// Return the stats object for a given player entity
+function statsFor(pl) {
+  return pl === player2 ? p2Stats : p1Stats;
+}
+
+// Combined stats for job market / leaderboard
+function combinedStats() {
+  return {
+    publications: p1Stats.publications + p2Stats.publications,
+    grants: p1Stats.grants + p2Stats.grants,
+    citations: p1Stats.citations + p2Stats.citations,
+    hIndex: Math.max(p1Stats.hIndex, p2Stats.hIndex),
+    lives: p1Stats.lives + p2Stats.lives,
+    score: p1Stats.score + p2Stats.score,
+    potions: p1Stats.potions + p2Stats.potions,
+    mentored: p1Stats.mentored + p2Stats.mentored,
+    coffee: p1Stats.coffee + p2Stats.coffee,
+  };
+}
+
 // Two-player mode
 let twoPlayerMode = false;
 let player2 = null;
 let player2Appearance = randomAppearance();
+let swappedControls = false; // Tab swaps which player P1/P2 keys control
 
 // Grad students (mentorable NPCs)
 let gradStudents = [];
@@ -3796,6 +3913,7 @@ let magicCasterX = 0;
 let magicCasterY = 0;
 let magicColumns = [];     // fire column positions
 let magicDamageDealt = false;
+let magicCasterPlayer = null;
 let screenShake = { x: 0, y: 0 };
 
 let levelTimer = 0;
@@ -4076,6 +4194,9 @@ function update() {
     if (justPressed['Escape'] || justPressed['Space']) {
       gameState = 'playing';
     }
+    if (justPressed['KeyX']) {
+      gameState = 'menu';
+    }
     for (const key in justPressed) delete justPressed[key];
     return;
   }
@@ -4093,7 +4214,8 @@ function update() {
 
   if (gameState === 'dead') {
     deathTimer--;
-    if (stats.lives > 0) {
+    const deathLives = twoPlayerMode ? p1Stats.lives + p2Stats.lives : stats.lives;
+    if (deathLives > 0) {
       // Auto-dismiss after timer for setbacks
       if (deathTimer <= 0) {
         initLevel(currentLevel);
@@ -4297,7 +4419,7 @@ function update() {
       const dir = pl.facingRight ? 1 : -1;
       fireballs.push({
         x: pl.x + (dir > 0 ? pl.w : -8), y: pl.y + pl.h / 2 - 4,
-        vx: dir * 7, vy: 0, w: 12, h: 12, life: 120, bounces: 0
+        vx: dir * 7, vy: 0, w: 12, h: 12, life: 120, bounces: 0, owner: pl
       });
       spawnParticles(pl.x + pl.w / 2, pl.y + pl.h / 2, '#ff5722', 4);
     }
@@ -4307,14 +4429,15 @@ function update() {
       const dir = pl.facingRight ? 1 : -1;
       fireballs.push({
         x: mentoringGS.x + (dir > 0 ? mentoringGS.w : -6), y: mentoringGS.y + 8,
-        vx: dir * 8, vy: -1.5, w: 10, h: 4, life: 90, bounces: 0, isPencil: true
+        vx: dir * 8, vy: -1.5, w: 10, h: 4, life: 90, bounces: 0, isPencil: true, owner: pl
       });
       spawnParticles(mentoringGS.x + mentoringGS.w / 2, mentoringGS.y + 10, '#ffd54f', 3);
     }
     // Mentor's Wrath magic (Golden Axe style — uses ALL stacked potions)
-    if (isActionJP(prefix + '_potion') && stats.potions > 0 && !magicActive) {
-      const potionsUsed = stats.potions;
-      stats.potions = 0;
+    const plSt = twoPlayerMode ? statsFor(pl) : stats;
+    if (isActionJP(prefix + '_potion') && plSt.potions > 0 && !magicActive) {
+      const potionsUsed = plSt.potions;
+      plSt.potions = 0;
       magicLevel = Math.min(potionsUsed, 4); // 1-4 levels
       magicActive = true;
       magicDuration = 60 + magicLevel * 40; // longer for higher level
@@ -4322,7 +4445,8 @@ function update() {
       magicDamageDealt = false;
       magicCasterX = pl.x + pl.w / 2;
       magicCasterY = pl.y;
-      stats.score += potionsUsed * 100;
+      magicCasterPlayer = pl;
+      plSt.score += potionsUsed * 100;
       // Generate fire column positions across the screen
       magicColumns = [];
       const colCount = 3 + magicLevel * 3; // 6, 9, 12, 15 columns
@@ -4394,9 +4518,17 @@ function update() {
     }
   }
 
-  updatePlayer(player, 'p1');
+  // Tab to swap controls between players
+  if (twoPlayerMode && justPressed['Tab']) {
+    swappedControls = !swappedControls;
+    showMessage(swappedControls ? 'Controls swapped! P1 keys -> P2, P2 keys -> P1' : 'Controls restored to default');
+  }
+
+  const p1Prefix = swappedControls ? 'p2' : 'p1';
+  const p2Prefix = swappedControls ? 'p1' : 'p2';
+  updatePlayer(player, p1Prefix);
   if (gameState !== 'playing') { for (const key in justPressed) delete justPressed[key]; return; }
-  updatePlayer(player2, 'p2');
+  updatePlayer(player2, p2Prefix);
   if (gameState !== 'playing') { for (const key in justPressed) delete justPressed[key]; return; }
 
   // Respawn dead players in co-op
@@ -4491,6 +4623,7 @@ function update() {
 
     // Head butt: only when player activates headbutt mode (jump+arrow)
     if (gs.mentee && gs.mentee.headbutting && Math.abs(gs.vx) > 1.5) {
+      const hbSt = twoPlayerMode ? statsFor(gs.mentee) : stats;
       for (const e of enemies) {
         if (!e.alive) continue;
         if (rectCollide(gs, e)) {
@@ -4500,7 +4633,7 @@ function update() {
             spawnFloatingText(e.x, e.y, 'HEAD BUTT!', '#ff9800');
             if (e.hp <= 0) {
               e.alive = false;
-              stats.score += e.type === 'dean' ? 5000 : 500;
+              hbSt.score += e.type === 'dean' ? 5000 : 500;
               spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
               if (e.type === 'dean') {
                 spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
@@ -4513,7 +4646,7 @@ function update() {
             }
           } else {
             e.alive = false;
-            stats.score += 200;
+            hbSt.score += 200;
             spawnFloatingText(e.x, e.y, '+200', '#ff9800');
           }
           // Bounce back slightly after headbutt
@@ -4532,8 +4665,8 @@ function update() {
         pl.vy = 0;
         pl.mentoringTimer = 900; // 15 seconds at 60fps
         pl.headbutting = false;
-        stats.mentored++;
-        spawnFloatingText(gs.x, gs.y - 10, 'Mentoring!', '#66bb6a');
+        (twoPlayerMode ? statsFor(pl) : stats).mentored++;
+        spawnFloatingText(gs.x, gs.y - 10, (twoPlayerMode ? (pl === player2 ? 'P2 ' : 'P1 ') : '') + 'Mentoring!', '#66bb6a');
       }
     }
   }
@@ -4543,48 +4676,52 @@ function update() {
     if (!pl || pl.dead) return false;
     if (!rectCollide(pl, { x: c.x, y: cy, w: c.w, h: c.h })) return false;
     c.collected = true;
+    const st = twoPlayerMode ? statsFor(pl) : stats;
+    const plLabel = twoPlayerMode ? (pl === player2 ? 'P2 ' : 'P1 ') : '';
     switch (c.type) {
       case 'publication':
-        stats.publications++; stats.score += 100;
+        st.publications++; st.score += 100;
         spawnParticles(c.x + 12, cy + 12, '#fff', 8);
-        spawnFloatingText(c.x, cy, '+1 Pub!', '#fff');
-        if (stats.publications % 5 === 0) showMessage('h-index increased!');
-        stats.hIndex = Math.floor(Math.sqrt(stats.publications * 2));
+        spawnFloatingText(c.x, cy, plLabel + '+1 Pub!', '#fff');
+        if (st.publications % 5 === 0) showMessage(plLabel + 'h-index increased!');
+        st.hIndex = Math.floor(Math.sqrt(st.publications * 2));
         break;
       case 'grant':
-        stats.grants++; stats.score += 500;
+        st.grants++; st.score += 500;
         spawnParticles(c.x + 12, cy + 12, '#ffd54f', 12);
-        spawnFloatingText(c.x, cy, '$$$!', '#ffd54f');
-        showMessage(["NSF Grant funded!", "NIH R01 approved!", "Internal seed grant!", "Industry partnership!"][Math.floor(Math.random() * 4)]);
+        spawnFloatingText(c.x, cy, plLabel + '$$$!', '#ffd54f');
+        showMessage(plLabel + ["NSF Grant funded!", "NIH R01 approved!", "Internal seed grant!", "Industry partnership!"][Math.floor(Math.random() * 4)]);
         break;
       case 'citation':
-        stats.citations++; stats.score += 50;
+        st.citations++; st.score += 50;
         spawnParticles(c.x + 12, cy + 12, '#4fc3f7', 6);
-        spawnFloatingText(c.x, cy, 'Cited!', '#4fc3f7');
+        spawnFloatingText(c.x, cy, plLabel + 'Cited!', '#4fc3f7');
         break;
       case 'coffee':
-        stats.coffee++; pl.powered = true; pl.powerTimer = 300; stats.score += 200;
+        st.coffee++; pl.powered = true; pl.powerTimer = 300; st.score += 200;
         spawnParticles(c.x + 12, cy + 12, '#8d6e63', 15);
-        spawnFloatingText(c.x, cy, 'CAFFEINE!', '#ff6f00');
-        showMessage('Coffee power! Speed boost!');
+        spawnFloatingText(c.x, cy, plLabel + 'CAFFEINE!', '#ff6f00');
+        showMessage(plLabel + 'Coffee power! Speed boost!');
         break;
       case 'heart':
-        stats.lives++; stats.score += 300;
+        st.lives++; st.score += 300;
         spawnParticles(c.x + 12, cy + 12, '#ef5350', 15);
-        spawnFloatingText(c.x, cy, '+1 UP!', '#ef5350');
-        showMessage('Extra life! Your CV impressed someone!');
+        spawnFloatingText(c.x, cy, plLabel + '+1 UP!', '#ef5350');
+        showMessage(plLabel + 'Extra life!');
         break;
       case 'flame':
-        pl.hasFlame = true; pl.flameTimer = 900; stats.score += 250;
+        pl.hasFlame = true; pl.flameTimer = 900; st.score += 250;
         spawnParticles(c.x + 12, cy + 12, '#ff5722', 20);
-        spawnFloatingText(c.x, cy, 'NEW CONTRIBUTION!', '#ff5722');
-        showMessage('New Contribution Flame! Press F to throw fireballs!');
+        spawnFloatingText(c.x, cy, plLabel + 'FLAME!', '#ff5722');
+        const fireKey = pl === player2 ? keyBindings.p2_fire[0] : keyBindings.p1_fire[0];
+        showMessage(`${plLabel}New Contribution Flame! Press ${keyName(fireKey)} to throw fireballs!`);
         break;
       case 'potion':
-        stats.potions++; stats.score += 150;
+        st.potions++; st.score += 150;
         spawnParticles(c.x + 12, cy + 12, '#9c27b0', 12);
-        spawnFloatingText(c.x, cy, '+1 Potion!', '#ce93d8');
-        showMessage("Mentor's Wrath potion! Stack more for stronger magic! [Q]");
+        spawnFloatingText(c.x, cy, plLabel + '+1 Potion!', '#ce93d8');
+        const potKey = pl === player2 ? keyBindings.p2_potion[0] : keyBindings.p1_potion[0];
+        showMessage(`${plLabel}Mentor's Wrath potion! [${keyName(potKey)}]`);
         break;
     }
     return true;
@@ -4691,6 +4828,7 @@ function update() {
     for (const pl of [player, player2]) {
       if (!pl || pl.dead || pl.invincible) continue;
       if (!rectCollide(pl, e)) continue;
+      const plSt2 = twoPlayerMode ? statsFor(pl) : stats;
       if (pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
         pl.vy = -8;
         if (e.hp !== undefined) {
@@ -4700,7 +4838,7 @@ function update() {
           spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
           if (e.hp <= 0) {
             e.alive = false;
-            stats.score += e.type === 'dean' ? 5000 : 500;
+            plSt2.score += e.type === 'dean' ? 5000 : 500;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
             if (e.type === 'dean') {
               spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
@@ -4723,7 +4861,7 @@ function update() {
           }
         } else {
           e.alive = false;
-          stats.score += 200;
+          plSt2.score += 200;
           spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffa726', 10);
           const defeatMsgs = {
             'reviewer2': 'Reviewer 2 defeated! Major revisions avoided!',
@@ -4789,6 +4927,7 @@ function update() {
     const damageMoment = Math.floor(magicDuration * 0.4);
     if (magicTimer >= damageMoment && !magicDamageDealt) {
       magicDamageDealt = true;
+      const magicSt = twoPlayerMode && magicCasterPlayer ? statsFor(magicCasterPlayer) : stats;
       const dmg = magicLevel * 2; // 2, 4, 6, 8 damage
       for (const e of enemies) {
         if (!e.alive) continue;
@@ -4800,7 +4939,7 @@ function update() {
             spawnFloatingText(e.x, e.y, `-${dmg} HP`, '#ff5722');
             if (e.hp <= 0) {
               e.alive = false;
-              stats.score += e.type === 'dean' ? 5000 : 500;
+              magicSt.score += e.type === 'dean' ? 5000 : 500;
               spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 25);
               if (e.type === 'dean') {
                 spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
@@ -4811,7 +4950,7 @@ function update() {
             }
           } else {
             e.alive = false;
-            stats.score += 200;
+            magicSt.score += 200;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 15);
             spawnFloatingText(e.x, e.y, 'BURNED!', '#ff5722');
           }
@@ -4859,6 +4998,7 @@ function update() {
       spawnParticles(fb.x, fb.y, '#ff5722', 6);
     }
 
+    const fbSt = twoPlayerMode && fb.owner ? statsFor(fb.owner) : stats;
     for (const e of enemies) {
       if (!e.alive) continue;
       if (rectCollide(fb, e)) {
@@ -4869,7 +5009,7 @@ function update() {
           spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
           if (e.hp <= 0) {
             e.alive = false;
-            stats.score += e.type === 'dean' ? 5000 : 500;
+            fbSt.score += e.type === 'dean' ? 5000 : 500;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
             if (e.type === 'dean') {
               spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
@@ -4882,7 +5022,7 @@ function update() {
           }
         } else {
           e.alive = false;
-          stats.score += 200;
+          fbSt.score += 200;
           spawnFloatingText(e.x, e.y, '+200', '#ff5722');
         }
       }
@@ -4898,7 +5038,7 @@ function update() {
       if (!pl || pl.dead) continue;
       if (rectCollide(pl, flagObj)) {
         flagObj.reached = true;
-        stats.score += 1000;
+        (twoPlayerMode ? statsFor(pl) : stats).score += 1000;
         spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
         if (currentLevel === 2) {
           gameState = 'jobMarketCheck';
@@ -4951,16 +5091,21 @@ function update() {
 
 function playerDie(msg) {
   player.dead = true;
-  stats.lives--;
+  const st = twoPlayerMode ? p1Stats : stats;
+  st.lives--;
   showMessage(msg || 'Career over!');
   spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 20);
-  if (stats.lives <= 0) {
-    gameState = 'dead';
-    deathTimer = 120;
-    submitScore();
-    fetchLeaderboard();
+  if (st.lives <= 0) {
+    if (twoPlayerMode && player2 && !player2.dead && p2Stats.lives > 0) {
+      // P1 is out but P2 still playing
+      showMessage('P1 is out of lives!');
+    } else {
+      gameState = 'dead';
+      deathTimer = 120;
+      submitScore();
+      fetchLeaderboard();
+    }
   } else if (twoPlayerMode && player2 && !player2.dead) {
-    // P2 still alive — P1 respawns after delay
     player.respawnTimer = 180;
   } else {
     gameState = 'dead';
@@ -4970,14 +5115,19 @@ function playerDie(msg) {
 
 function p2Die(msg) {
   player2.dead = true;
-  stats.lives--;
+  p2Stats.lives--;
   showMessage(msg);
   spawnParticles(player2.x + player2.w / 2, player2.y + player2.h / 2, '#ef5350', 20);
-  if (stats.lives <= 0) {
-    gameState = 'dead';
-    deathTimer = 120;
-    submitScore();
-    fetchLeaderboard();
+  if (p2Stats.lives <= 0) {
+    if (!player.dead && (twoPlayerMode ? p1Stats : stats).lives > 0) {
+      // P2 is out but P1 still playing
+      showMessage('P2 is out of lives!');
+    } else {
+      gameState = 'dead';
+      deathTimer = 120;
+      submitScore();
+      fetchLeaderboard();
+    }
   } else if (!player.dead) {
     player2.respawnTimer = 180;
   } else {
@@ -5442,8 +5592,8 @@ function drawMenu() {
     // Controls
     ctx.fillStyle = '#78909c';
     ctx.font = '11px monospace';
-    ctx.fillText("Arrow Keys / WASD: Move | Space: Jump (x2!) | Q: Mentor's Wrath", GAME_W / 2, 305);
-    ctx.fillText('F: Fireball | Jump on enemies | Mentor grad students', GAME_W / 2, 323);
+    ctx.fillText("P1: Arrows+Space | .: Fire | ,: Wrath", GAME_W / 2, 305);
+    ctx.fillText('P2: WASD | E: Fire | Q: Wrath | Jump on enemies!', GAME_W / 2, 323);
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 11px monospace';
     ctx.fillText('C: Customize | K: Key Config | 2: Two Players', GAME_W / 2, 346);
@@ -5451,7 +5601,7 @@ function drawMenu() {
     // Two-player status
     ctx.fillStyle = twoPlayerMode ? '#66bb6a' : '#546e7a';
     ctx.font = '10px monospace';
-    ctx.fillText(`Two Players: ${twoPlayerMode ? 'ON (P2: IJKL+U+H)' : 'OFF'}`, GAME_W / 2, 362);
+    ctx.fillText(`Two Players: ${twoPlayerMode ? 'ON (P2: WASD+E+Q | TAB: swap controls)' : 'OFF'}`, GAME_W / 2, 362);
 
     // Show P2 character preview if enabled
     if (twoPlayerMode) {
@@ -5823,8 +5973,14 @@ function drawPauseScreen() {
   // Stats summary
   ctx.fillStyle = '#78909c';
   ctx.font = '10px monospace';
-  ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 75);
-  ctx.fillText(`Wrath Potions: ${stats.potions} | Lives: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 95);
+  if (twoPlayerMode) {
+    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | M ${p1Stats.mentored} | Score ${p1Stats.score} | Lives ${p1Stats.lives}`, GAME_W / 2, GAME_H / 2 + 70);
+    ctx.fillStyle = '#42a5f5';
+    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | M ${p2Stats.mentored} | Score ${p2Stats.score} | Lives ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 88);
+  } else {
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 75);
+    ctx.fillText(`Wrath Potions: ${stats.potions} | Lives: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 95);
+  }
 
   const blink = Math.sin(Date.now() * 0.005) > 0;
   if (blink) {
@@ -5832,6 +5988,9 @@ function drawPauseScreen() {
     ctx.font = 'bold 13px monospace';
     ctx.fillText('Press ESC or SPACE to resume', GAME_W / 2, GAME_H / 2 + 130);
   }
+  ctx.fillStyle = '#ef5350';
+  ctx.font = '11px monospace';
+  ctx.fillText('Press X to quit to menu', GAME_W / 2, GAME_H / 2 + 155);
 
   ctx.textAlign = 'left';
 }
@@ -5902,7 +6061,8 @@ function drawLevelIntro() {
     ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | ${t.mentored} mentored | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
     ctx.fillStyle = '#78909c';
     ctx.font = '9px monospace';
-    ctx.fillText(`You have: ${stats.publications} pubs, ${stats.grants} grants, ${stats.citations} cites, h=${stats.hIndex}, ${stats.mentored} mentored`, GAME_W / 2, GAME_H / 2 + 75);
+    const liSt = twoPlayerMode ? combinedStats() : stats;
+    ctx.fillText(`You have: ${liSt.publications} pubs, ${liSt.grants} grants, ${liSt.citations} cites, h=${liSt.hIndex}, ${liSt.mentored} mentored`, GAME_W / 2, GAME_H / 2 + 75);
     if (postdocCount > 0) {
       ctx.fillStyle = '#ffa726';
       ctx.fillText(`Postdoc attempt #${postdocCount + 1}`, GAME_W / 2, GAME_H / 2 + 92);
@@ -5921,8 +6081,10 @@ function drawLevelIntro() {
 
 function drawDeathScreen() {
   const progress = 1 - deathTimer / 120;
+  const ds = twoPlayerMode ? combinedStats() : stats;
+  const dsLives = twoPlayerMode ? p1Stats.lives + p2Stats.lives : stats.lives;
 
-  if (stats.lives > 0) {
+  if (dsLives > 0) {
     // Just a setback — brief overlay
     ctx.fillStyle = `rgba(120, 10, 20, ${0.5 + progress * 0.2})`;
     ctx.fillRect(0, 0, GAME_W, GAME_H);
@@ -5933,7 +6095,11 @@ function drawDeathScreen() {
     ctx.fillText('CAREER SETBACK!', GAME_W / 2, GAME_H / 2 - 20);
     ctx.fillStyle = '#ffd54f';
     ctx.font = '13px monospace';
-    ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
+    if (twoPlayerMode) {
+      ctx.fillText(`P1 Lives: ${p1Stats.lives} | P2 Lives: ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
+    } else {
+      ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
+    }
     ctx.textAlign = 'left';
   } else {
     // Game over — full screen with leaderboard
@@ -5951,7 +6117,15 @@ function drawDeathScreen() {
 
     ctx.fillStyle = '#b0bec5';
     ctx.font = '11px monospace';
-    ctx.fillText(`Score: ${stats.score} | Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored}`, GAME_W / 2, 108);
+    if (twoPlayerMode) {
+      ctx.fillText(`P1: Score ${p1Stats.score} | Pubs ${p1Stats.publications} | Grants ${p1Stats.grants} | h=${p1Stats.hIndex}`, GAME_W / 2, 100);
+      ctx.fillStyle = '#42a5f5';
+      ctx.fillText(`P2: Score ${p2Stats.score} | Pubs ${p2Stats.publications} | Grants ${p2Stats.grants} | h=${p2Stats.hIndex}`, GAME_W / 2, 118);
+      ctx.fillStyle = '#ffa726';
+      ctx.fillText(`Combined Score: ${ds.score}`, GAME_W / 2, 136);
+    } else {
+      ctx.fillText(`Score: ${stats.score} | Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored}`, GAME_W / 2, 108);
+    }
     if (leaderboardRank) {
       ctx.fillStyle = '#ffd54f';
       ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W / 2, 128);
@@ -6000,7 +6174,13 @@ function drawLevelComplete() {
 
   ctx.fillStyle = '#b0bec5';
   ctx.font = '11px monospace';
-  ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
+  if (twoPlayerMode) {
+    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | Score ${p1Stats.score}`, GAME_W / 2, GAME_H / 2 + 35);
+    ctx.fillStyle = '#42a5f5';
+    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | Score ${p2Stats.score}`, GAME_W / 2, GAME_H / 2 + 53);
+  } else {
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
+  }
   ctx.textAlign = 'left';
 }
 
@@ -6109,11 +6289,21 @@ function drawWinScreen() {
   ctx.fillText('FINAL STATS', GAME_W / 4, 280);
   ctx.fillStyle = '#fff';
   ctx.font = '10px monospace';
-  ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  Mentored: ${stats.mentored}`, GAME_W / 4, 298);
-  ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
-  ctx.fillStyle = '#ffa726';
-  ctx.font = 'bold 12px monospace';
-  ctx.fillText(`Score: ${stats.score}`, GAME_W / 4, 332);
+  if (twoPlayerMode) {
+    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | M ${p1Stats.mentored} | C ${p1Stats.citations} | h=${p1Stats.hIndex}`, GAME_W / 4, 296);
+    ctx.fillStyle = '#42a5f5';
+    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | M ${p2Stats.mentored} | C ${p2Stats.citations} | h=${p2Stats.hIndex}`, GAME_W / 4, 312);
+    const cs = combinedStats();
+    ctx.fillStyle = '#ffa726';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`P1 Score: ${p1Stats.score}  |  P2 Score: ${p2Stats.score}  |  Total: ${cs.score}`, GAME_W / 4, 332);
+  } else {
+    ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  Mentored: ${stats.mentored}`, GAME_W / 4, 298);
+    ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
+    ctx.fillStyle = '#ffa726';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`Score: ${stats.score}`, GAME_W / 4, 332);
+  }
 
   // Right column: leaderboard
   if (leaderboardData.length > 0) {
@@ -6172,16 +6362,17 @@ async function fetchRank(score) {
 
 async function submitScore() {
   try {
+    const st = twoPlayerMode ? combinedStats() : stats;
     const res = await fetch(LEADERBOARD_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: playerName || 'Anonymous',
-        score: stats.score,
-        publications: stats.publications,
-        grants: stats.grants,
-        citations: stats.citations,
-        hIndex: stats.hIndex,
+        score: st.score,
+        publications: st.publications,
+        grants: st.grants,
+        citations: st.citations,
+        hIndex: st.hIndex,
       }),
     });
     const data = await res.json();
@@ -6193,16 +6384,17 @@ async function submitScore() {
 
 async function checkJobMarket() {
   const t = JOB_MARKET_THRESHOLDS;
+  const st = twoPlayerMode ? combinedStats() : stats;
   const failReasons = [];
 
-  if (stats.publications < t.publications) failReasons.push(`Pubs: ${stats.publications}/${t.publications}`);
-  if (stats.grants < t.grants) failReasons.push(`Grants: ${stats.grants}/${t.grants}`);
-  if (stats.citations < t.citations) failReasons.push(`Cites: ${stats.citations}/${t.citations}`);
-  if (stats.hIndex < t.hIndex) failReasons.push(`h-index: ${stats.hIndex}/${t.hIndex}`);
-  if (stats.mentored < t.mentored) failReasons.push(`Mentored: ${stats.mentored}/${t.mentored}`);
+  if (st.publications < t.publications) failReasons.push(`Pubs: ${st.publications}/${t.publications}`);
+  if (st.grants < t.grants) failReasons.push(`Grants: ${st.grants}/${t.grants}`);
+  if (st.citations < t.citations) failReasons.push(`Cites: ${st.citations}/${t.citations}`);
+  if (st.hIndex < t.hIndex) failReasons.push(`h-index: ${st.hIndex}/${t.hIndex}`);
+  if (st.mentored < t.mentored) failReasons.push(`Mentored: ${st.mentored}/${t.mentored}`);
 
   // Check leaderboard rank
-  const rank = await fetchRank(stats.score);
+  const rank = await fetchRank(st.score);
   leaderboardRank = rank;
   if (rank > t.leaderboardRank) failReasons.push(`Rank: #${rank} (need top ${t.leaderboardRank})`);
 
@@ -6317,9 +6509,10 @@ function drawJobMarketResult() {
     ctx.font = '14px monospace';
     ctx.fillText('The search committee was impressed!', GAME_W / 2, 160);
 
+    const jmSt = twoPlayerMode ? combinedStats() : stats;
     ctx.fillStyle = '#ffd54f';
     ctx.font = '12px monospace';
-    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | Cites: ${stats.citations} | h=${stats.hIndex} | Mentored: ${stats.mentored}`, GAME_W / 2, 200);
+    ctx.fillText(`Pubs: ${jmSt.publications} | Grants: ${jmSt.grants} | Cites: ${jmSt.citations} | h=${jmSt.hIndex} | Mentored: ${jmSt.mentored}`, GAME_W / 2, 200);
     if (leaderboardRank) {
       ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 225);
     }
@@ -6507,9 +6700,12 @@ function drawMiniLeaderboard(startX, startY, maxRows) {
 }
 
 function startGame() {
-  stats = { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0, potions: 0, mentored: 0 };
+  p1Stats = newStats();
+  p2Stats = newStats();
+  stats = p1Stats;
   postdocCount = 0;
   jobMarketPassed = null;
+  swappedControls = false;
   // playerAppearance is already set by customization or random default
 
   // Start name input
