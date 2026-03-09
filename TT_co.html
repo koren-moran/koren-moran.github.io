@@ -63,40 +63,6 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { keys[e.code] = false; e.preventDefault(); });
 
 // ============================================================
-// KEY BINDINGS
-// ============================================================
-let keyBindings = {
-  p1_left:  ['ArrowLeft'],
-  p1_right: ['ArrowRight'],
-  p1_jump:  ['ArrowUp', 'Space'],
-  p1_fire:  ['Period'],
-  p1_potion:['Comma'],
-  p2_left:  ['KeyA'],
-  p2_right: ['KeyD'],
-  p2_jump:  ['KeyW'],
-  p2_fire:  ['KeyE'],
-  p2_potion:['KeyQ'],
-};
-const BINDABLE_ACTIONS = ['p1_left','p1_right','p1_jump','p1_fire','p1_potion','p2_left','p2_right','p2_jump','p2_fire','p2_potion'];
-const ACTION_LABELS = {
-  p1_left:'P1 Left', p1_right:'P1 Right', p1_jump:'P1 Jump', p1_fire:'P1 Fire', p1_potion:'P1 Potion',
-  p2_left:'P2 Left', p2_right:'P2 Right', p2_jump:'P2 Jump', p2_fire:'P2 Fire', p2_potion:'P2 Potion',
-};
-function isAction(action) { return keyBindings[action] && keyBindings[action].some(k => keys[k]); }
-function isActionJP(action) { return keyBindings[action] && keyBindings[action].some(k => justPressed[k]); }
-function keyName(code) {
-  if (code.startsWith('Key')) return code.slice(3);
-  if (code.startsWith('Arrow')) return code.slice(5);
-  if (code === 'Space') return 'Space';
-  return code;
-}
-
-// Key config state
-let keyConfigActive = false;
-let keyConfigIndex = 0;
-let keyConfigWaiting = false; // waiting for new key press
-
-// ============================================================
 // DRAWING HELPERS
 // ============================================================
 function drawRoundRect(x, y, w, h, r) {
@@ -338,33 +304,13 @@ const JACKET_COLORS = [
 
 const TIE_COLORS = ['#ef5350', '#42a5f5', '#ffd54f', '#66bb6a', '#ab47bc', '#ff7043', '#26c6da'];
 
-const HOODIE_COLORS = [
-  { main: '#66bb6a', dark: '#388e3c' },  // green (original)
-  { main: '#42a5f5', dark: '#1565c0' },  // blue
-  { main: '#ab47bc', dark: '#7b1fa2' },  // purple
-  { main: '#ef5350', dark: '#c62828' },  // red
-  { main: '#ffa726', dark: '#e65100' },  // orange
-  { main: '#26c6da', dark: '#00838f' },  // teal
-  { main: '#ec407a', dark: '#ad1457' },  // pink
-  { main: '#78909c', dark: '#37474f' },  // gray
-  { main: '#ffee58', dark: '#f9a825' },  // yellow
-];
-
-const GLASSES_STYLES = ['none', 'round', 'rectangular', 'cat-eye'];
-const ACCESSORY_STYLES = ['none', 'earrings', 'necklace', 'scarf', 'bowtie'];
-
 function randomAppearance() {
-  const gender = Math.random() < 0.5 ? 'masc' : 'fem';
   return {
-    gender,
     skin: SKIN_TONES[Math.floor(Math.random() * SKIN_TONES.length)],
     hair: HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)],
     hairStyle: HAIR_STYLES[Math.floor(Math.random() * HAIR_STYLES.length)],
     jacket: JACKET_COLORS[Math.floor(Math.random() * JACKET_COLORS.length)],
     tie: TIE_COLORS[Math.floor(Math.random() * TIE_COLORS.length)],
-    hoodie: HOODIE_COLORS[Math.floor(Math.random() * HOODIE_COLORS.length)],
-    glasses: GLASSES_STYLES[Math.floor(Math.random() * GLASSES_STYLES.length)],
-    accessory: ACCESSORY_STYLES[Math.floor(Math.random() * ACCESSORY_STYLES.length)],
   };
 }
 
@@ -401,69 +347,67 @@ randomizeCustomIndices();
 
 function drawHairStyle(style, color, x, headY, w) {
   ctx.fillStyle = color;
-  // Hair is drawn behind the head — must extend above/beyond head bounds to be visible
   switch (style) {
     case 'messy':
-      drawRoundRect(x - 1, headY - 5, w + 2, 10, 5);
+      drawRoundRect(x + 1, headY - 3, w - 2, 8, 5);
       ctx.fill();
-      // Tufts sticking up
-      ctx.fillRect(x + 1, headY - 8, 4, 5);
-      ctx.fillRect(x + w / 2 - 2, headY - 9, 4, 6);
-      ctx.fillRect(x + w - 5, headY - 7, 4, 4);
+      ctx.fillRect(x + 2, headY - 5, 3, 4);
+      ctx.fillRect(x + w / 2 - 1, headY - 6, 3, 5);
+      ctx.fillRect(x + w - 6, headY - 4, 3, 3);
       break;
     case 'short':
-      drawRoundRect(x, headY - 4, w, 8, 5);
+      drawRoundRect(x + 2, headY - 1, w - 4, 6, 4);
       ctx.fill();
       break;
     case 'long':
-      drawRoundRect(x - 2, headY - 5, w + 4, 10, 5);
+      drawRoundRect(x, headY - 3, w, 8, 5);
       ctx.fill();
-      // Side hair flowing down past head
-      drawRoundRect(x - 3, headY + 2, 5, 16, 3);
+      // Side hair flowing down
+      drawRoundRect(x - 1, headY + 3, 4, 12, 2);
       ctx.fill();
-      drawRoundRect(x + w - 2, headY + 2, 5, 16, 3);
+      drawRoundRect(x + w - 3, headY + 3, 4, 12, 2);
       ctx.fill();
       break;
     case 'curly':
-      // Poofy round curls extending above and to sides
+      // Poofy round curls
       for (let i = 0; i < 5; i++) {
-        drawCircle(x + 2 + i * ((w - 4) / 4), headY - 3, 5);
+        drawCircle(x + 3 + i * ((w - 6) / 4), headY - 1, 4);
         ctx.fill();
       }
-      drawCircle(x - 1, headY + 4, 4);
+      drawCircle(x + 1, headY + 3, 3);
       ctx.fill();
-      drawCircle(x + w + 1, headY + 4, 4);
+      drawCircle(x + w - 1, headY + 3, 3);
       ctx.fill();
       break;
     case 'bun':
-      drawRoundRect(x, headY - 4, w, 7, 4);
+      drawRoundRect(x + 2, headY - 1, w - 4, 5, 3);
       ctx.fill();
-      // Top bun — sits well above head
-      drawCircle(x + w / 2, headY - 8, 6);
+      // Top bun
+      drawCircle(x + w / 2, headY - 5, 5);
       ctx.fill();
       break;
     case 'mohawk':
-      drawRoundRect(x + 1, headY - 3, w - 2, 6, 3);
+      drawRoundRect(x + 2, headY - 1, w - 4, 5, 3);
       ctx.fill();
       // Tall center spike
       ctx.beginPath();
-      ctx.moveTo(x + w / 2 - 4, headY - 2);
-      ctx.lineTo(x + w / 2, headY - 14);
-      ctx.lineTo(x + w / 2 + 4, headY - 2);
+      ctx.moveTo(x + w / 2 - 3, headY - 1);
+      ctx.lineTo(x + w / 2, headY - 10);
+      ctx.lineTo(x + w / 2 + 3, headY - 1);
       ctx.fill();
       break;
     case 'bob':
-      drawRoundRect(x - 2, headY - 4, w + 4, 9, 5);
+      drawRoundRect(x, headY - 2, w, 7, 5);
       ctx.fill();
-      // Neat sides extending past head
-      drawRoundRect(x - 3, headY + 2, 6, 12, 3);
+      // Neat sides
+      drawRoundRect(x - 1, headY + 3, 5, 8, 3);
       ctx.fill();
-      drawRoundRect(x + w - 3, headY + 2, 6, 12, 3);
+      drawRoundRect(x + w - 4, headY + 3, 5, 8, 3);
       ctx.fill();
       break;
     case 'afro':
-      // Big round afro — extends well beyond head
-      drawCircle(x + w / 2, headY + 2, w / 2 + 5);
+      // Big round afro
+      drawCircle(x + w / 2, headY + 2, w / 2 + 3);
       ctx.fill();
       break;
   }
@@ -586,10 +530,6 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
 
   // Head (big, cute, round) with contour
   const headY = drawY - 2;
-
-  // Hair (drawn behind head)
-  drawHairStyle(app.hairStyle, app.hair, x, headY, w);
-
   // Head outline
   ctx.fillStyle = darkenColor(app.skin.shadow, 60);
   drawRoundRect(x + 1, headY - 1, w - 2, 20, 9);
@@ -626,6 +566,9 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
     ctx.lineTo(x + w - 5.5 + bl * 1.8, headY + 12);
     ctx.stroke();
   }
+
+  // Hair
+  drawHairStyle(app.hairStyle, app.hair, x, headY, w);
 
   // Anime-style big eyes
   const eyeL = x + 7;
@@ -684,10 +627,9 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
       ctx.fill();
     }
 
-    // Upper eyelash lines — thicker/longer for fem
+    // Thin upper eyelash lines (manga style)
     ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = app.gender === 'fem' ? 1.8 : 1.2;
-    ctx.lineCap = 'round';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(eyeL - 1.5, eyeY - 2);
     ctx.quadraticCurveTo(eyeL + 2, eyeY - 3.5, eyeL + 5.5, eyeY - 1.5);
@@ -696,73 +638,19 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
     ctx.moveTo(eyeR - 1.5, eyeY - 1.5);
     ctx.quadraticCurveTo(eyeR + 2, eyeY - 3.5, eyeR + 5.5, eyeY - 2);
     ctx.stroke();
-    // Fem: extra lash flicks
-    if (app.gender === 'fem') {
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(eyeL + 5.5, eyeY - 1.5);
-      ctx.lineTo(eyeL + 7, eyeY - 3);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(eyeR + 5.5, eyeY - 2);
-      ctx.lineTo(eyeR + 7, eyeY - 3.5);
-      ctx.stroke();
-    }
-    ctx.lineCap = 'butt';
   }
 
-  // Glasses (based on appearance)
-  if (app.glasses && app.glasses !== 'none') {
-    if (app.glasses === 'cat-eye') {
-      ctx.strokeStyle = '#880e4f';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(x + 4, headY + 10);
-      ctx.lineTo(x + 4, headY + 5);
-      ctx.lineTo(x + 13, headY + 4);
-      ctx.lineTo(x + 13, headY + 10);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x + w - 13, headY + 10);
-      ctx.lineTo(x + w - 13, headY + 5);
-      ctx.lineTo(x + w - 4, headY + 4);
-      ctx.lineTo(x + w - 4, headY + 10);
-      ctx.closePath();
-      ctx.stroke();
-    } else if (app.glasses === 'round') {
-      ctx.strokeStyle = 'rgba(55,71,79,0.7)';
-      ctx.lineWidth = 1;
-      drawCircle(x + 8.5, headY + 7.5, 5);
-      ctx.stroke();
-      drawCircle(x + w - 8.5, headY + 7.5, 5);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x + 13, headY + 7);
-      ctx.lineTo(x + w - 13, headY + 7);
-      ctx.stroke();
-    } else {
-      ctx.strokeStyle = 'rgba(55,71,79,0.6)';
-      ctx.lineWidth = 1;
-      drawRoundRect(x + 4, headY + 4, 9, 7, 3);
-      ctx.stroke();
-      drawRoundRect(x + w - 13, headY + 4, 9, 7, 3);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x + 13, headY + 7);
-      ctx.lineTo(x + w - 13, headY + 7);
-      ctx.stroke();
-    }
-  }
-
-  // Fem: earrings
-  if (app.gender === 'fem' && app.accessory === 'earrings') {
-    ctx.fillStyle = '#ffd54f';
-    drawCircle(x + 1, headY + 12, 1.5);
-    ctx.fill();
-    drawCircle(x + w - 1, headY + 12, 1.5);
-    ctx.fill();
-  }
+  // Glasses (thinner, more stylish)
+  ctx.strokeStyle = 'rgba(55,71,79,0.6)';
+  ctx.lineWidth = 1;
+  drawRoundRect(x + 4, headY + 4, 9, 7, 3);
+  ctx.stroke();
+  drawRoundRect(x + w - 13, headY + 4, 9, 7, 3);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x + 13, headY + 7);
+  ctx.lineTo(x + w - 13, headY + 7);
+  ctx.stroke();
 
   // Mouth
   if (isDead) {
@@ -776,21 +664,13 @@ function drawPlayer(x, y, w, h, frame, facingRight, powered, isDead) {
     ctx.stroke();
   } else {
     // Cute cat-mouth (anime :3 style)
-    ctx.strokeStyle = app.gender === 'fem' ? '#c0392b' : '#5d4037';
+    ctx.strokeStyle = '#5d4037';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(x + w / 2 - 3, headY + 13);
     ctx.quadraticCurveTo(x + w / 2 - 1, headY + 15, x + w / 2, headY + 13.5);
     ctx.quadraticCurveTo(x + w / 2 + 1, headY + 15, x + w / 2 + 3, headY + 13);
     ctx.stroke();
-    // Fem: subtle lip color
-    if (app.gender === 'fem') {
-      ctx.fillStyle = 'rgba(192,57,43,0.25)';
-      ctx.beginPath();
-      ctx.moveTo(x + w / 2 - 3, headY + 13);
-      ctx.quadraticCurveTo(x + w / 2, headY + 15.5, x + w / 2 + 3, headY + 13);
-      ctx.fill();
-    }
   }
 
   // Flame aura
@@ -983,10 +863,6 @@ function drawEnemy(e, x, y) {
 
     case 'bureaucrat': {
       const ba = e.appearance || { skin: SKIN_TONES[0], jacket: JACKET_COLORS[0], tie: TIE_COLORS[0], hair: HAIR_COLORS[0], hairStyle: 'short' };
-      // Body contour
-      ctx.fillStyle = darkenColor(ba.jacket.patch, 60);
-      drawRoundRect(x + 1, dy + 7, e.w - 2, e.h - 8, 9);
-      ctx.fill();
       // Cute suit blob
       const grad = ctx.createLinearGradient(x, dy, x, dy + e.h);
       grad.addColorStop(0, ba.jacket.main);
@@ -995,21 +871,17 @@ function drawEnemy(e, x, y) {
       drawRoundRect(x + 2, dy + 8, e.w - 4, e.h - 10, 8);
       ctx.fill();
 
-      // Hair behind head (must extend above head contour)
-      ctx.fillStyle = ba.hair;
-      drawRoundRect(x + e.w / 2 - 10, dy - 7, 20, 8, 5);
-      ctx.fill();
-
-      // Head contour
-      ctx.fillStyle = darkenColor(ba.skin.shadow, 60);
-      drawCircle(x + e.w / 2, dy + 6, 10);
-      ctx.fill();
       // Head
       const headGrad = ctx.createRadialGradient(x + e.w / 2, dy + 6, 2, x + e.w / 2, dy + 6, 10);
       headGrad.addColorStop(0, ba.skin.base);
       headGrad.addColorStop(1, ba.skin.shadow);
       ctx.fillStyle = headGrad;
       drawCircle(x + e.w / 2, dy + 6, 9);
+      ctx.fill();
+
+      // Hair on bureaucrat
+      ctx.fillStyle = ba.hair;
+      drawRoundRect(x + e.w / 2 - 9, dy - 3, 18, 5, 4);
       ctx.fill();
 
       // Tie
@@ -1037,46 +909,15 @@ function drawEnemy(e, x, y) {
         ctx.fillStyle = ba.skin.shadow;
         ctx.fillRect(bex - 4, dy + 1, 8, 3);
       }
-      // Fem: longer eyelashes
-      if (ba.gender === 'fem') {
-        ctx.strokeStyle = '#1a1a2e';
-        ctx.lineWidth = 1.2;
-        ctx.lineCap = 'round';
-        for (const bex of [x + e.w / 2 - 4, x + e.w / 2 + 4]) {
-          ctx.beginPath();
-          ctx.moveTo(bex + 3.5, dy + 3);
-          ctx.lineTo(bex + 5, dy + 1.5);
-          ctx.stroke();
-        }
-        ctx.lineCap = 'butt';
-      }
 
       // Flat annoyed mouth
-      ctx.strokeStyle = ba.gender === 'fem' ? '#c0392b' : '#555';
+      ctx.strokeStyle = '#555';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(x + e.w / 2 - 3, dy + 10);
       ctx.lineTo(x + e.w / 2 + 3, dy + 10.5);
       ctx.stroke();
-      // Fem: lip color
-      if (ba.gender === 'fem') {
-        ctx.fillStyle = 'rgba(192,57,43,0.2)';
-        drawEllipse(x + e.w / 2, dy + 10.5, 3, 1.5);
-        ctx.fill();
-      }
-      // Fem: earrings
-      if (ba.gender === 'fem' && ba.accessory === 'earrings') {
-        ctx.fillStyle = '#ffd54f';
-        drawCircle(x + e.w / 2 - 9, dy + 10, 1.5);
-        ctx.fill();
-        drawCircle(x + e.w / 2 + 9, dy + 10, 1.5);
-        ctx.fill();
-      }
 
-      // Briefcase contour
-      ctx.fillStyle = '#2a1a10';
-      drawRoundRect(x + e.w - 3, dy + e.h - 15, 10, 12, 3);
-      ctx.fill();
       // Briefcase with shine
       ctx.fillStyle = '#5d4037';
       drawRoundRect(x + e.w - 2, dy + e.h - 14, 8, 10, 2);
@@ -1103,22 +944,6 @@ function drawEnemy(e, x, y) {
       ctx.shadowBlur = 0;
 
       ctx.globalAlpha = alpha;
-
-      // Ghost body contour (dark outline)
-      ctx.fillStyle = '#4a148c';
-      ctx.beginPath();
-      ctx.moveTo(x + 2, dy + e.h + 1);
-      ctx.lineTo(x + 2, dy + 7);
-      ctx.quadraticCurveTo(x + e.w / 2, dy - 7, x + e.w - 2, dy + 7);
-      ctx.lineTo(x + e.w - 2, dy + e.h + 1);
-      for (let i = 0; i < 4; i++) {
-        const wx2 = x + 2 + (i + 0.5) * ((e.w - 4) / 4);
-        const wx3 = x + 2 + (i + 1) * ((e.w - 4) / 4);
-        const waveOff = Math.sin(levelTimer * 0.1 + i) * 2;
-        ctx.quadraticCurveTo(wx2, dy + e.h + 7 + waveOff, wx3, dy + e.h + 1);
-      }
-      ctx.closePath();
-      ctx.fill();
 
       const grad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 3, x + e.w / 2, dy + e.h / 2, 20);
       grad.addColorStop(0, '#e1bee7');
@@ -1185,17 +1010,8 @@ function drawEnemy(e, x, y) {
 
     case 'teaching': {
       // Walking stack of books with eyes
-      // Stack contour
-      ctx.fillStyle = '#1a1a2e';
-      drawRoundRect(x + 1, dy + 3, e.w - 2, e.h - 2, 3);
-      ctx.fill();
-
       const bookColors = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc'];
       for (let i = 0; i < 5; i++) {
-        // Book contour
-        ctx.fillStyle = darkenColor(bookColors[i], 80);
-        drawRoundRect(x + 1 + (i % 2), dy + 3 + i * 5, e.w - 2 - (i % 2) * 2, 7, 2);
-        ctx.fill();
         ctx.fillStyle = bookColors[i];
         drawRoundRect(x + 2 + (i % 2), dy + 4 + i * 5, e.w - 4 - (i % 2) * 2, 6, 2);
         ctx.fill();
@@ -1205,11 +1021,6 @@ function drawEnemy(e, x, y) {
       }
 
       // Eyes peeking out from between books
-      ctx.fillStyle = '#1a1a2e';
-      drawCircle(x + 8, dy + 10, 5);
-      ctx.fill();
-      drawCircle(x + e.w - 8, dy + 10, 5);
-      ctx.fill();
       ctx.fillStyle = '#fff';
       drawCircle(x + 8, dy + 10, 4);
       ctx.fill();
@@ -1256,36 +1067,22 @@ function drawEnemy(e, x, y) {
         JACKET_COLORS[Math.floor((e.startX * 4 + 1) % JACKET_COLORS.length)],
         JACKET_COLORS[Math.floor((e.startX * 6 + 3) % JACKET_COLORS.length)],
       ];
-      const committeeGenders = [
-        (e.startX * 13) % 2 < 1 ? 'fem' : 'masc',
-        (e.startX * 17 + 1) % 2 < 1 ? 'fem' : 'masc',
-        (e.startX * 23 + 2) % 2 < 1 ? 'fem' : 'masc',
-      ];
       for (let i = 0; i < 3; i++) {
         const cx = x + 2 + i * 9;
-        const cGender = committeeGenders[i];
 
-        // Body contour
-        ctx.fillStyle = darkenColor(committeeJackets[i].patch || committeeJackets[i].main, 60);
-        drawRoundRect(cx - 1, dy + 11, 10, 18, 4);
-        ctx.fill();
         // Body
         ctx.fillStyle = committeeJackets[i].main;
         drawRoundRect(cx, dy + 12, 8, 16, 3);
         ctx.fill();
 
-        // Hair behind head (extend above head contour)
-        ctx.fillStyle = committeeHair[i];
-        drawRoundRect(cx - 1, dy, 10, 4, 3);
-        ctx.fill();
-
-        // Head contour
-        ctx.fillStyle = darkenColor(committeeSkins[i].shadow || committeeSkins[i].base, 60);
-        drawCircle(cx + 4, dy + 8, 6);
-        ctx.fill();
         // Head
         ctx.fillStyle = committeeSkins[i].base;
         drawCircle(cx + 4, dy + 8, 5);
+        ctx.fill();
+
+        // Hair
+        ctx.fillStyle = committeeHair[i];
+        drawRoundRect(cx, dy + 3, 8, 3, 3);
         ctx.fill();
 
         // Eyes (dots)
@@ -1294,22 +1091,9 @@ function drawEnemy(e, x, y) {
         ctx.fill();
         drawCircle(cx + 6, dy + 7, 1);
         ctx.fill();
-        // Fem: eyelash flicks
-        if (cGender === 'fem') {
-          ctx.strokeStyle = '#1a1a2e';
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(cx + 4, dy + 6);
-          ctx.lineTo(cx + 5, dy + 5);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(cx + 7, dy + 6);
-          ctx.lineTo(cx + 8, dy + 5);
-          ctx.stroke();
-        }
 
         // Serious mouth
-        ctx.strokeStyle = cGender === 'fem' ? '#c0392b' : '#333';
+        ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(cx + 2, dy + 10);
@@ -1319,282 +1103,21 @@ function drawEnemy(e, x, y) {
       break;
     }
 
-    case 'rival': {
-      // Rival researcher — competitive academic with distinct personality
-      const ra = e.appearance || { skin: SKIN_TONES[0], jacket: JACKET_COLORS[0], hair: HAIR_COLORS[0], gender: 'masc', glasses: 'none', accessory: 'none' };
-      const rivalTitle = e.rivalTitle || 'RIVAL';
-      const rivalColor = e.rivalColor || '#ff9800';
-
-      // Intimidation aura
-      const rAuraAlpha = 0.1 + Math.sin(levelTimer * 0.06) * 0.05;
-      ctx.fillStyle = `rgba(255,152,0,${rAuraAlpha})`;
-      drawCircle(x + e.w / 2, dy + e.h / 2, 30);
-      ctx.fill();
-
-      // Lab coat body contour
-      ctx.fillStyle = '#9e9e9e';
-      drawRoundRect(x + 1, dy + 13, e.w - 2, e.h - 14, 7);
-      ctx.fill();
-      // Lab coat body (large)
-      const labGrad = ctx.createLinearGradient(x, dy + 14, x + e.w, dy + e.h);
-      labGrad.addColorStop(0, '#fafafa');
-      labGrad.addColorStop(0.7, '#e0e0e0');
-      labGrad.addColorStop(1, '#bdbdbd');
-      ctx.fillStyle = labGrad;
-      drawRoundRect(x + 2, dy + 14, e.w - 4, e.h - 16, 6);
-      ctx.fill();
-
-      // Coat buttons
-      ctx.fillStyle = '#9e9e9e';
-      for (let bi = 0; bi < 3; bi++) {
-        drawCircle(x + e.w / 2, dy + 20 + bi * 7, 1.5);
-        ctx.fill();
-      }
-
-      // Accessory: scarf or necklace on body
-      if (ra.accessory === 'scarf') {
-        ctx.fillStyle = ra.tie || '#ef5350';
-        drawRoundRect(x + 8, dy + 14, e.w - 16, 4, 2);
-        ctx.fill();
-      } else if (ra.accessory === 'necklace') {
-        ctx.strokeStyle = '#ffd54f';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x + e.w / 2, dy + 16, 6, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-        ctx.fillStyle = '#ffd54f';
-        drawCircle(x + e.w / 2, dy + 22, 2);
-        ctx.fill();
-      } else if (ra.accessory === 'bowtie') {
-        ctx.fillStyle = ra.tie || '#42a5f5';
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2, dy + 15);
-        ctx.lineTo(x + e.w / 2 - 4, dy + 13);
-        ctx.lineTo(x + e.w / 2 - 4, dy + 17);
-        ctx.closePath();
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2, dy + 15);
-        ctx.lineTo(x + e.w / 2 + 4, dy + 13);
-        ctx.lineTo(x + e.w / 2 + 4, dy + 17);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Hair — gender-diverse styles (drawn behind head, must extend beyond head bounds)
-      ctx.fillStyle = ra.hair;
-      if (ra.hairStyle === 'long' || ra.hairStyle === 'bob') {
-        drawRoundRect(x + 3, dy - 6, e.w - 6, 10, 5);
-        ctx.fill();
-        // Side hair flowing past head
-        drawRoundRect(x + 2, dy + 2, 5, 14, 3);
-        ctx.fill();
-        drawRoundRect(x + e.w - 7, dy + 2, 5, 14, 3);
-        ctx.fill();
-      } else if (ra.hairStyle === 'bun') {
-        drawRoundRect(x + 5, dy - 6, e.w - 10, 8, 5);
-        ctx.fill();
-        drawCircle(x + e.w / 2, dy - 9, 6);
-        ctx.fill();
-      } else if (ra.hairStyle === 'afro') {
-        drawCircle(x + e.w / 2, dy + 4, 18);
-        ctx.fill();
-      } else if (ra.hairStyle === 'curly') {
-        for (let ci = 0; ci < 5; ci++) {
-          drawCircle(x + 7 + ci * 5, dy - 4, 5);
-          ctx.fill();
-        }
-      } else if (ra.hairStyle === 'mohawk') {
-        drawRoundRect(x + 6, dy - 4, e.w - 12, 6, 4);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 4, dy - 3);
-        ctx.lineTo(x + e.w / 2, dy - 14);
-        ctx.lineTo(x + e.w / 2 + 4, dy - 3);
-        ctx.fill();
-      } else if (ra.hairStyle === 'messy') {
-        drawRoundRect(x + 4, dy - 6, e.w - 8, 10, 5);
-        ctx.fill();
-        ctx.fillRect(x + 6, dy - 9, 4, 5);
-        ctx.fillRect(x + e.w / 2 - 2, dy - 10, 4, 6);
-        ctx.fillRect(x + e.w - 10, dy - 8, 4, 4);
-      } else {
-        // short/default
-        drawRoundRect(x + 4, dy - 5, e.w - 8, 8, 5);
-        ctx.fill();
-      }
-
-      // Head contour (drawn on top of hair)
-      ctx.fillStyle = darkenColor(ra.skin.shadow, 60);
-      drawRoundRect(x + 5, dy - 2, e.w - 10, 20, 9);
-      ctx.fill();
-      // Head
-      const rHeadGrad = ctx.createRadialGradient(x + e.w / 2, dy + 7, 2, x + e.w / 2, dy + 9, 11);
-      rHeadGrad.addColorStop(0, lightenColor(ra.skin.base, 10));
-      rHeadGrad.addColorStop(1, ra.skin.shadow);
-      ctx.fillStyle = rHeadGrad;
-      drawRoundRect(x + 6, dy - 1, e.w - 12, 18, 8);
-      ctx.fill();
-
-      // Earrings accessory
-      if (ra.accessory === 'earrings') {
-        ctx.fillStyle = '#ffd54f';
-        drawCircle(x + 6, dy + 10, 2);
-        ctx.fill();
-        drawCircle(x + e.w - 6, dy + 10, 2);
-        ctx.fill();
-      }
-
-      // Glasses
-      if (ra.glasses === 'round') {
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        drawCircle(x + e.w / 2 - 5, dy + 8, 4);
-        ctx.stroke();
-        drawCircle(x + e.w / 2 + 5, dy + 8, 4);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 1, dy + 8);
-        ctx.lineTo(x + e.w / 2 + 1, dy + 8);
-        ctx.stroke();
-      } else if (ra.glasses === 'rectangular') {
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x + e.w / 2 - 9, dy + 6, 7, 5);
-        ctx.strokeRect(x + e.w / 2 + 2, dy + 6, 7, 5);
-      } else if (ra.glasses === 'cat-eye') {
-        ctx.strokeStyle = '#880e4f';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 9, dy + 6);
-        ctx.lineTo(x + e.w / 2 - 2, dy + 6);
-        ctx.lineTo(x + e.w / 2 - 2, dy + 11);
-        ctx.lineTo(x + e.w / 2 - 9, dy + 10);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 + 2, dy + 6);
-        ctx.lineTo(x + e.w / 2 + 9, dy + 6);
-        ctx.lineTo(x + e.w / 2 + 9, dy + 10);
-        ctx.lineTo(x + e.w / 2 + 2, dy + 11);
-        ctx.closePath();
-        ctx.stroke();
-      }
-
-      // Competitive eyes (narrowed, intense)
-      for (const rex of [x + e.w / 2 - 6, x + e.w / 2 + 4]) {
-        ctx.fillStyle = '#fff';
-        drawEllipse(rex, dy + 8, 4, 3);
-        ctx.fill();
-        ctx.fillStyle = '#e65100';
-        drawCircle(rex, dy + 8.5, 2.2);
-        ctx.fill();
-        ctx.fillStyle = '#000';
-        drawCircle(rex, dy + 8.5, 1.2);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        drawCircle(rex - 0.8, dy + 7.5, 0.9);
-        ctx.fill();
-      }
-      // Fem: longer eyelashes with flicks
-      if (ra.gender === 'fem') {
-        ctx.strokeStyle = '#1a1a2e';
-        ctx.lineWidth = 1.3;
-        ctx.lineCap = 'round';
-        for (const rex of [x + e.w / 2 - 6, x + e.w / 2 + 4]) {
-          ctx.beginPath();
-          ctx.moveTo(rex + 3.5, dy + 6);
-          ctx.lineTo(rex + 5.5, dy + 4);
-          ctx.stroke();
-        }
-        ctx.lineCap = 'butt';
-      }
-
-      // Mouth — competitive expression
-      ctx.strokeStyle = ra.gender === 'fem' ? '#c0392b' : '#5d4037';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 - 4, dy + 13);
-      ctx.quadraticCurveTo(x + e.w / 2 + 2, dy + 15, x + e.w / 2 + 5, dy + 12);
-      ctx.stroke();
-      // Fem: lip color
-      if (ra.gender === 'fem') {
-        ctx.fillStyle = 'rgba(192,57,43,0.2)';
-        drawEllipse(x + e.w / 2, dy + 13.5, 4, 2);
-        ctx.fill();
-      }
-
-      // Paper they're waving (their competing paper)
-      const paperWave = Math.sin(levelTimer * 0.15) * 5;
-      ctx.fillStyle = '#fff';
-      ctx.save();
-      ctx.translate(x + e.w - 2, dy + 20);
-      ctx.rotate(paperWave * 0.05);
-      drawRoundRect(0, 0, 12, 16, 2);
-      ctx.fill();
-      ctx.fillStyle = '#e65100';
-      ctx.font = 'bold 5px monospace';
-      ctx.fillText('MY', 2, 6);
-      ctx.fillText('PUB', 1, 12);
-      ctx.restore();
-
-      // Shooting indicator (flash when about to shoot)
-      if (e.shootTimer !== undefined && e.shootTimer > 140) {
-        ctx.fillStyle = `rgba(255,0,0,${0.3 + Math.sin(levelTimer * 0.3) * 0.2})`;
-        drawCircle(x + (e.vx > 0 ? e.w + 4 : -4), dy + 18, 4);
-        ctx.fill();
-      }
-
-      // HP bar
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      drawRoundRect(x, dy - 10, e.w, 6, 3);
-      ctx.fill();
-      ctx.fillStyle = e.hp > 1 ? rivalColor : '#ef5350';
-      drawRoundRect(x + 1, dy - 9, (e.w - 2) * (e.hp / e.maxHp), 4, 2);
-      ctx.fill();
-
-      // Label with rival subtype
-      ctx.fillStyle = rivalColor;
-      ctx.font = 'bold 7px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(rivalTitle, x + e.w / 2, dy - 12);
-      ctx.textAlign = 'left';
-
-      // Charging indicator
-      if (e.charging) {
-        ctx.fillStyle = 'rgba(255,87,34,0.3)';
-        const chargeDir = e.vx > 0 ? 1 : -1;
-        for (let ci = 0; ci < 5; ci++) {
-          drawCircle(x + e.w / 2 - chargeDir * (ci * 5 + 8), dy + e.h / 2, 3 - ci * 0.4);
-          ctx.fill();
-        }
-      }
-      break;
-    }
-
     case 'dean': {
       const da = e.appearance || { skin: SKIN_TONES[0], hair: '#9e9e9e' };
 
-      // Menacing aura (anime boss glow) — intensifies with phase
-      const phaseIntensity = e.phase ? e.phase / 3 : 0.33;
-      ctx.shadowColor = e.phase >= 3 ? '#ff0000' : e.phase >= 2 ? '#ff6f00' : '#880e4f';
-      ctx.shadowBlur = 15 + phaseIntensity * 10;
-      const dAuraAlpha = (0.15 + phaseIntensity * 0.15) + Math.sin(levelTimer * (0.08 + phaseIntensity * 0.06)) * 0.08;
-      const auraR = e.phase >= 3 ? 200 : e.phase >= 2 ? 160 : 136;
-      const auraG = e.phase >= 3 ? 0 : e.phase >= 2 ? 40 : 14;
-      const auraB = e.phase >= 3 ? 0 : e.phase >= 2 ? 0 : 79;
-      const dAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 10, x + e.w / 2, dy + e.h / 2, 40 + phaseIntensity * 15);
-      dAuraGrad.addColorStop(0, `rgba(${auraR},${auraG},${auraB},${dAuraAlpha})`);
-      dAuraGrad.addColorStop(1, `rgba(${auraR},${auraG},${auraB},0)`);
+      // Menacing aura (anime boss glow)
+      ctx.shadowColor = '#880e4f';
+      ctx.shadowBlur = 15;
+      const dAuraAlpha = 0.15 + Math.sin(levelTimer * 0.08) * 0.08;
+      const dAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 10, x + e.w / 2, dy + e.h / 2, 40);
+      dAuraGrad.addColorStop(0, `rgba(136,14,79,${dAuraAlpha})`);
+      dAuraGrad.addColorStop(1, 'rgba(136,14,79,0)');
       ctx.fillStyle = dAuraGrad;
       drawCircle(x + e.w / 2, dy + e.h / 2, 40);
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Robe contour
-      ctx.fillStyle = '#1a0010';
-      drawRoundRect(x + 3, dy + 19, e.w - 6, e.h - 20, 7);
-      ctx.fill();
       // Robe with richer gradient
       const robeGrad = ctx.createLinearGradient(x, dy + 20, x + e.w, dy + e.h);
       robeGrad.addColorStop(0, '#ad1457');
@@ -1619,26 +1142,19 @@ function drawEnemy(e, x, y) {
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Side hair behind head (distinguished)
-      ctx.fillStyle = da.hair;
-      drawRoundRect(x + 7, dy + 8, 6, 14, 3);
-      ctx.fill();
-      drawRoundRect(x + e.w - 13, dy + 8, 6, 14, 3);
-      ctx.fill();
-      // Hair on top
-      drawRoundRect(x + 9, dy - 2, e.w - 18, 7, 5);
-      ctx.fill();
-
-      // Head contour
-      ctx.fillStyle = darkenColor(da.skin.shadow, 60);
-      drawRoundRect(x + 9, dy + 1, e.w - 18, 24, 11);
-      ctx.fill();
       // Head
       const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 10, 3, x + e.w / 2, dy + 12, 14);
       headGrad2.addColorStop(0, da.skin.base);
       headGrad2.addColorStop(1, da.skin.shadow);
       ctx.fillStyle = headGrad2;
       drawRoundRect(x + 10, dy + 2, e.w - 20, 22, 10);
+      ctx.fill();
+
+      // Side hair (distinguished)
+      ctx.fillStyle = da.hair;
+      drawRoundRect(x + 8, dy + 10, 5, 10, 2);
+      ctx.fill();
+      drawRoundRect(x + e.w - 13, dy + 10, 5, 10, 2);
       ctx.fill();
 
       // Anime eyes for the Dean (intimidating)
@@ -1722,10 +1238,6 @@ function drawEnemy(e, x, y) {
       ctx.save();
       ctx.translate(x + e.w / 2, dy + e.h / 2);
       ctx.rotate(rot * 0.3 + Math.sin(levelTimer * 0.2) * 0.2);
-      // Paper contour
-      ctx.fillStyle = '#90a4ae';
-      drawRoundRect(-e.w / 2 - 1, -e.h / 2 - 1, e.w + 2, e.h + 2, 3);
-      ctx.fill();
       ctx.fillStyle = '#fff';
       drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2);
       ctx.fill();
@@ -1739,284 +1251,7 @@ function drawEnemy(e, x, y) {
       ctx.restore();
       break;
     }
-
-    case 'critique': {
-      // Rival's thrown critique paper — spinning red-marked manuscript
-      const crot = Math.atan2(e.vy || 0, e.vx || 1);
-      ctx.save();
-      ctx.translate(x + e.w / 2, dy + e.h / 2);
-      ctx.rotate(crot * 0.3 + levelTimer * 0.15);
-      // Paper contour
-      ctx.fillStyle = '#90a4ae';
-      drawRoundRect(-e.w / 2 - 1, -e.h / 2 - 1, e.w + 2, e.h + 2, 3);
-      ctx.fill();
-      ctx.fillStyle = '#fffde7';
-      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2);
-      ctx.fill();
-      // Red strikethrough marks
-      ctx.strokeStyle = '#c62828';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(-5, -2); ctx.lineTo(5, -2);
-      ctx.moveTo(-4, 1); ctx.lineTo(4, 1);
-      ctx.stroke();
-      // Red "X" mark
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(-3, -3); ctx.lineTo(3, 3);
-      ctx.moveTo(3, -3); ctx.lineTo(-3, 3);
-      ctx.stroke();
-      ctx.restore();
-      break;
-    }
   }
-
-  ctx.restore();
-}
-
-// ============================================================
-// GRAD STUDENT DRAWING (mentorable NPC)
-// ============================================================
-function drawGradStudent(gs, x, y) {
-  const bob = gs.panicked ? 0 : Math.sin(levelTimer * 0.05 + gs.startX * 0.1) * 1.5;
-  const dy = y + bob;
-  const facingLeft = gs.vx < 0;
-
-  ctx.save();
-  if (facingLeft) {
-    ctx.translate(x + gs.w, 0);
-    ctx.scale(-1, 1);
-    x = 0;
-  }
-
-  const ga = gs.appearance || { skin: SKIN_TONES[0], hair: HAIR_COLORS[0], hoodie: HOODIE_COLORS[0] };
-  const hoodieColor = ga.hoodie || HOODIE_COLORS[0];
-
-  // Panic shake
-  const panicShake = gs.panicked ? (Math.random() - 0.5) * 3 : 0;
-
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  drawEllipse(x + gs.w / 2, y + gs.h + 2, gs.w / 2.5, 3);
-  ctx.fill();
-
-  // Charge aura when mentee is moving fast
-  if (gs.mentee && Math.abs(gs.vx) > 2) {
-    ctx.fillStyle = 'rgba(255,235,59,0.25)';
-    drawCircle(x + gs.w / 2 + panicShake, dy + gs.h / 2, gs.w * 0.8);
-    ctx.fill();
-  }
-
-  // Body contour
-  ctx.fillStyle = darkenColor(hoodieColor.dark, 60);
-  drawRoundRect(x + 1 + panicShake, dy + 9, gs.w - 2, gs.h - 10, 6);
-  ctx.fill();
-  // Body (hoodie with diverse colors)
-  const bodyGrad = ctx.createLinearGradient(x, dy + 10, x + gs.w, dy + gs.h);
-  bodyGrad.addColorStop(0, hoodieColor.main);
-  bodyGrad.addColorStop(1, hoodieColor.dark);
-  ctx.fillStyle = bodyGrad;
-  drawRoundRect(x + 2 + panicShake, dy + 10, gs.w - 4, gs.h - 12, 5);
-  ctx.fill();
-
-  // Hoodie highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.1)';
-  drawRoundRect(x + 4 + panicShake, dy + 11, gs.w - 8, 4, 3);
-  ctx.fill();
-
-  // Backpack contour
-  ctx.fillStyle = '#bf360c';
-  drawRoundRect(x - 3 + panicShake, dy + 13, 8, 12, 4);
-  ctx.fill();
-  // Backpack (cute detail)
-  ctx.fillStyle = '#ff7043';
-  drawRoundRect(x - 2 + panicShake, dy + 14, 6, 10, 3);
-  ctx.fill();
-  ctx.fillStyle = '#bf360c';
-  ctx.fillRect(x - 1 + panicShake, dy + 17, 4, 1);
-
-  // Hair — diverse styles (drawn behind head, must extend beyond head bounds)
-  ctx.fillStyle = ga.hair;
-  if (ga.hairStyle === 'long' || ga.hairStyle === 'bob') {
-    drawRoundRect(x + 1 + panicShake, dy - 7, gs.w - 2, 8, 4);
-    ctx.fill();
-    // Side hair past head
-    drawRoundRect(x - 1 + panicShake, dy, 4, 12, 2);
-    ctx.fill();
-    drawRoundRect(x + gs.w - 3 + panicShake, dy, 4, 12, 2);
-    ctx.fill();
-  } else if (ga.hairStyle === 'bun') {
-    drawRoundRect(x + 2 + panicShake, dy - 6, gs.w - 4, 6, 4);
-    ctx.fill();
-    drawCircle(x + gs.w / 2 + panicShake, dy - 9, 5);
-    ctx.fill();
-  } else if (ga.hairStyle === 'afro') {
-    drawCircle(x + gs.w / 2 + panicShake, dy + 2, 14);
-    ctx.fill();
-  } else if (ga.hairStyle === 'curly') {
-    for (let ci = 0; ci < 4; ci++) {
-      drawCircle(x + 4 + ci * 5 + panicShake, dy - 5, 4.5);
-      ctx.fill();
-    }
-  } else if (ga.hairStyle === 'mohawk') {
-    drawRoundRect(x + gs.w / 2 - 3 + panicShake, dy - 11, 6, 10, 3);
-    ctx.fill();
-  } else if (ga.hairStyle === 'messy') {
-    drawRoundRect(x + 2 + panicShake, dy - 7, gs.w - 4, 8, 4);
-    ctx.fill();
-    ctx.fillRect(x + 3 + panicShake, dy - 9, 3, 4);
-    ctx.fillRect(x + gs.w / 2 - 1 + panicShake, dy - 10, 3, 5);
-    ctx.fillRect(x + gs.w - 6 + panicShake, dy - 8, 3, 3);
-  } else {
-    // short/default
-    drawRoundRect(x + 2 + panicShake, dy - 6, gs.w - 4, 7, 4);
-    ctx.fill();
-  }
-
-  // Head contour (drawn on top of hair)
-  ctx.fillStyle = darkenColor(ga.skin.shadow, 60);
-  drawRoundRect(x + 2 + panicShake, dy - 3, gs.w - 4, 16, 7);
-  ctx.fill();
-  // Head
-  const headGrad = ctx.createRadialGradient(x + gs.w / 2, dy + 5, 2, x + gs.w / 2, dy + 7, 9);
-  headGrad.addColorStop(0, ga.skin.base);
-  headGrad.addColorStop(1, ga.skin.shadow);
-  ctx.fillStyle = headGrad;
-  drawRoundRect(x + 3 + panicShake, dy - 2, gs.w - 6, 14, 6);
-  ctx.fill();
-
-  // Glasses (if any)
-  if (ga.glasses === 'round') {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 0.8;
-    drawCircle(x + 7 + panicShake, dy + 5, 3);
-    ctx.stroke();
-    drawCircle(x + gs.w - 9 + panicShake, dy + 5, 3);
-    ctx.stroke();
-  } else if (ga.glasses === 'rectangular') {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 0.8;
-    ctx.strokeRect(x + 4 + panicShake, dy + 3, 5, 4);
-    ctx.strokeRect(x + gs.w - 11 + panicShake, dy + 3, 5, 4);
-  }
-
-  // Earrings accessory
-  if (ga.accessory === 'earrings') {
-    ctx.fillStyle = '#ffd54f';
-    drawCircle(x + 3 + panicShake, dy + 8, 1.5);
-    ctx.fill();
-    drawCircle(x + gs.w - 3 + panicShake, dy + 8, 1.5);
-    ctx.fill();
-  }
-
-  // Eyes — panicked = wide & scared, normal = friendly
-  if (gs.panicked) {
-    for (const gex of [x + 7 + panicShake, x + gs.w - 9 + panicShake]) {
-      ctx.fillStyle = '#fff';
-      drawEllipse(gex, dy + 5, 4, 3.5);
-      ctx.fill();
-      ctx.fillStyle = '#333';
-      drawCircle(gex, dy + 5.5, 1.5);
-      ctx.fill();
-    }
-  } else {
-    for (const gex of [x + 7, x + gs.w - 9]) {
-      ctx.fillStyle = '#fff';
-      drawEllipse(gex, dy + 5, 3.5, 3);
-      ctx.fill();
-      ctx.fillStyle = hoodieColor.main;
-      drawCircle(gex, dy + 5.5, 2);
-      ctx.fill();
-      ctx.fillStyle = '#000';
-      drawCircle(gex, dy + 5.5, 1);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      drawCircle(gex - 0.7, dy + 4.5, 0.8);
-      ctx.fill();
-    }
-  }
-  // Fem: eyelash flicks
-  if (ga.gender === 'fem') {
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 1;
-    ctx.lineCap = 'round';
-    const ps = gs.panicked ? panicShake : 0;
-    for (const gex of [x + 7 + ps, x + gs.w - 9 + ps]) {
-      ctx.beginPath();
-      ctx.moveTo(gex + 3, dy + 3);
-      ctx.lineTo(gex + 4.5, dy + 1.5);
-      ctx.stroke();
-    }
-    ctx.lineCap = 'butt';
-  }
-
-  // Mouth — panicked = open scream, normal = happy
-  ctx.strokeStyle = ga.gender === 'fem' ? '#c0392b' : '#5d4037';
-  ctx.lineWidth = 1;
-  if (gs.panicked) {
-    ctx.fillStyle = ga.gender === 'fem' ? '#c0392b' : '#5d4037';
-    drawEllipse(x + gs.w / 2 + panicShake, dy + 9, 2.5, 2);
-    ctx.fill();
-  } else {
-    ctx.beginPath();
-    ctx.arc(x + gs.w / 2, dy + 8, 2.5, 0.1, Math.PI - 0.1);
-    ctx.stroke();
-    // Fem: subtle lip color
-    if (ga.gender === 'fem') {
-      ctx.fillStyle = 'rgba(192,57,43,0.2)';
-      drawEllipse(x + gs.w / 2, dy + 9, 2.5, 1.5);
-      ctx.fill();
-    }
-  }
-
-  // Coffee cup in hand (not when panicked — dropped it!)
-  if (!gs.panicked) {
-    // Cup contour
-    ctx.fillStyle = '#90a4ae';
-    drawRoundRect(x + gs.w - 2, dy + 15, 7, 8, 3);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    drawRoundRect(x + gs.w - 1, dy + 16, 5, 6, 2);
-    ctx.fill();
-    ctx.fillStyle = '#8d6e63';
-    drawRoundRect(x + gs.w, dy + 17, 3, 4, 1);
-    ctx.fill();
-  }
-
-  // "MENTOR ME" indicator when player is nearby
-  if (!gs.panicked && !gs.spent) {
-    const p1Dist = player ? Math.abs(player.x - gs.x) + Math.abs(player.y - gs.y) : 999;
-    const p2Dist = player2 ? Math.abs(player2.x - gs.x) + Math.abs(player2.y - gs.y) : 999;
-    if (Math.min(p1Dist, p2Dist) < TILE * 3 && !gs.mentee) {
-      ctx.fillStyle = 'rgba(102,187,106,0.7)';
-      ctx.font = 'bold 7px monospace';
-      ctx.textAlign = 'center';
-      const arrowBob = Math.sin(levelTimer * 0.15) * 3;
-      ctx.fillText('\u25BC MENTOR' + (gs.gsLabel ? ' (' + gs.gsLabel + ')' : ''), x + gs.w / 2, dy - 8 + arrowBob);
-      ctx.textAlign = 'left';
-    }
-  } else {
-    // Panic sweat drops
-    ctx.fillStyle = 'rgba(100,181,246,0.7)';
-    const sweatBob = Math.sin(levelTimer * 0.3) * 2;
-    drawCircle(x + gs.w + 2 + panicShake, dy + 2 + sweatBob, 1.5);
-    ctx.fill();
-    drawCircle(x - 2 + panicShake, dy + 4 + sweatBob, 1);
-    ctx.fill();
-  }
-
-  // Shoes contour
-  ctx.fillStyle = '#2a1a10';
-  drawRoundRect(x + 1 + panicShake, dy + gs.h - 6, 9, 6, 3);
-  ctx.fill();
-  drawRoundRect(x + gs.w - 10 + panicShake, dy + gs.h - 6, 9, 6, 3);
-  ctx.fill();
-  // Shoes
-  ctx.fillStyle = '#5d4037';
-  drawRoundRect(x + 2 + panicShake, dy + gs.h - 5, 7, 4, 2);
-  ctx.fill();
-  drawRoundRect(x + gs.w - 9 + panicShake, dy + gs.h - 5, 7, 4, 2);
-  ctx.fill();
 
   ctx.restore();
 }
@@ -2270,15 +1505,6 @@ function drawCollectible(type, x, y, w, h) {
       ctx.translate(cx, cy);
       ctx.scale(pulse, pulse);
 
-      // Heart contour
-      ctx.fillStyle = '#7f0000';
-      ctx.beginPath();
-      ctx.moveTo(0, 6);
-      ctx.bezierCurveTo(-2, 3, -9, -2, -9, -5.5);
-      ctx.bezierCurveTo(-9, -10, -5, -11.5, 0, -8);
-      ctx.bezierCurveTo(5, -11.5, 9, -10, 9, -5.5);
-      ctx.bezierCurveTo(9, -2, 2, 3, 0, 6);
-      ctx.fill();
       // Heart shape
       const heartGrad = ctx.createRadialGradient(0, -2, 2, 0, 0, 12);
       heartGrad.addColorStop(0, '#ff6b81');
@@ -2318,24 +1544,12 @@ function drawCollectible(type, x, y, w, h) {
       const flameY = y + h / 2;
       const flicker = Math.sin(levelTimer * 0.2) * 2;
 
-      // Flame base contour (pot/pedestal)
-      ctx.fillStyle = '#3e2723';
-      drawRoundRect(x + 5, y + h - 9, w - 10, 10, 4);
-      ctx.fill();
+      // Flame base (pot/pedestal)
       ctx.fillStyle = '#795548';
       drawRoundRect(x + 6, y + h - 8, w - 12, 8, 3);
       ctx.fill();
       ctx.fillStyle = '#ffd54f';
       drawRoundRect(x + 7, y + h - 9, w - 14, 3, 2);
-      ctx.fill();
-
-      // Flame contour
-      ctx.fillStyle = '#bf360c';
-      ctx.beginPath();
-      ctx.moveTo(flameX, y + 1 + flicker);
-      ctx.bezierCurveTo(flameX - 8, y + 5, flameX - 10, y + h - 11, flameX - 6, y + h - 9);
-      ctx.lineTo(flameX + 6, y + h - 9);
-      ctx.bezierCurveTo(flameX + 10, y + h - 11, flameX + 8, y + 5, flameX, y + 1 + flicker);
       ctx.fill();
 
       // Flame body
@@ -2361,76 +1575,6 @@ function drawCollectible(type, x, y, w, h) {
       ctx.fill();
 
       ctx.shadowBlur = 0;
-      break;
-    }
-
-    case 'potion': {
-      // Magic potion bottle
-      ctx.shadowColor = '#9c27b0';
-      ctx.shadowBlur = 10 * glow * 2;
-
-      const potX = x + w / 2;
-
-      // Bottle body contour
-      ctx.fillStyle = '#4a148c';
-      drawRoundRect(x + 4, y + 7, w - 8, h - 8, 6);
-      ctx.fill();
-      // Bottle body
-      const potGrad = ctx.createLinearGradient(x + 5, y + 6, x + w - 5, y + h);
-      potGrad.addColorStop(0, '#e1bee7');
-      potGrad.addColorStop(0.3, '#ce93d8');
-      potGrad.addColorStop(0.7, '#9c27b0');
-      potGrad.addColorStop(1, '#6a1b9a');
-      ctx.fillStyle = potGrad;
-      drawRoundRect(x + 5, y + 8, w - 10, h - 10, 5);
-      ctx.fill();
-
-      // Bottle neck contour
-      ctx.fillStyle = '#4a148c';
-      drawRoundRect(potX - 4, y + 1, 8, 9, 3);
-      ctx.fill();
-      // Bottle neck
-      ctx.fillStyle = '#7b1fa2';
-      drawRoundRect(potX - 3, y + 2, 6, 8, 2);
-      ctx.fill();
-
-      // Cork contour
-      ctx.fillStyle = '#5d4037';
-      drawRoundRect(potX - 5, y - 1, 10, 5, 3);
-      ctx.fill();
-      // Cork
-      ctx.fillStyle = '#a1887f';
-      drawRoundRect(potX - 4, y, 8, 4, 2);
-      ctx.fill();
-
-      // Liquid shine
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
-      drawRoundRect(x + 7, y + 10, 4, h - 16, 3);
-      ctx.fill();
-
-      // Bubbles
-      const bubT = levelTimer * 0.1;
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      drawCircle(potX - 2, y + h - 8 + Math.sin(bubT) * 3, 1.5);
-      ctx.fill();
-      drawCircle(potX + 2, y + h - 6 + Math.sin(bubT + 1) * 2, 1);
-      ctx.fill();
-
-      ctx.shadowBlur = 0;
-
-      // Magic sparkles around bottle
-      ctx.fillStyle = '#e1bee7';
-      drawStar(x + 3, y + 5, 4, 2, 1);
-      ctx.fill();
-      drawStar(x + w - 3, y + h - 5, 4, 2, 1);
-      ctx.fill();
-
-      // Label
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 6px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('POT', potX, y + h + 2);
-      ctx.textAlign = 'left';
       break;
     }
   }
@@ -3312,14 +2456,13 @@ function drawFlag() {
 // HUD DRAWING
 // ============================================================
 function drawHUD() {
-  const hudH = twoPlayerMode ? 62 : 40;
   // HUD background with glass effect
-  const hudGrad = ctx.createLinearGradient(0, 0, 0, hudH + 6);
+  const hudGrad = ctx.createLinearGradient(0, 0, 0, 46);
   hudGrad.addColorStop(0, 'rgba(15,12,30,0.92)');
   hudGrad.addColorStop(0.5, 'rgba(20,18,40,0.88)');
   hudGrad.addColorStop(1, 'rgba(15,12,30,0.85)');
   ctx.fillStyle = hudGrad;
-  drawRoundRect(4, 4, GAME_W - 8, hudH, 10);
+  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
   ctx.fill();
 
   // HUD top highlight (glass effect)
@@ -3333,260 +2476,106 @@ function drawHUD() {
   // HUD border (subtle colored glow)
   ctx.strokeStyle = 'rgba(233,69,96,0.25)';
   ctx.lineWidth = 1.5;
-  drawRoundRect(4, 4, GAME_W - 8, hudH, 10);
+  drawRoundRect(4, 4, GAME_W - 8, 40, 10);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  drawRoundRect(5, 5, GAME_W - 10, 38, 9);
   ctx.stroke();
 
-  if (twoPlayerMode) {
-    // ===== TWO-PLAYER HUD =====
-    // Divider between P1 and P2 rows
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
+  // Divider lines between sections
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  for (const divX of [105, 215, 320]) {
     ctx.beginPath();
-    ctx.moveTo(10, 34);
-    ctx.lineTo(GAME_W - 10, 34);
+    ctx.moveTo(divX, 10);
+    ctx.lineTo(divX, 38);
     ctx.stroke();
+  }
 
-    // Helper to draw one player's stats row
-    function drawPlayerRow(st, label, color, baseY, pl, prefix) {
-      // Player label
-      ctx.fillStyle = color;
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText(label, 12, baseY);
+  ctx.font = 'bold 11px monospace';
 
-      // Lives (hearts)
-      ctx.shadowColor = '#ef5350';
-      ctx.shadowBlur = 3;
-      ctx.fillStyle = '#ef5350';
-      ctx.font = '11px serif';
-      for (let i = 0; i < Math.min(st.lives, 5); i++) {
-        ctx.fillText('\u2665', 32 + i * 13, baseY);
-      }
-      if (st.lives > 5) {
-        ctx.fillStyle = '#ef5350';
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText(`+${st.lives - 5}`, 32 + 5 * 13, baseY);
-      }
-      ctx.shadowBlur = 0;
-
-      // Pub
-      ctx.fillStyle = '#b0bec5';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText('PUB', 105, baseY);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(`${st.publications}`, 130, baseY);
-
-      // Grant
-      ctx.fillStyle = '#66bb6a';
-      ctx.fillText('G', 152, baseY);
-      ctx.fillStyle = '#81c784';
-      ctx.fillText(`${st.grants}`, 160, baseY);
-
-      // Cite
-      ctx.fillStyle = '#4fc3f7';
-      ctx.fillText('C', 180, baseY);
-      ctx.fillText(`${st.citations}`, 188, baseY);
-
-      // h-index
-      ctx.fillStyle = '#ffd54f';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText(`h=${st.hIndex}`, 210, baseY);
-
-      // Mentored
-      ctx.fillStyle = '#81c784';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText(`M${st.mentored}`, 250, baseY);
-
-      // Score
-      ctx.fillStyle = '#ffa726';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText(`${st.score}`, 280, baseY);
-
-      // Potions
-      if (st.potions > 0) {
-        ctx.fillStyle = '#ce93d8';
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText(`POT:${st.potions}`, 330, baseY);
-      }
-
-      // Power-up indicators
-      let indX = 380;
-      if (pl && pl.powered) {
-        ctx.fillStyle = '#ff6f00';
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText(`CAF ${Math.ceil(pl.powerTimer / 60)}s`, indX, baseY);
-        indX += 50;
-      }
-      if (pl && pl.hasFlame) {
-        ctx.fillStyle = '#ff5722';
-        ctx.font = 'bold 8px monospace';
-        const fKey = keyName(keyBindings[prefix + '_fire'][0]);
-        ctx.fillText(`FLM ${Math.ceil(pl.flameTimer / 60)}s [${fKey}]`, indX, baseY);
-        indX += 70;
-      }
-      if (pl && pl.mentoring) {
-        ctx.fillStyle = '#66bb6a';
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText(`MENT ${Math.ceil(pl.mentoringTimer / 60)}s`, indX, baseY);
-      }
-    }
-
-    drawPlayerRow(p1Stats, 'P1', '#fff', 24, player, 'p1');
-    drawPlayerRow(p2Stats, 'P2', '#42a5f5', 46, player2, 'p2');
-
-    // Swap indicator
-    if (swappedControls) {
-      ctx.fillStyle = '#ffa726';
-      ctx.font = 'bold 7px monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText('\u21C4 SWAPPED', GAME_W - 14, 56);
-      ctx.textAlign = 'left';
-    }
-  } else {
-    // ===== SINGLE-PLAYER HUD =====
-    // Divider lines between sections
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-    for (const divX of [105, 215, 320]) {
-      ctx.beginPath();
-      ctx.moveTo(divX, 10);
-      ctx.lineTo(divX, 38);
-      ctx.stroke();
-    }
-
-    ctx.font = 'bold 11px monospace';
-
-    // Lives with hearts (with glow)
-    for (let i = 0; i < stats.lives; i++) {
-      ctx.shadowColor = '#ef5350';
-      ctx.shadowBlur = 4;
-      ctx.fillStyle = '#ef5350';
-      ctx.font = '14px serif';
-      ctx.fillText('\u2665', 14 + i * 18, 24);
-      ctx.shadowBlur = 0;
-    }
-
-    // Publications
-    ctx.font = 'bold 10px monospace';
-    ctx.fillStyle = '#b0bec5';
-    ctx.fillText('PUB', 14, 36);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 11px monospace';
-    ctx.fillText(`${stats.publications}`, 44, 36);
-
-    // Grants
-    ctx.fillStyle = '#4caf50';
-    ctx.font = 'bold 9px monospace';
-    ctx.fillText('GRANT', 115, 22);
-    ctx.fillStyle = '#66bb6a';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.grants}`, 165, 22);
-
-    // Citations
-    ctx.fillStyle = '#29b6f6';
-    ctx.font = 'bold 9px monospace';
-    ctx.fillText('CITE', 115, 36);
-    ctx.fillStyle = '#4fc3f7';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.citations}`, 148, 36);
-
-    // h-index
-    ctx.shadowColor = '#ffd54f';
-    ctx.shadowBlur = 6;
-    ctx.fillStyle = '#ffd54f';
-    ctx.font = 'bold 14px monospace';
-    ctx.fillText(`h=${stats.hIndex}`, 225, 26);
+  // Lives with hearts (with glow)
+  for (let i = 0; i < stats.lives; i++) {
+    // Heart glow
+    ctx.shadowColor = '#ef5350';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#ef5350';
+    ctx.font = '14px serif';
+    ctx.fillText('\u2665', 14 + i * 18, 24);
     ctx.shadowBlur = 0;
+  }
 
-    // Mentored
-    ctx.fillStyle = '#66bb6a';
-    ctx.font = 'bold 9px monospace';
-    ctx.fillText('MENT', 185, 36);
-    ctx.fillStyle = '#81c784';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.mentored}`, 215, 36);
+  // Publications with icon
+  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = '#b0bec5';
+  ctx.fillText('PUB', 14, 36);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText(`${stats.publications}`, 44, 36);
 
-    // Score
-    ctx.fillStyle = '#78909c';
-    ctx.font = 'bold 8px monospace';
-    ctx.fillText('SCORE', 225, 37);
-    ctx.fillStyle = '#ffa726';
+  // Grants with icon-like label
+  ctx.fillStyle = '#4caf50';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText('GRANT', 115, 22);
+  ctx.fillStyle = '#66bb6a';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`${stats.grants}`, 165, 22);
+
+  // Citations
+  ctx.fillStyle = '#29b6f6';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillText('CITE', 115, 36);
+  ctx.fillStyle = '#4fc3f7';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`${stats.citations}`, 148, 36);
+
+  // h-index (prominent with glow)
+  ctx.shadowColor = '#ffd54f';
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 14px monospace';
+  ctx.fillText(`h=${stats.hIndex}`, 225, 26);
+  ctx.shadowBlur = 0;
+
+  // Score with counter style
+  ctx.fillStyle = '#78909c';
+  ctx.font = 'bold 8px monospace';
+  ctx.fillText('SCORE', 225, 37);
+  ctx.fillStyle = '#ffa726';
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText(`${stats.score}`, 262, 37);
+
+  // Coffee indicator
+  if (player && player.powered) {
+    ctx.fillStyle = '#ff6f00';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText(`${stats.score}`, 262, 37);
+    const coffeeBar = Math.ceil(player.powerTimer / 60);
+    ctx.fillText(`CAFFEINE ${coffeeBar}s`, 330, 24);
 
-    // Mentoring timer
-    if (player && player.mentoring) {
-      const mentorSecs = Math.ceil(player.mentoringTimer / 60);
-      const mentorColor = mentorSecs <= 5 ? '#ef5350' : '#66bb6a';
-      ctx.fillStyle = mentorColor;
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText(`MENTOR ${mentorSecs}s`, 330, 24);
-      ctx.fillStyle = 'rgba(102,187,106,0.3)';
-      drawRoundRect(330, 28, 80, 6, 3);
-      ctx.fill();
-      ctx.fillStyle = mentorColor;
-      drawRoundRect(330, 28, 80 * (player.mentoringTimer / 900), 6, 3);
-      ctx.fill();
-      if (player.headbutting) {
-        ctx.fillStyle = '#ff5722';
-        ctx.font = 'bold 10px monospace';
-        ctx.fillText('HEADBUTT!', 330, 42);
-      }
-    }
+    // Coffee bar
+    ctx.fillStyle = 'rgba(255,111,0,0.3)';
+    drawRoundRect(330, 28, 80, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ff6f00';
+    drawRoundRect(330, 28, 80 * (player.powerTimer / 300), 6, 3);
+    ctx.fill();
+  }
 
-    // Coffee indicator
-    if (player && player.powered) {
-      ctx.fillStyle = '#ff6f00';
-      ctx.font = 'bold 11px monospace';
-      const coffeeBar = Math.ceil(player.powerTimer / 60);
-      ctx.fillText(`CAFFEINE ${coffeeBar}s`, 330, 24);
-      ctx.fillStyle = 'rgba(255,111,0,0.3)';
-      drawRoundRect(330, 28, 80, 6, 3);
-      ctx.fill();
-      ctx.fillStyle = '#ff6f00';
-      drawRoundRect(330, 28, 80 * (player.powerTimer / 300), 6, 3);
-      ctx.fill();
-    }
+  // Flame indicator
+  if (player && player.hasFlame) {
+    const flameHudX = player.powered ? 430 : 330;
+    ctx.fillStyle = '#ff5722';
+    ctx.font = 'bold 11px monospace';
+    const flameBar = Math.ceil(player.flameTimer / 60);
+    ctx.fillText(`FLAME ${flameBar}s [F]`, flameHudX, 24);
 
-    // Flame indicator
-    if (player && player.hasFlame) {
-      const flameHudX = player.powered ? 430 : 330;
-      ctx.fillStyle = '#ff5722';
-      ctx.font = 'bold 11px monospace';
-      const flameBar = Math.ceil(player.flameTimer / 60);
-      ctx.fillText(`FLAME ${flameBar}s [${keyName(keyBindings.p1_fire[0])}]`, flameHudX, 24);
-      ctx.fillStyle = 'rgba(255,87,34,0.3)';
-      drawRoundRect(flameHudX, 28, 80, 6, 3);
-      ctx.fill();
-      ctx.fillStyle = '#ff5722';
-      drawRoundRect(flameHudX, 28, 80 * (player.flameTimer / 900), 6, 3);
-      ctx.fill();
-    }
-
-    // Potion meter
-    if (stats.potions > 0 || magicActive) {
-      const potHudX = 330;
-      const potHudY = player && (player.powered || player.hasFlame) ? 38 : 24;
-      ctx.fillStyle = '#9c27b0';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText('WRATH', potHudX, potHudY - 2);
-      for (let pi = 0; pi < Math.min(stats.potions, 8); pi++) {
-        const px = potHudX + pi * 12;
-        ctx.fillStyle = pi < 1 ? '#ce93d8' : pi < 2 ? '#ab47bc' : pi < 3 ? '#9c27b0' : '#7b1fa2';
-        drawRoundRect(px, potHudY + 1, 8, 10, 2);
-        ctx.fill();
-        ctx.fillStyle = '#e1bee7';
-        drawRoundRect(px + 2, potHudY - 1, 4, 4, 1);
-        ctx.fill();
-      }
-      if (stats.potions > 8) {
-        ctx.fillStyle = '#ce93d8';
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText(`+${stats.potions - 8}`, potHudX + 100, potHudY + 8);
-      }
-      ctx.fillStyle = '#78909c';
-      ctx.font = '7px monospace';
-      ctx.fillText(`[${keyName(keyBindings.p1_potion[0])}]`, potHudX + Math.min(stats.potions, 8) * 12 + 4, potHudY + 8);
-    }
+    ctx.fillStyle = 'rgba(255,87,34,0.3)';
+    drawRoundRect(flameHudX, 28, 80, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = '#ff5722';
+    drawRoundRect(flameHudX, 28, 80 * (player.flameTimer / 900), 6, 3);
+    ctx.fill();
   }
 
   // Level name (right side)
@@ -3621,12 +2610,12 @@ const LEVEL_SUBTITLES = [
 ];
 
 const LEVELS = [
-  { width: 200, height: 15, gravity: 0.5 },
-  { width: 240, height: 15, gravity: 0.5 },
-  { width: 220, height: 15, gravity: 0.5 },
-  { width: 280, height: 15, gravity: 0.5 },
-  { width: 260, height: 15, gravity: 0.5 },
-  { width: 180, height: 15, gravity: 0.5 },
+  { width: 100, height: 15, gravity: 0.5 },
+  { width: 120, height: 15, gravity: 0.5 },
+  { width: 110, height: 15, gravity: 0.5 },
+  { width: 140, height: 15, gravity: 0.5 },
+  { width: 130, height: 15, gravity: 0.5 },
+  { width: 80, height: 15, gravity: 0.5 },
 ];
 
 // Job market thresholds to pass World 3
@@ -3635,7 +2624,6 @@ const JOB_MARKET_THRESHOLDS = {
   grants: 2,
   citations: 8,
   hIndex: 2,
-  mentored: 2,
   leaderboardRank: 1000, // must be in top 1000
 };
 
@@ -3676,8 +2664,8 @@ function generateLevel(levelIdx) {
   entities.push({ type: 'player', x: 2, y: groundY - 2 });
   entities.push({ type: 'flag', x: w - 4, y: groundY - 3 });
 
-  // Pits (scaled for longer levels)
-  const pitCount = Math.round((3 + levelIdx * 2) * (w / 100));
+  // Pits
+  const pitCount = 3 + levelIdx * 2;
   const pitPositions = [];
   for (let i = 0; i < pitCount; i++) {
     const px = 12 + Math.floor(Math.random() * (w - 25));
@@ -3700,8 +2688,8 @@ function generateLevel(levelIdx) {
     }
   }
 
-  // Platforms (scaled for longer levels)
-  const platCount = Math.round((8 + levelIdx * 4) * (w / 100));
+  // Platforms
+  const platCount = 8 + levelIdx * 4;
   for (let i = 0; i < platCount; i++) {
     const px = 5 + Math.floor(Math.random() * (w - 10));
     const py = groundY - 3 - Math.floor(Math.random() * 5);
@@ -3712,11 +2700,10 @@ function generateLevel(levelIdx) {
       }
     }
     if (Math.random() < 0.7) {
-      const collectTypes = ['publication', 'grant', 'citation', 'coffee', 'heart', 'flame', 'potion'];
-      //                                  pub   grant  cite  coffee heart flame potion
-      const weights = levelIdx === 0 ? [0.25, 0.12, 0.42, 0.08, 0.02, 0.065, 0.015] :
-                      levelIdx === 1 ? [0.20, 0.19, 0.34, 0.10, 0.03, 0.09, 0.02] :
-                      [0.18, 0.27, 0.23, 0.10, 0.03, 0.12, 0.04];
+      const collectTypes = ['publication', 'grant', 'citation', 'coffee', 'heart', 'flame'];
+      const weights = levelIdx === 0 ? [0.45, 0.1, 0.25, 0.1, 0.05, 0.05] :
+                      levelIdx === 1 ? [0.35, 0.18, 0.18, 0.15, 0.07, 0.07] :
+                      [0.25, 0.25, 0.18, 0.15, 0.07, 0.10];
       let r = Math.random(), cumul = 0, cType = 'publication';
       for (let ci = 0; ci < collectTypes.length; ci++) {
         cumul += weights[ci];
@@ -3726,13 +2713,12 @@ function generateLevel(levelIdx) {
     }
   }
 
-  // Ground collectibles (scaled for longer levels)
-  for (let i = 0; i < Math.round((10 + levelIdx * 3) * (w / 100)); i++) {
+  // Ground collectibles
+  for (let i = 0; i < 10 + levelIdx * 3; i++) {
     const cx = 5 + Math.floor(Math.random() * (w - 10));
     if (tiles[groundY][cx] === 1) {
-      const collectTypes = ['publication', 'grant', 'citation', 'publication', 'grant', 'citation', 'citation', 'citation', 'grant', 'publication'];
-      const gType = Math.random() < 0.03 ? 'potion' : collectTypes[Math.floor(Math.random() * collectTypes.length)];
-      entities.push({ type: gType, x: cx, y: groundY - 1 });
+      const collectTypes = ['publication', 'grant', 'citation'];
+      entities.push({ type: collectTypes[Math.floor(Math.random() * collectTypes.length)], x: cx, y: groundY - 1 });
     }
   }
 
@@ -3740,10 +2726,10 @@ function generateLevel(levelIdx) {
   const enemyTypes = [
     ['reviewer2', 'imposter'],
     ['reviewer2', 'imposter', 'bureaucrat'],
-    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival'],  // Job Market
-    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival'],
-    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival'],
-    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival']
+    ['reviewer2', 'committee', 'bureaucrat'],  // Job Market
+    ['reviewer2', 'bureaucrat', 'teaching'],
+    ['bureaucrat', 'teaching', 'committee'],
+    ['reviewer2', 'bureaucrat', 'committee']
   ];
 
   // Collect platform info for enemy spawning
@@ -3760,7 +2746,7 @@ function generateLevel(levelIdx) {
     if (start !== -1) platforms.push({ y: row, x1: start, x2: w - 1 });
   }
 
-  const enemyCount = Math.round((5 + levelIdx * 3) * 1.3 * (w / 100));
+  const enemyCount = Math.round((5 + levelIdx * 3) * 1.3);
   const platformEnemyCount = platforms.length > 0 ? Math.floor(enemyCount * 0.4) : 0;
   const groundEnemyCount = enemyCount - platformEnemyCount;
 
@@ -3783,25 +2769,6 @@ function generateLevel(levelIdx) {
     entities.push({ type: eType, x: ex, y: plat.y - 1.5, patrolRange: patrol });
   }
 
-  // Grad students (mentorable NPCs — rare and valuable)
-  const gsCount = Math.max(1, Math.floor((1 + levelIdx) * 0.7));
-  let gsPlaced = 0;
-  for (const plat of platforms) {
-    if (gsPlaced >= gsCount) break;
-    const pw2 = plat.x2 - plat.x1 + 1;
-    if (pw2 >= 4 && Math.random() < 0.22) {
-      entities.push({ type: 'gradStudent', x: plat.x1 + 1, y: plat.y - 1.5, patrolRange: Math.min(3, Math.floor(pw2 / 2)) });
-      gsPlaced++;
-    }
-  }
-  // One on the ground if none placed yet
-  if (gsPlaced === 0) {
-    const gsx = 15 + Math.floor(Math.random() * (w - 30));
-    if (tiles[groundY][gsx] === 1) {
-      entities.push({ type: 'gradStudent', x: gsx, y: groundY - 1.5, patrolRange: 3 });
-    }
-  }
-
   // Signs
   const signMsgs = [
     ['"Sleep is for the tenured"', '"Free food in seminar room"', '"Advisor meeting: cancelled (again)"', '"IRB approval pending since 2019"'],
@@ -3812,9 +2779,8 @@ function generateLevel(levelIdx) {
     ['"Decision in 6-8 months"', '"External letters: still waiting"', '"H-index insufficient"', '"One more R&R should do it"']
   ];
 
-  const signCount = Math.round(4 * (w / 100));
-  for (let i = 0; i < signCount; i++) {
-    const sx = 8 + Math.floor(i * (w - 10) / signCount);
+  for (let i = 0; i < 4; i++) {
+    const sx = 8 + Math.floor(i * (w - 10) / 4);
     if (tiles[groundY][sx] === 1) {
       const msgs = signMsgs[levelIdx];
       entities.push({ type: 'sign', x: sx, y: groundY - 1, text: msgs[Math.floor(Math.random() * msgs.length)] });
@@ -3822,22 +2788,18 @@ function generateLevel(levelIdx) {
   }
 
   if (levelIdx === 5) {
-    entities.push({ type: 'dean', x: w - 20, y: groundY - 2, patrolRange: 8, hp: 12 });
+    entities.push({ type: 'dean', x: w - 15, y: groundY - 2, patrolRange: 4, hp: 5 });
     // Place flame collectibles leading up to and near the dean
-    for (let fi = 0; fi < 8; fi++) {
-      const fx = w - 50 + fi * 5;
+    for (let fi = 0; fi < 4; fi++) {
+      const fx = w - 30 + fi * 4;
       entities.push({ type: 'flame', x: fx, y: groundY - 1 });
     }
-    // Potion stash near boss arena
-    for (let fi = 0; fi < 3; fi++) {
-      entities.push({ type: 'potion', x: w - 45 + fi * 6, y: groundY - 1 });
-    }
-    // Boss arena platforms
-    for (let fi = 0; fi < 4; fi++) {
-      const px = w - 40 + fi * 8;
-      const py = groundY - 4 - (fi % 2) * 3;
+    // A couple on platforms near the dean area
+    for (let fi = 0; fi < 2; fi++) {
+      const px = w - 25 + fi * 8;
+      const py = groundY - 4 - fi * 2;
       if (py >= 0 && px < w) {
-        for (let dx = 0; dx < 4; dx++) {
+        for (let dx = 0; dx < 3; dx++) {
           if (px + dx < w) tiles[py][px + dx] = 2;
         }
         entities.push({ type: 'flame', x: px + 1, y: py - 1 });
@@ -3866,55 +2828,8 @@ let flagObj = null;
 
 let stats = {
   publications: 0, grants: 0, citations: 0,
-  hIndex: 0, lives: 3, coffee: 0, score: 0, potions: 0, mentored: 0,
+  hIndex: 0, lives: 3, coffee: 0, score: 0,
 };
-
-function newStats() {
-  return { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0, potions: 0, mentored: 0 };
-}
-let p1Stats = newStats();
-let p2Stats = newStats();
-
-// Return the stats object for a given player entity
-function statsFor(pl) {
-  return pl === player2 ? p2Stats : p1Stats;
-}
-
-// Combined stats for job market / leaderboard
-function combinedStats() {
-  return {
-    publications: p1Stats.publications + p2Stats.publications,
-    grants: p1Stats.grants + p2Stats.grants,
-    citations: p1Stats.citations + p2Stats.citations,
-    hIndex: Math.max(p1Stats.hIndex, p2Stats.hIndex),
-    lives: p1Stats.lives + p2Stats.lives,
-    score: p1Stats.score + p2Stats.score,
-    potions: p1Stats.potions + p2Stats.potions,
-    mentored: p1Stats.mentored + p2Stats.mentored,
-    coffee: p1Stats.coffee + p2Stats.coffee,
-  };
-}
-
-// Two-player mode
-let twoPlayerMode = false;
-let player2 = null;
-let player2Appearance = randomAppearance();
-let swappedControls = false; // Tab swaps which player P1/P2 keys control
-
-// Grad students (mentorable NPCs)
-let gradStudents = [];
-
-// Mentor's Wrath magic system (Golden Axe style)
-let magicActive = false;
-let magicTimer = 0;
-let magicDuration = 0;
-let magicLevel = 0;       // 1-4 based on potions spent
-let magicCasterX = 0;
-let magicCasterY = 0;
-let magicColumns = [];     // fire column positions
-let magicDamageDealt = false;
-let magicCasterPlayer = null;
-let screenShake = { x: 0, y: 0 };
 
 let levelTimer = 0;
 let introTimer = 0;
@@ -3938,7 +2853,6 @@ function initLevel(idx) {
   particles = [];
   floatingTexts = [];
   fireballs = [];
-  gradStudents = [];
   flagObj = null;
   messageQueue = [];
   currentMessage = null;
@@ -3965,9 +2879,7 @@ function initLevel(idx) {
           wasOnGround: false,
           hasFlame: false,
           flameTimer: 0,
-          fireCooldown: 0,
-          mentoringTimer: 0,
-          headbutting: false
+          fireCooldown: 0
         };
         break;
       case 'flag':
@@ -3979,7 +2891,6 @@ function initLevel(idx) {
       case 'coffee':
       case 'heart':
       case 'flame':
-      case 'potion':
         collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
         break;
       case 'reviewer2':
@@ -3995,75 +2906,20 @@ function initLevel(idx) {
           appearance: randomAppearance()
         });
         break;
-      case 'rival': {
-        const rivalSubtypes = [
-          { title: 'SCOOPER', color: '#e65100', desc: 'Publishes your idea first' },
-          { title: 'CRITIC', color: '#c62828', desc: 'Tears apart your methods' },
-          { title: 'STAR', color: '#f9a825', desc: 'Gets all the grants' },
-          { title: 'SNAKE', color: '#2e7d32', desc: 'Steals your collaborators' },
-          { title: 'HOTSHOT', color: '#6a1b9a', desc: 'Fresh PhD, 50 citations' },
-        ];
-        const sub = rivalSubtypes[Math.floor(Math.random() * rivalSubtypes.length)];
-        enemies.push({
-          type: 'rival', x: wx, y: wy - TILE * 0.3, w: 40, h: 44,
-          vx: (Math.random() < 0.5 ? 1 : -1) * (0.7 + idx * 0.2),
-          startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
-          alive: true, hp: 3, maxHp: 3,
-          frame: 0, frameTimer: 0, chargeTimer: 0, charging: false,
-          shootTimer: 0, shootCooldown: 0,
-          rivalTitle: sub.title, rivalColor: sub.color,
-          appearance: randomAppearance()
-        });
-        break;
-      }
       case 'dean':
         enemies.push({
           type: 'dean', x: wx, y: wy - TILE, w: 48, h: 56,
           vx: 1.5, startX: wx, patrolRange: (ent.patrolRange || 4) * TILE,
-          alive: true, hp: ent.hp || 12, maxHp: ent.hp || 12,
+          alive: true, hp: ent.hp || 5, maxHp: ent.hp || 5,
           frame: 0, frameTimer: 0, attackTimer: 0,
-          phase: 1, phaseTimer: 0, slamCooldown: 0,
           appearance: randomAppearance()
         });
         break;
-      case 'gradStudent': {
-        const gsNames = ['1st Year', '2nd Year', '3rd Year', 'ABD', 'Postdoc', 'Lab Rat', 'TA'];
-        gradStudents.push({
-          x: wx, y: wy, w: 24, h: 28, vx: 0.8, vy: 0,
-          startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
-          onGround: false, mentee: null, hp: 2,
-          frame: 0, frameTimer: 0,
-          pencilCooldown: 0, panicked: false, panicTimer: 0, spent: false,
-          gsLabel: gsNames[Math.floor(Math.random() * gsNames.length)],
-          appearance: randomAppearance()
-        });
-        break;
-      }
       case 'sign':
         signs.push({ x: wx, y: wy, text: ent.text });
         break;
     }
   }
-
-  // Player 2
-  if (twoPlayerMode && player) {
-    player2 = {
-      x: player.x + 30, y: player.y, vx: 0, vy: 0,
-      w: 26, h: 32,
-      onGround: false, facingRight: true,
-      frame: 0, frameTimer: 0,
-      powered: false, powerTimer: 0,
-      invincible: false, invTimer: 0,
-      dead: false, isPlayer: true,
-      hasDoubleJumped: false,
-      jumpBuffer: 0, coyoteTime: 0, wasOnGround: false,
-      hasFlame: false, flameTimer: 0, fireCooldown: 0,
-      mentoring: null, mentoringTimer: 0, headbutting: false
-    };
-  } else {
-    player2 = null;
-  }
-  if (player) { player.isPlayer = true; player.mentoring = null; player.mentoringTimer = 0; player.headbutting = false; }
 
   camera.x = 0;
   camera.y = 0;
@@ -4100,7 +2956,7 @@ function moveEntity(ent, gravity) {
       if (isSolid(tx, ty)) {
         if (ent.vx > 0) ent.x = tx * TILE - ent.w;
         else if (ent.vx < 0) ent.x = (tx + 1) * TILE;
-        if (ent.isPlayer) ent.vx = 0;
+        if (ent === player) ent.vx = 0;
         else ent.vx *= -1;
       }
     }
@@ -4184,23 +3040,6 @@ function update() {
     if (messageTimer <= 0) currentMessage = null;
   }
 
-  // Pause toggle
-  if (gameState === 'playing' && justPressed['Escape']) {
-    gameState = 'paused';
-    for (const key in justPressed) delete justPressed[key];
-    return;
-  }
-  if (gameState === 'paused') {
-    if (justPressed['Escape'] || justPressed['Space']) {
-      gameState = 'playing';
-    }
-    if (justPressed['KeyX']) {
-      gameState = 'menu';
-    }
-    for (const key in justPressed) delete justPressed[key];
-    return;
-  }
-
   if (gameState === 'levelIntro') {
     introTimer--;
     if (introTimer <= 0 || keys['Space'] || keys['Enter']) {
@@ -4214,8 +3053,7 @@ function update() {
 
   if (gameState === 'dead') {
     deathTimer--;
-    const deathLives = twoPlayerMode ? p1Stats.lives + p2Stats.lives : stats.lives;
-    if (deathLives > 0) {
+    if (stats.lives > 0) {
       // Auto-dismiss after timer for setbacks
       if (deathTimer <= 0) {
         initLevel(currentLevel);
@@ -4310,33 +3148,6 @@ function update() {
       if (justPressed['Escape']) {
         customizing = false;
       }
-    } else if (keyConfigActive) {
-      if (keyConfigWaiting) {
-        // Waiting for a new key press to bind
-        for (const code in justPressed) {
-          if (code === 'Escape') {
-            keyConfigWaiting = false;
-            break;
-          }
-          const action = BINDABLE_ACTIONS[keyConfigIndex];
-          keyBindings[action] = [code];
-          keyConfigWaiting = false;
-          break;
-        }
-      } else {
-        if (justPressed['ArrowUp'] || justPressed['KeyW']) {
-          keyConfigIndex = (keyConfigIndex - 1 + BINDABLE_ACTIONS.length) % BINDABLE_ACTIONS.length;
-        }
-        if (justPressed['ArrowDown'] || justPressed['KeyS']) {
-          keyConfigIndex = (keyConfigIndex + 1) % BINDABLE_ACTIONS.length;
-        }
-        if (justPressed['Enter'] || justPressed['Space']) {
-          keyConfigWaiting = true;
-        }
-        if (justPressed['Escape']) {
-          keyConfigActive = false;
-        }
-      }
     } else {
       if (justPressed['Space']) {
         startGame();
@@ -4348,15 +3159,6 @@ function update() {
       if (justPressed['KeyL']) {
         gameState = 'showLeaderboard';
         fetchLeaderboard();
-      }
-      if (justPressed['KeyK']) {
-        keyConfigActive = true;
-        keyConfigIndex = 0;
-        keyConfigWaiting = false;
-      }
-      if (justPressed['Digit2']) {
-        twoPlayerMode = !twoPlayerMode;
-        if (twoPlayerMode) player2Appearance = randomAppearance();
       }
     }
     for (const key in justPressed) delete justPressed[key];
@@ -4370,367 +3172,162 @@ function update() {
 
   levelTimer++;
 
-  // --- Helper: update one player ---
-  function updatePlayer(pl, prefix) {
-    if (!pl || pl.dead) return;
-    const mentoringGS = pl.mentoring;
-    const speedMul = mentoringGS ? 1.5 : 1;
-    const speed = (pl.powered ? 5 : 3.5) * speedMul;
-    if (isAction(prefix + '_left')) {
-      pl.vx = -speed;
-      pl.facingRight = false;
-    } else if (isAction(prefix + '_right')) {
-      pl.vx = speed;
-      pl.facingRight = true;
-    } else {
-      pl.vx *= 0.7;
-      if (Math.abs(pl.vx) < 0.3) pl.vx = 0;
-    }
-    if (pl.onGround) { pl.coyoteTime = 8; pl.wasOnGround = true; }
-    else { if (pl.coyoteTime > 0) pl.coyoteTime--; }
-    const jp = isActionJP(prefix + '_jump');
-    if (jp) pl.jumpBuffer = 8;
-    if (pl.jumpBuffer > 0) pl.jumpBuffer--;
-    const wj = pl.jumpBuffer > 0;
-    const cgj = pl.onGround || pl.coyoteTime > 0;
-    const jumpPower = mentoringGS ? (pl.powered ? -15 : -13) : (pl.powered ? -13 : -11);
-    if (wj && cgj) {
-      pl.vy = jumpPower;
-      pl.onGround = false; pl.coyoteTime = 0; pl.jumpBuffer = 0;
-      pl.hasDoubleJumped = false; pl.wasOnGround = false;
-      if (mentoringGS) { mentoringGS.vy = jumpPower; mentoringGS.onGround = false; }
-      spawnParticles(pl.x + pl.w / 2, pl.y + pl.h, 'rgba(180,180,180,0.6)', 4);
-    } else if (jp && !cgj && !pl.hasDoubleJumped) {
-      pl.vy = pl.powered ? -11 : -9;
-      pl.hasDoubleJumped = true; pl.jumpBuffer = 0;
-      spawnParticles(pl.x + pl.w / 2, pl.y + pl.h, '#aaa', 6);
-    }
-    if (Math.abs(pl.vx) > 0.5) {
-      pl.frameTimer++;
-      if (pl.frameTimer > 8) { pl.frame = (pl.frame + 1) % 4; pl.frameTimer = 0; }
-    }
-    if (pl.powered) { pl.powerTimer--; if (pl.powerTimer <= 0) pl.powered = false; }
-    if (pl.invincible) { pl.invTimer--; if (pl.invTimer <= 0) pl.invincible = false; }
-    if (pl.hasFlame) { pl.flameTimer--; if (pl.flameTimer <= 0) pl.hasFlame = false; }
-    if (pl.fireCooldown > 0) pl.fireCooldown--;
-    // Fireball
-    if (pl.hasFlame && isActionJP(prefix + '_fire') && pl.fireCooldown <= 0) {
-      pl.fireCooldown = 20;
-      const dir = pl.facingRight ? 1 : -1;
-      fireballs.push({
-        x: pl.x + (dir > 0 ? pl.w : -8), y: pl.y + pl.h / 2 - 4,
-        vx: dir * 7, vy: 0, w: 12, h: 12, life: 120, bounces: 0, owner: pl
-      });
-      spawnParticles(pl.x + pl.w / 2, pl.y + pl.h / 2, '#ff5722', 4);
-    }
-    // Pencil shooting while mentoring grad student
-    if (mentoringGS && isActionJP(prefix + '_fire') && mentoringGS.pencilCooldown <= 0) {
-      mentoringGS.pencilCooldown = 25;
-      const dir = pl.facingRight ? 1 : -1;
-      fireballs.push({
-        x: mentoringGS.x + (dir > 0 ? mentoringGS.w : -6), y: mentoringGS.y + 8,
-        vx: dir * 8, vy: -1.5, w: 10, h: 4, life: 90, bounces: 0, isPencil: true, owner: pl
-      });
-      spawnParticles(mentoringGS.x + mentoringGS.w / 2, mentoringGS.y + 10, '#ffd54f', 3);
-    }
-    // Mentor's Wrath magic (Golden Axe style — uses ALL stacked potions)
-    const plSt = twoPlayerMode ? statsFor(pl) : stats;
-    if (isActionJP(prefix + '_potion') && plSt.potions > 0 && !magicActive) {
-      const potionsUsed = plSt.potions;
-      plSt.potions = 0;
-      magicLevel = Math.min(potionsUsed, 4); // 1-4 levels
-      magicActive = true;
-      magicDuration = 60 + magicLevel * 40; // longer for higher level
-      magicTimer = 0;
-      magicDamageDealt = false;
-      magicCasterX = pl.x + pl.w / 2;
-      magicCasterY = pl.y;
-      magicCasterPlayer = pl;
-      plSt.score += potionsUsed * 100;
-      // Generate fire column positions across the screen
-      magicColumns = [];
-      const colCount = 3 + magicLevel * 3; // 6, 9, 12, 15 columns
-      for (let i = 0; i < colCount; i++) {
-        magicColumns.push({
-          screenX: (i + 0.5) * (GAME_W / colCount),
-          delay: Math.floor(i * (15 / magicLevel)) + Math.floor(Math.random() * 8),
-          height: 0,
-          maxHeight: GAME_H * (0.5 + magicLevel * 0.12) + Math.random() * 40,
-          width: 20 + magicLevel * 6 + Math.random() * 10,
-        });
-      }
-      const wrathNames = [
-        "MENTOR'S WRATH!",
-        "MENTOR'S FURY!",
-        "MENTOR'S INFERNO!",
-        "MENTOR'S APOCALYPSE!"
-      ];
-      spawnFloatingText(pl.x, pl.y - 30, wrathNames[magicLevel - 1], '#ff5722');
-      showMessage(magicLevel >= 3 ? 'Your mentor rains fire upon academia!' : "Mentor's Wrath unleashed!");
-    }
-    // Mentoring: steer grad student and snap to it
-    if (pl.mentoring) {
-      const gs = pl.mentoring;
-      // Mentoring timer (15 seconds = 900 frames)
-      pl.mentoringTimer--;
-      if (pl.mentoringTimer <= 0) {
-        // Time's up — dismount, grad student runs off
-        pl.mentoring = null; gs.mentee = null;
-        pl.vy = -4;
-        pl.headbutting = false;
-        gs.spent = true;
-        gs.panicked = true;
-        gs.panicTimer = 180;
-        gs.vx = (pl.facingRight ? -3.5 : 3.5);
-        gs.vy = -4;
-        spawnFloatingText(gs.x, gs.y - 10, 'Gotta go!', '#ff9800');
-        showMessage('Grad student defended their thesis and left!');
-      } else {
-        // Headbutt mode: jump + arrow while mentoring
-        const pressingArrow = isAction(prefix + '_left') || isAction(prefix + '_right');
-        if (isActionJP(prefix + '_jump') && pressingArrow) {
-          pl.headbutting = true;
-          spawnFloatingText(gs.x, gs.y - 10, 'HEAD BUTT!', '#ff5722');
-        }
-        // Headbutt mode lasts until the player stops pressing arrow keys
-        if (pl.headbutting && !pressingArrow) {
-          pl.headbutting = false;
-        }
-        if (Math.abs(pl.vx) > 0.5) {
-          gs.vx = pl.vx * (pl.headbutting ? 1.0 : 0.6); // faster when headbutting
-          gs.facingRight = pl.vx > 0;
-        }
-        pl.x = gs.x + (gs.w - pl.w) / 2;
-        pl.y = gs.y - pl.h;
-        pl.vy = gs.vy;
-        pl.onGround = gs.onGround;
-        if (gs.pencilCooldown > 0) gs.pencilCooldown--;
-      }
-    }
-    // Physics
-    if (!pl.mentoring) {
-      const result = moveEntity(pl, 0.5);
-      if (result === 'fell') {
-        if (pl === player) { playerDie('Fell into industry...'); }
-        else { p2Die('Player 2 fell!'); }
-        return;
-      }
-    }
-  }
-
-  // Tab to swap controls between players
-  if (twoPlayerMode && justPressed['Tab']) {
-    swappedControls = !swappedControls;
-    showMessage(swappedControls ? 'Controls swapped! P1 keys -> P2, P2 keys -> P1' : 'Controls restored to default');
-  }
-
-  const p1Prefix = swappedControls ? 'p2' : 'p1';
-  const p2Prefix = swappedControls ? 'p1' : 'p2';
-  updatePlayer(player, p1Prefix);
-  if (gameState !== 'playing') { for (const key in justPressed) delete justPressed[key]; return; }
-  updatePlayer(player2, p2Prefix);
-  if (gameState !== 'playing') { for (const key in justPressed) delete justPressed[key]; return; }
-
-  // Respawn dead players in co-op
-  if (twoPlayerMode) {
-    if (player.dead && player.respawnTimer !== undefined) {
-      player.respawnTimer--;
-      if (player.respawnTimer <= 0) {
-        player.dead = false;
-        player.x = player2.x;
-        player.y = player2.y - 30;
-        player.vy = 0; player.vx = 0;
-        player.invincible = true; player.invTimer = 120;
-        player.respawnTimer = undefined;
-        showMessage('Player 1 respawned!');
-      }
-    }
-    if (player2 && player2.dead && player2.respawnTimer !== undefined) {
-      player2.respawnTimer--;
-      if (player2.respawnTimer <= 0) {
-        player2.dead = false;
-        player2.x = player.x;
-        player2.y = player.y - 30;
-        player2.vy = 0; player2.vx = 0;
-        player2.invincible = true; player2.invTimer = 120;
-        player2.respawnTimer = undefined;
-        showMessage('Player 2 respawned!');
-      }
-    }
-  }
-
-  // Camera (smooth) — follow midpoint if two players
-  let camFocusX, camFocusY;
-  if (player.dead && player2 && !player2.dead) {
-    camFocusX = player2.x; camFocusY = player2.y;
-  } else if (player2 && !player2.dead && !player.dead) {
-    camFocusX = (player.x + player2.x) / 2;
-    camFocusY = (player.y + player2.y) / 2;
+  // Player input
+  const speed = player.powered ? 5 : 3.5;
+  if (keys['ArrowLeft'] || keys['KeyA']) {
+    player.vx = -speed;
+    player.facingRight = false;
+  } else if (keys['ArrowRight'] || keys['KeyD']) {
+    player.vx = speed;
+    player.facingRight = true;
   } else {
-    camFocusX = player.x; camFocusY = player.y;
+    player.vx *= 0.7;
+    if (Math.abs(player.vx) < 0.3) player.vx = 0;
   }
-  const targetCamX = camFocusX - GAME_W / 2 + player.w / 2;
-  const targetCamY = camFocusY - GAME_H / 2;
+
+  // Coyote time: track frames since last on ground
+  if (player.onGround) {
+    player.coyoteTime = 8; // 8 frames of grace after leaving ground
+    player.wasOnGround = true;
+  } else {
+    if (player.coyoteTime > 0) player.coyoteTime--;
+  }
+
+  // Jump buffer: remember jump press for several frames
+  const jumpPressed = justPressed['ArrowUp'] || justPressed['KeyW'] || justPressed['Space'];
+  if (jumpPressed) player.jumpBuffer = 8; // 8 frames of input buffer
+  if (player.jumpBuffer > 0) player.jumpBuffer--;
+
+  const wantsJump = player.jumpBuffer > 0;
+  const canGroundJump = player.onGround || player.coyoteTime > 0;
+
+  if (wantsJump && canGroundJump) {
+    player.vy = player.powered ? -13 : -11;
+    player.onGround = false;
+    player.coyoteTime = 0;
+    player.jumpBuffer = 0;
+    player.hasDoubleJumped = false;
+    player.wasOnGround = false;
+    // Jump dust
+    spawnParticles(player.x + player.w / 2, player.y + player.h, 'rgba(180,180,180,0.6)', 4);
+  } else if (jumpPressed && !canGroundJump && !player.hasDoubleJumped) {
+    player.vy = player.powered ? -11 : -9;
+    player.hasDoubleJumped = true;
+    player.jumpBuffer = 0;
+    spawnParticles(player.x + player.w / 2, player.y + player.h, '#aaa', 6);
+  }
+
+  // Animation
+  if (Math.abs(player.vx) > 0.5) {
+    player.frameTimer++;
+    if (player.frameTimer > 8) {
+      player.frame = (player.frame + 1) % 4;
+      player.frameTimer = 0;
+    }
+  }
+
+  if (player.powered) {
+    player.powerTimer--;
+    if (player.powerTimer <= 0) player.powered = false;
+  }
+  if (player.invincible) {
+    player.invTimer--;
+    if (player.invTimer <= 0) player.invincible = false;
+  }
+
+  // Flame power-up timer
+  if (player.hasFlame) {
+    player.flameTimer--;
+    if (player.flameTimer <= 0) player.hasFlame = false;
+  }
+  if (player.fireCooldown > 0) player.fireCooldown--;
+
+  // Shoot fireball with F key
+  if (player.hasFlame && (justPressed['KeyF'] || justPressed['KeyX']) && player.fireCooldown <= 0) {
+    player.fireCooldown = 20;
+    const dir = player.facingRight ? 1 : -1;
+    fireballs.push({
+      x: player.x + (dir > 0 ? player.w : -8),
+      y: player.y + player.h / 2 - 4,
+      vx: dir * 7,
+      vy: 0,
+      w: 12, h: 12,
+      life: 120,
+      bounces: 0
+    });
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ff5722', 4);
+  }
+
+  const result = moveEntity(player, 0.5);
+  if (result === 'fell') {
+    playerDie('Fell into industry...');
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  // Camera (smooth)
+  const targetCamX = player.x - GAME_W / 2 + player.w / 2;
+  const targetCamY = player.y - GAME_H / 2;
   camera.x += (targetCamX - camera.x) * 0.1;
   camera.y += (targetCamY - camera.y) * 0.05;
   camera.x = Math.max(0, Math.min(level.width * TILE - GAME_W, camera.x));
   camera.y = Math.max(0, Math.min(level.height * TILE - GAME_H, camera.y));
 
-  // Grad students update
-  for (const gs of gradStudents) {
-    // Panic behavior: run away fast, then disappear
-    if (gs.panicked) {
-      gs.panicTimer--;
-      gs.x += gs.vx;
-      gs.vy = (gs.vy || 0) + 0.5;
-      if (gs.vy > 12) gs.vy = 12;
-      gs.y += gs.vy;
-      gs.onGround = false;
-      const gLeft = Math.floor(gs.x / TILE);
-      const gRight = Math.floor((gs.x + gs.w - 1) / TILE);
-      const gBot = Math.floor((gs.y + gs.h) / TILE);
-      for (let tx = gLeft; tx <= gRight; tx++) {
-        if (isSolid(tx, gBot) || isPlatform(tx, gBot)) {
-          gs.y = gBot * TILE - gs.h;
-          gs.vy = 0;
-          gs.onGround = true;
-        }
-      }
-      if (gs.panicTimer <= 0) {
-        gradStudents = gradStudents.filter(g => g !== gs);
-      }
-      continue;
-    }
-
-    gs.x += gs.vx;
-    if (!gs.mentee && Math.abs(gs.x - gs.startX) > gs.patrolRange) gs.vx *= -1;
-    gs.vy = (gs.vy || 0) + 0.5;
-    if (gs.vy > 12) gs.vy = 12;
-    gs.y += gs.vy;
-    gs.onGround = false;
-    const gLeft = Math.floor(gs.x / TILE);
-    const gRight = Math.floor((gs.x + gs.w - 1) / TILE);
-    const gBot = Math.floor((gs.y + gs.h) / TILE);
-    for (let tx = gLeft; tx <= gRight; tx++) {
-      if (isSolid(tx, gBot) || isPlatform(tx, gBot)) {
-        gs.y = gBot * TILE - gs.h;
-        gs.vy = 0;
-        gs.onGround = true;
-      }
-    }
-    gs.frameTimer++;
-    if (gs.frameTimer > 10) { gs.frame = (gs.frame + 1) % 2; gs.frameTimer = 0; }
-
-    // Head butt: only when player activates headbutt mode (jump+arrow)
-    if (gs.mentee && gs.mentee.headbutting && Math.abs(gs.vx) > 1.5) {
-      const hbSt = twoPlayerMode ? statsFor(gs.mentee) : stats;
-      for (const e of enemies) {
-        if (!e.alive) continue;
-        if (rectCollide(gs, e)) {
-          spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 10);
-          if (e.hp !== undefined) {
-            e.hp -= 2;
-            spawnFloatingText(e.x, e.y, 'HEAD BUTT!', '#ff9800');
-            if (e.hp <= 0) {
-              e.alive = false;
-              hbSt.score += e.type === 'dean' ? 5000 : 500;
-              spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
-              if (e.type === 'dean') {
-                spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
-                showMessage('You defeated the Dean! Tenure is yours!');
-                gameState = 'levelComplete'; winTimer = 180;
-                if (flagObj) flagObj.reached = true;
-              } else {
-                spawnFloatingText(e.x, e.y, 'Rival down!', '#ff9800');
-              }
-            }
-          } else {
-            e.alive = false;
-            hbSt.score += 200;
-            spawnFloatingText(e.x, e.y, '+200', '#ff9800');
-          }
-          // Bounce back slightly after headbutt
-          gs.vx *= -0.3;
-          break;
-        }
-      }
-    }
-
-    // Check if player can mentor (not panicked)
-    for (const pl of [player, player2]) {
-      if (!pl || pl.dead || pl.mentoring) continue;
-      if (pl.vy > 0 && rectCollide(pl, gs) && pl.y + pl.h - 6 < gs.y + gs.h / 2 && !gs.mentee && !gs.spent && !gs.panicked) {
-        pl.mentoring = gs;
-        gs.mentee = pl;
-        pl.vy = 0;
-        pl.mentoringTimer = 900; // 15 seconds at 60fps
-        pl.headbutting = false;
-        (twoPlayerMode ? statsFor(pl) : stats).mentored++;
-        spawnFloatingText(gs.x, gs.y - 10, (twoPlayerMode ? (pl === player2 ? 'P2 ' : 'P1 ') : '') + 'Mentoring!', '#66bb6a');
-      }
-    }
-  }
-
-  // Collectibles — check both players
-  function collectItem(c, cy, pl) {
-    if (!pl || pl.dead) return false;
-    if (!rectCollide(pl, { x: c.x, y: cy, w: c.w, h: c.h })) return false;
-    c.collected = true;
-    const st = twoPlayerMode ? statsFor(pl) : stats;
-    const plLabel = twoPlayerMode ? (pl === player2 ? 'P2 ' : 'P1 ') : '';
-    switch (c.type) {
-      case 'publication':
-        st.publications++; st.score += 100;
-        spawnParticles(c.x + 12, cy + 12, '#fff', 8);
-        spawnFloatingText(c.x, cy, plLabel + '+1 Pub!', '#fff');
-        if (st.publications % 5 === 0) showMessage(plLabel + 'h-index increased!');
-        st.hIndex = Math.floor(Math.sqrt(st.publications * 2));
-        break;
-      case 'grant':
-        st.grants++; st.score += 500;
-        spawnParticles(c.x + 12, cy + 12, '#ffd54f', 12);
-        spawnFloatingText(c.x, cy, plLabel + '$$$!', '#ffd54f');
-        showMessage(plLabel + ["NSF Grant funded!", "NIH R01 approved!", "Internal seed grant!", "Industry partnership!"][Math.floor(Math.random() * 4)]);
-        break;
-      case 'citation':
-        st.citations++; st.score += 50;
-        spawnParticles(c.x + 12, cy + 12, '#4fc3f7', 6);
-        spawnFloatingText(c.x, cy, plLabel + 'Cited!', '#4fc3f7');
-        break;
-      case 'coffee':
-        st.coffee++; pl.powered = true; pl.powerTimer = 300; st.score += 200;
-        spawnParticles(c.x + 12, cy + 12, '#8d6e63', 15);
-        spawnFloatingText(c.x, cy, plLabel + 'CAFFEINE!', '#ff6f00');
-        showMessage(plLabel + 'Coffee power! Speed boost!');
-        break;
-      case 'heart':
-        st.lives++; st.score += 300;
-        spawnParticles(c.x + 12, cy + 12, '#ef5350', 15);
-        spawnFloatingText(c.x, cy, plLabel + '+1 UP!', '#ef5350');
-        showMessage(plLabel + 'Extra life!');
-        break;
-      case 'flame':
-        pl.hasFlame = true; pl.flameTimer = 900; st.score += 250;
-        spawnParticles(c.x + 12, cy + 12, '#ff5722', 20);
-        spawnFloatingText(c.x, cy, plLabel + 'FLAME!', '#ff5722');
-        const fireKey = pl === player2 ? keyBindings.p2_fire[0] : keyBindings.p1_fire[0];
-        showMessage(`${plLabel}New Contribution Flame! Press ${keyName(fireKey)} to throw fireballs!`);
-        break;
-      case 'potion':
-        st.potions++; st.score += 150;
-        spawnParticles(c.x + 12, cy + 12, '#9c27b0', 12);
-        spawnFloatingText(c.x, cy, plLabel + '+1 Potion!', '#ce93d8');
-        const potKey = pl === player2 ? keyBindings.p2_potion[0] : keyBindings.p1_potion[0];
-        showMessage(`${plLabel}Mentor's Wrath potion! [${keyName(potKey)}]`);
-        break;
-    }
-    return true;
-  }
+  // Collectibles
   for (const c of collectibles) {
     if (c.collected) continue;
     c.bobOffset += 0.05;
     const cy = c.y + Math.sin(c.bobOffset) * 4;
-    if (!collectItem(c, cy, player)) collectItem(c, cy, player2);
+    if (rectCollide(player, { x: c.x, y: cy, w: c.w, h: c.h })) {
+      c.collected = true;
+      switch (c.type) {
+        case 'publication':
+          stats.publications++;
+          stats.score += 100;
+          spawnParticles(c.x + 12, cy + 12, '#fff', 8);
+          spawnFloatingText(c.x, cy, '+1 Pub!', '#fff');
+          if (stats.publications % 5 === 0) showMessage('h-index increased!');
+          stats.hIndex = Math.floor(Math.sqrt(stats.publications * 2));
+          break;
+        case 'grant':
+          stats.grants++;
+          stats.score += 500;
+          spawnParticles(c.x + 12, cy + 12, '#ffd54f', 12);
+          spawnFloatingText(c.x, cy, '$$$!', '#ffd54f');
+          showMessage(["NSF Grant funded!", "NIH R01 approved!", "Internal seed grant!", "Industry partnership!"][Math.floor(Math.random() * 4)]);
+          break;
+        case 'citation':
+          stats.citations++;
+          stats.score += 50;
+          spawnParticles(c.x + 12, cy + 12, '#4fc3f7', 6);
+          spawnFloatingText(c.x, cy, 'Cited!', '#4fc3f7');
+          break;
+        case 'coffee':
+          stats.coffee++;
+          player.powered = true;
+          player.powerTimer = 300;
+          stats.score += 200;
+          spawnParticles(c.x + 12, cy + 12, '#8d6e63', 15);
+          spawnFloatingText(c.x, cy, 'CAFFEINE!', '#ff6f00');
+          showMessage('Coffee power! Speed boost!');
+          break;
+        case 'heart':
+          stats.lives++;
+          stats.score += 300;
+          spawnParticles(c.x + 12, cy + 12, '#ef5350', 15);
+          spawnFloatingText(c.x, cy, '+1 UP!', '#ef5350');
+          showMessage('Extra life! Your CV impressed someone!');
+          break;
+        case 'flame':
+          player.hasFlame = true;
+          player.flameTimer = 900; // 15 seconds
+          stats.score += 250;
+          spawnParticles(c.x + 12, cy + 12, '#ff5722', 20);
+          spawnFloatingText(c.x, cy, 'NEW CONTRIBUTION!', '#ff5722');
+          showMessage('New Contribution Flame! Press F to throw fireballs!');
+          break;
+      }
+    }
   }
 
   // Enemies
@@ -4740,81 +3337,21 @@ function update() {
     if (Math.abs(e.x - e.startX) > e.patrolRange) e.vx *= -1;
 
     e.frameTimer++;
-    if (e.frameTimer > 12) { e.frame = (e.frame + 1) % 2; e.frameTimer = 0; }
+    if (e.frameTimer > 12) {
+      e.frame = (e.frame + 1) % 2;
+      e.frameTimer = 0;
+    }
 
-    // Rival charging and shooting behavior
-    if (e.type === 'rival' && e.alive) {
-      e.chargeTimer = (e.chargeTimer || 0) + 1;
-      e.shootTimer = (e.shootTimer || 0) + 1;
-      const closestP = [player, player2].filter(p => p && !p.dead).sort((a,b) => Math.abs(a.x - e.x) - Math.abs(b.x - e.x))[0];
-      // Charging behavior
-      if (closestP && Math.abs(closestP.x - e.x) < TILE * 5 && e.chargeTimer > 120) {
-        e.charging = true;
-        e.vx = closestP.x < e.x ? -3.5 : 3.5;
-        if (e.chargeTimer > 160) { e.charging = false; e.chargeTimer = 0; e.vx = e.vx > 0 ? 0.7 : -0.7; }
-      } else {
-        e.charging = false;
-      }
-      // Shooting: rivals throw critique papers at the player
-      if (closestP && Math.abs(closestP.x - e.x) < TILE * 8 && e.shootTimer > 160) {
-        e.shootTimer = 0;
-        const dir = closestP.x < e.x ? -1 : 1;
+    if (e.type === 'dean' && e.alive) {
+      e.attackTimer++;
+      if (e.attackTimer > 120) {
+        e.attackTimer = 0;
         enemies.push({
-          type: 'critique', x: e.x + e.w / 2, y: e.y + 12,
-          w: 14, h: 10, vx: dir * 3.5, vy: -1.5,
+          type: 'rejection', x: e.x + e.w / 2, y: e.y + 10,
+          w: 20, h: 14, vx: player.x < e.x ? -4 : 4, vy: -2,
           startX: e.x, patrolRange: 300, alive: true,
           frame: 0, frameTimer: 0, isProjectile: true
         });
-        spawnFloatingText(e.x, e.y - 5, 'Peer Review!', e.rivalColor || '#ff9800');
-      }
-    }
-
-    // Dean boss — multi-phase attack patterns
-    if (e.type === 'dean' && e.alive) {
-      // Update phase based on HP
-      const hpPct = e.hp / e.maxHp;
-      e.phase = hpPct > 0.66 ? 1 : hpPct > 0.33 ? 2 : 3;
-      e.attackTimer++;
-      const attackRate = e.phase === 1 ? 100 : e.phase === 2 ? 70 : 45;
-      if (e.attackTimer > attackRate) {
-        e.attackTimer = 0;
-        const closestP = [player, player2].filter(p => p && !p.dead).sort((a,b) => Math.abs(a.x - e.x) - Math.abs(b.x - e.x))[0] || player;
-        if (e.phase === 1) {
-          // Single rejection letter
-          enemies.push({
-            type: 'rejection', x: e.x + e.w / 2, y: e.y + 10,
-            w: 20, h: 14, vx: closestP.x < e.x ? -4 : 4, vy: -2,
-            startX: e.x, patrolRange: 400, alive: true,
-            frame: 0, frameTimer: 0, isProjectile: true
-          });
-        } else if (e.phase === 2) {
-          // Spread of 3 rejection letters
-          for (let si = -1; si <= 1; si++) {
-            enemies.push({
-              type: 'rejection', x: e.x + e.w / 2, y: e.y + 10,
-              w: 20, h: 14, vx: (closestP.x < e.x ? -4 : 4) + si * 1.5, vy: -3 + Math.abs(si),
-              startX: e.x, patrolRange: 400, alive: true,
-              frame: 0, frameTimer: 0, isProjectile: true
-            });
-          }
-        } else {
-          // Phase 3: fan of 5 + speed boost
-          for (let si = -2; si <= 2; si++) {
-            enemies.push({
-              type: 'rejection', x: e.x + e.w / 2, y: e.y + 10,
-              w: 20, h: 14, vx: (closestP.x < e.x ? -5 : 5) + si * 1.2, vy: -4 + Math.abs(si) * 0.8,
-              startX: e.x, patrolRange: 500, alive: true,
-              frame: 0, frameTimer: 0, isProjectile: true
-            });
-          }
-          // Phase 3 boss moves faster
-          e.vx = e.vx > 0 ? 3 : -3;
-        }
-      }
-      // Phase transitions
-      if (e.phaseTimer) {
-        e.phaseTimer--;
-        if (e.phaseTimer === 0) showMessage(e.phase === 2 ? 'The Dean grows angry!' : 'FINAL PHASE! The Dean is furious!');
       }
     }
 
@@ -4824,44 +3361,30 @@ function update() {
       if (e.y > level.height * TILE) e.alive = false;
     }
 
-    // Check collision with both players
-    for (const pl of [player, player2]) {
-      if (!pl || pl.dead || pl.invincible) continue;
-      if (!rectCollide(pl, e)) continue;
-      const plSt2 = twoPlayerMode ? statsFor(pl) : stats;
-      if (pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
-        pl.vy = -8;
-        if (e.hp !== undefined) {
-          // HP-based enemy (dean, rival)
+    if (rectCollide(player, e)) {
+      if (player.invincible) continue;
+      if (player.vy > 0 && player.y + player.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
+        player.vy = -8;
+        if (e.type === 'dean') {
           e.hp--;
           spawnParticles(e.x + e.w / 2, e.y, '#ff0000', 10);
           spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
           if (e.hp <= 0) {
             e.alive = false;
-            plSt2.score += e.type === 'dean' ? 5000 : 500;
+            stats.score += 5000;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
-            if (e.type === 'dean') {
-              spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
-              showMessage('You defeated the Dean! Tenure is yours!');
-              gameState = 'levelComplete'; winTimer = 180;
-              if (flagObj) flagObj.reached = true;
-            } else {
-              spawnFloatingText(e.x, e.y, 'Rival defeated!', '#ff9800');
-              showMessage('Rival researcher out-published!');
-            }
+            spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
+            showMessage('You defeated the Dean! Tenure is yours!');
+            // Trigger win
+            gameState = 'levelComplete';
+            winTimer = 180;
+            if (flagObj) flagObj.reached = true;
           } else {
-            if (e.type === 'dean') {
-              const prevPhase = e.phase;
-              e.phase = (e.hp / e.maxHp) > 0.66 ? 1 : (e.hp / e.maxHp) > 0.33 ? 2 : 3;
-              if (e.phase !== prevPhase) e.phaseTimer = 60;
-              showMessage(`Dean HP: ${e.hp}/${e.maxHp} - Keep going!`);
-            } else {
-              showMessage(`Rival HP: ${e.hp}/${e.maxHp}`);
-            }
+            showMessage(`Dean HP: ${e.hp}/${e.maxHp} - Keep jumping!`);
           }
         } else {
           e.alive = false;
-          plSt2.score += 200;
+          stats.score += 200;
           spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffa726', 10);
           const defeatMsgs = {
             'reviewer2': 'Reviewer 2 defeated! Major revisions avoided!',
@@ -4874,33 +3397,12 @@ function update() {
           if (defeatMsgs[e.type]) showMessage(defeatMsgs[e.type]);
         }
       } else {
-        // Player hit by enemy
-        if (pl.mentoring && !pl.headbutting) {
-          // Not headbutting — grad student panics and escapes for good!
-          const gs = pl.mentoring;
-          pl.mentoring = null; gs.mentee = null;
-          pl.headbutting = false;
-          pl.invincible = true; pl.invTimer = 60;
-          pl.vy = -6;
-          // Grad student runs away in panic — can't be mentored again
-          gs.spent = true;
-          gs.panicked = true;
-          gs.panicTimer = 180;
-          gs.vx = (gs.x < e.x ? -4 : 4); // run away from enemy
-          gs.vy = -5; // small panic jump
-          spawnParticles(gs.x + gs.w / 2, gs.y + gs.h / 2, '#ffeb3b', 10);
-          spawnFloatingText(gs.x, gs.y - 10, 'AAAH!', '#ef5350');
-          showMessage('Grad student escaped in panic!');
-        } else if (pl.mentoring && pl.headbutting) {
-          // Headbutting — player is protected, enemy takes damage instead
-          continue;
-        } else if (!pl.powered) {
-          if (pl === player) playerDie(getDeathMessage(e.type));
-          else { p2Die('P2: ' + getDeathMessage(e.type)); }
+        if (!player.powered) {
+          playerDie(getDeathMessage(e.type));
         } else {
-          pl.powered = false;
-          pl.invincible = true;
-          pl.invTimer = 90;
+          player.powered = false;
+          player.invincible = true;
+          player.invTimer = 90;
           showMessage('Lost your coffee buzz!');
         }
       }
@@ -4909,120 +3411,51 @@ function update() {
 
   enemies = enemies.filter(e => e.alive || !e.isProjectile);
 
-  // Mentor's Wrath magic animation update
-  if (magicActive) {
-    magicTimer++;
-    // Screen shake intensity scales with magic level
-    const shakeIntensity = magicLevel * 2 * Math.max(0, 1 - magicTimer / magicDuration);
-    screenShake.x = (Math.random() - 0.5) * shakeIntensity;
-    screenShake.y = (Math.random() - 0.5) * shakeIntensity;
-    // Grow fire columns
-    for (const col of magicColumns) {
-      if (magicTimer > col.delay) {
-        const growProgress = Math.min(1, (magicTimer - col.delay) / 20);
-        col.height = col.maxHeight * growProgress;
-      }
-    }
-    // Deal damage at the peak moment (40% through animation)
-    const damageMoment = Math.floor(magicDuration * 0.4);
-    if (magicTimer >= damageMoment && !magicDamageDealt) {
-      magicDamageDealt = true;
-      const magicSt = twoPlayerMode && magicCasterPlayer ? statsFor(magicCasterPlayer) : stats;
-      const dmg = magicLevel * 2; // 2, 4, 6, 8 damage
-      for (const e of enemies) {
-        if (!e.alive) continue;
-        const esx = e.x - camera.x;
-        if (esx > -80 && esx < GAME_W + 80) {
-          if (e.hp !== undefined) {
-            e.hp -= dmg;
-            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 12 + magicLevel * 3);
-            spawnFloatingText(e.x, e.y, `-${dmg} HP`, '#ff5722');
-            if (e.hp <= 0) {
-              e.alive = false;
-              magicSt.score += e.type === 'dean' ? 5000 : 500;
-              spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 25);
-              if (e.type === 'dean') {
-                spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
-                showMessage('The Dean has been vanquished!');
-                gameState = 'levelComplete'; winTimer = 180;
-                if (flagObj) flagObj.reached = true;
-              }
-            }
-          } else {
-            e.alive = false;
-            magicSt.score += 200;
-            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 15);
-            spawnFloatingText(e.x, e.y, 'BURNED!', '#ff5722');
-          }
-        }
-      }
-    }
-    // Spawn fire particles throughout the animation
-    if (magicTimer % 3 === 0) {
-      for (const col of magicColumns) {
-        if (magicTimer > col.delay && col.height > 10) {
-          const wx = col.screenX + camera.x;
-          const wy = GAME_H - col.height + camera.y + Math.random() * col.height * 0.5;
-          spawnParticles(wx, wy, Math.random() < 0.5 ? '#ff5722' : '#ffd54f', 2);
-        }
-      }
-    }
-    if (magicTimer >= magicDuration) {
-      magicActive = false;
-      screenShake.x = 0;
-      screenShake.y = 0;
-    }
-  }
-
   // Fireballs
   for (const fb of fireballs) {
     fb.x += fb.vx;
-    fb.vy += fb.isPencil ? 0.08 : 0.25;
+    fb.vy += 0.25;
     fb.y += fb.vy;
     fb.life--;
 
+    // Bounce off ground
     const fbTileX = Math.floor((fb.x + fb.w / 2) / TILE);
     const fbTileY = Math.floor((fb.y + fb.h) / TILE);
     if (isSolid(fbTileX, fbTileY) || isPlatform(fbTileX, fbTileY)) {
-      if (fb.isPencil) {
-        fb.life = 0; // pencils stick into walls
-        spawnParticles(fb.x, fb.y, '#ffd54f', 4);
-      } else {
-        fb.vy = -5; fb.bounces++;
-        if (fb.bounces > 3) fb.life = 0;
-      }
+      fb.vy = -5;
+      fb.bounces++;
+      if (fb.bounces > 3) fb.life = 0;
     }
+    // Hit wall
     if (isSolid(Math.floor(fb.x / TILE), Math.floor((fb.y + fb.h / 2) / TILE)) ||
         isSolid(Math.floor((fb.x + fb.w) / TILE), Math.floor((fb.y + fb.h / 2) / TILE))) {
       fb.life = 0;
       spawnParticles(fb.x, fb.y, '#ff5722', 6);
     }
 
-    const fbSt = twoPlayerMode && fb.owner ? statsFor(fb.owner) : stats;
+    // Hit enemies
     for (const e of enemies) {
       if (!e.alive) continue;
       if (rectCollide(fb, e)) {
         fb.life = 0;
         spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 12);
-        if (e.hp !== undefined) {
+        if (e.type === 'dean') {
           e.hp--;
           spawnFloatingText(e.x, e.y, `HP: ${e.hp}/${e.maxHp}`, '#ef5350');
           if (e.hp <= 0) {
             e.alive = false;
-            fbSt.score += e.type === 'dean' ? 5000 : 500;
+            stats.score += 5000;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 30);
-            if (e.type === 'dean') {
-              spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
-              showMessage('You defeated the Dean! Tenure is yours!');
-              gameState = 'levelComplete'; winTimer = 180;
-              if (flagObj) flagObj.reached = true;
-            } else {
-              spawnFloatingText(e.x, e.y, 'Rival down!', '#ff9800');
-            }
+            spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
+            showMessage('You defeated the Dean! Tenure is yours!');
+            // Trigger win
+            gameState = 'levelComplete';
+            winTimer = 180;
+            if (flagObj) flagObj.reached = true;
           }
         } else {
           e.alive = false;
-          fbSt.score += 200;
+          stats.score += 200;
           spawnFloatingText(e.x, e.y, '+200', '#ff5722');
         }
       }
@@ -5032,41 +3465,35 @@ function update() {
   }
   fireballs = fireballs.filter(fb => fb.life > 0);
 
-  // Flag — either player can reach it
-  if (flagObj && !flagObj.reached) {
-    for (const pl of [player, player2]) {
-      if (!pl || pl.dead) continue;
-      if (rectCollide(pl, flagObj)) {
-        flagObj.reached = true;
-        (twoPlayerMode ? statsFor(pl) : stats).score += 1000;
-        spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
-        if (currentLevel === 2) {
-          gameState = 'jobMarketCheck';
-          checkJobMarket();
-        } else {
-          gameState = 'levelComplete'; winTimer = 180;
-          const completeMsgs = [
-            'Qualifying exam passed! On to the postdoc!',
-            'Postdoc complete! Time for the job market!',
-            '',
-            'Third-year review passed! Keep going!',
-            'Survived committee hell! Almost there!',
-            'TENURE GRANTED! YOU WIN!'
-          ];
-          showMessage(completeMsgs[currentLevel]);
-        }
-        break;
-      }
+  // Flag
+  if (flagObj && !flagObj.reached && rectCollide(player, flagObj)) {
+    flagObj.reached = true;
+    stats.score += 1000;
+    spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
+
+    if (currentLevel === 2) {
+      // Job Market gate — check thresholds and leaderboard
+      gameState = 'jobMarketCheck';
+      checkJobMarket();
+    } else {
+      gameState = 'levelComplete';
+      winTimer = 180;
+      const completeMsgs = [
+        'Qualifying exam passed! On to the postdoc!',
+        'Postdoc complete! Time for the job market!',
+        '', // job market handled separately
+        'Third-year review passed! Keep going!',
+        'Survived committee hell! Almost there!',
+        'TENURE GRANTED! YOU WIN!'
+      ];
+      showMessage(completeMsgs[currentLevel]);
     }
   }
 
-  // Signs proximity (both players)
+  // Signs proximity
   for (const s of signs) {
-    let minDist = Math.abs(player.x - s.x) + Math.abs(player.y - s.y);
-    if (player2 && !player2.dead) {
-      minDist = Math.min(minDist, Math.abs(player2.x - s.x) + Math.abs(player2.y - s.y));
-    }
-    s.showText = minDist < TILE * 2.5;
+    const dist = Math.abs(player.x - s.x) + Math.abs(player.y - s.y);
+    s.showText = dist < TILE * 2.5;
   }
 
   // Particles
@@ -5091,48 +3518,15 @@ function update() {
 
 function playerDie(msg) {
   player.dead = true;
-  const st = twoPlayerMode ? p1Stats : stats;
-  st.lives--;
+  stats.lives--;
+  gameState = 'dead';
+  deathTimer = 120;
   showMessage(msg || 'Career over!');
   spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 20);
-  if (st.lives <= 0) {
-    if (twoPlayerMode && player2 && !player2.dead && p2Stats.lives > 0) {
-      // P1 is out but P2 still playing
-      showMessage('P1 is out of lives!');
-    } else {
-      gameState = 'dead';
-      deathTimer = 120;
-      submitScore();
-      fetchLeaderboard();
-    }
-  } else if (twoPlayerMode && player2 && !player2.dead) {
-    player.respawnTimer = 180;
-  } else {
-    gameState = 'dead';
-    deathTimer = 120;
-  }
-}
-
-function p2Die(msg) {
-  player2.dead = true;
-  p2Stats.lives--;
-  showMessage(msg);
-  spawnParticles(player2.x + player2.w / 2, player2.y + player2.h / 2, '#ef5350', 20);
-  if (p2Stats.lives <= 0) {
-    if (!player.dead && (twoPlayerMode ? p1Stats : stats).lives > 0) {
-      // P2 is out but P1 still playing
-      showMessage('P2 is out of lives!');
-    } else {
-      gameState = 'dead';
-      deathTimer = 120;
-      submitScore();
-      fetchLeaderboard();
-    }
-  } else if (!player.dead) {
-    player2.respawnTimer = 180;
-  } else {
-    gameState = 'dead';
-    deathTimer = 120;
+  if (stats.lives <= 0) {
+    // Game over — submit score and fetch leaderboard
+    submitScore();
+    fetchLeaderboard();
   }
 }
 
@@ -5144,8 +3538,7 @@ function getDeathMessage(enemyType) {
     'teaching': 'Teaching overload! No time for research!',
     'committee': 'Endless meetings consumed your soul!',
     'dean': 'The Dean denied your tenure case!',
-    'rejection': 'Hit by a rejection letter!',
-    'rival': 'Scooped by a rival researcher!'
+    'rejection': 'Hit by a rejection letter!'
   };
   return msgs[enemyType] || 'Academic career interrupted!';
 }
@@ -5166,12 +3559,6 @@ function draw() {
   }
 
   const ci = currentLevel;
-
-  // Screen shake
-  ctx.save();
-  if (magicActive) {
-    ctx.translate(screenShake.x, screenShake.y);
-  }
 
   // Background
   drawBackground(ci);
@@ -5202,97 +3589,61 @@ function draw() {
     drawCollectible(c.type, sx, sy, c.w, c.h);
   }
 
-  // Grad students
-  for (const gs of gradStudents) {
-    drawGradStudent(gs, gs.x - camera.x, gs.y - camera.y);
-  }
-
   // Enemies
   for (const e of enemies) {
     if (!e.alive) continue;
     drawEnemy(e, e.x - camera.x, e.y - camera.y);
   }
 
-  // Fireballs and pencils (enhanced with trails and glow)
+  // Fireballs (enhanced with trails and glow)
   for (const fb of fireballs) {
     const fbsx = fb.x - camera.x;
     const fbsy = fb.y - camera.y;
+    const rot = levelTimer * 0.3;
 
-    if (fb.isPencil) {
-      // Draw pencil projectile
-      ctx.save();
-      ctx.translate(fbsx + fb.w / 2, fbsy + fb.h / 2);
-      ctx.rotate(Math.atan2(fb.vy, fb.vx));
-      // Pencil body (yellow)
-      ctx.fillStyle = '#ffd54f';
-      ctx.fillRect(-6, -2, 12, 4);
-      // Pencil tip (dark)
-      ctx.fillStyle = '#5d4037';
-      ctx.beginPath();
-      ctx.moveTo(6, -2); ctx.lineTo(9, 0); ctx.lineTo(6, 2);
-      ctx.fill();
-      // Eraser (pink)
-      ctx.fillStyle = '#f48fb1';
-      ctx.fillRect(-8, -2, 2, 4);
-      // Metal band
-      ctx.fillStyle = '#bdbdbd';
-      ctx.fillRect(-6, -2, 1.5, 4);
-      ctx.restore();
-      // Small trail
-      const dir = fb.vx > 0 ? -1 : 1;
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = '#ffd54f';
-      drawCircle(fbsx + fb.w / 2 + dir * 8, fbsy + fb.h / 2, 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    } else {
-      // Original fireball rendering
-      const rot = levelTimer * 0.3;
+    // Outer glow halo
+    const haloGrad = ctx.createRadialGradient(fbsx + fb.w / 2, fbsy + fb.h / 2, 2, fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
+    haloGrad.addColorStop(0, 'rgba(255,152,0,0.3)');
+    haloGrad.addColorStop(0.5, 'rgba(255,87,34,0.1)');
+    haloGrad.addColorStop(1, 'rgba(255,87,34,0)');
+    ctx.fillStyle = haloGrad;
+    drawCircle(fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
+    ctx.fill();
 
-      // Outer glow halo
-      const haloGrad = ctx.createRadialGradient(fbsx + fb.w / 2, fbsy + fb.h / 2, 2, fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
-      haloGrad.addColorStop(0, 'rgba(255,152,0,0.3)');
-      haloGrad.addColorStop(0.5, 'rgba(255,87,34,0.1)');
-      haloGrad.addColorStop(1, 'rgba(255,87,34,0)');
-      ctx.fillStyle = haloGrad;
-      drawCircle(fbsx + fb.w / 2, fbsy + fb.h / 2, 18);
+    // Trail particles (behind)
+    const dir = fb.vx > 0 ? -1 : 1;
+    for (let ti = 0; ti < 4; ti++) {
+      const trailAlpha = 0.4 - ti * 0.1;
+      ctx.globalAlpha = trailAlpha;
+      ctx.fillStyle = ti < 2 ? '#ff9800' : '#ff5722';
+      drawCircle(fbsx + fb.w / 2 + dir * (ti * 4 + 3), fbsy + fb.h / 2 + Math.sin(levelTimer * 0.5 + ti) * 2, 3 - ti * 0.5);
       ctx.fill();
-
-      // Trail particles (behind)
-      const dir = fb.vx > 0 ? -1 : 1;
-      for (let ti = 0; ti < 4; ti++) {
-        const trailAlpha = 0.4 - ti * 0.1;
-        ctx.globalAlpha = trailAlpha;
-        ctx.fillStyle = ti < 2 ? '#ff9800' : '#ff5722';
-        drawCircle(fbsx + fb.w / 2 + dir * (ti * 4 + 3), fbsy + fb.h / 2 + Math.sin(levelTimer * 0.5 + ti) * 2, 3 - ti * 0.5);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-
-      ctx.save();
-      ctx.translate(fbsx + fb.w / 2, fbsy + fb.h / 2);
-      ctx.rotate(rot);
-      // Fireball glow
-      ctx.shadowColor = '#ff5722';
-      ctx.shadowBlur = 12;
-      const fbGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 7);
-      fbGrad.addColorStop(0, '#ffffff');
-      fbGrad.addColorStop(0.2, '#fff9c4');
-      fbGrad.addColorStop(0.5, '#ff9800');
-      fbGrad.addColorStop(1, '#ff5722');
-      ctx.fillStyle = fbGrad;
-      drawCircle(0, 0, 7);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      // Inner bright core
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      drawCircle(0, 0, 2.5);
-      ctx.fill();
-      ctx.restore();
     }
+    ctx.globalAlpha = 1;
+
+    ctx.save();
+    ctx.translate(fbsx + fb.w / 2, fbsy + fb.h / 2);
+    ctx.rotate(rot);
+    // Fireball glow
+    ctx.shadowColor = '#ff5722';
+    ctx.shadowBlur = 12;
+    const fbGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 7);
+    fbGrad.addColorStop(0, '#ffffff');
+    fbGrad.addColorStop(0.2, '#fff9c4');
+    fbGrad.addColorStop(0.5, '#ff9800');
+    fbGrad.addColorStop(1, '#ff5722');
+    ctx.fillStyle = fbGrad;
+    drawCircle(0, 0, 7);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // Inner bright core
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    drawCircle(0, 0, 2.5);
+    ctx.fill();
+    ctx.restore();
   }
 
-  // Player 1
+  // Player
   if (player && !player.dead) {
     const sx = player.x - camera.x;
     const sy = player.y - camera.y;
@@ -5301,33 +3652,6 @@ function draw() {
     } else {
       drawPlayer(sx, sy, player.w, player.h, player.frame, player.facingRight, player.powered, player.dead);
     }
-    // P1 label in two-player mode
-    if (twoPlayerMode) {
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 8px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('P1', sx + player.w / 2, sy - 12);
-      ctx.textAlign = 'left';
-    }
-  }
-
-  // Player 2
-  if (player2 && !player2.dead) {
-    const sx2 = player2.x - camera.x;
-    const sy2 = player2.y - camera.y;
-    if (player2.invincible && Math.floor(player2.invTimer / 3) % 2 === 0) {
-      // blink
-    } else {
-      const savedApp = playerAppearance;
-      playerAppearance = player2Appearance;
-      drawPlayer(sx2, sy2, player2.w, player2.h, player2.frame, player2.facingRight, player2.powered, player2.dead);
-      playerAppearance = savedApp;
-    }
-    ctx.fillStyle = '#42a5f5';
-    ctx.font = 'bold 8px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('P2', sx2 + player2.w / 2, sy2 - 12);
-    ctx.textAlign = 'left';
   }
 
   // Flag
@@ -5395,12 +3719,6 @@ function draw() {
   }
   ctx.globalAlpha = 1;
 
-  // Mentor's Wrath magic overlay
-  if (magicActive) drawMentorsWrath();
-
-  // Restore screen shake transform before HUD/overlays
-  ctx.restore();
-
   // Cinematic vignette (stronger, more professional)
   const vigGrad = ctx.createRadialGradient(GAME_W / 2, GAME_H / 2, GAME_W * 0.3, GAME_W / 2, GAME_H / 2, GAME_W * 0.65);
   vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -5431,7 +3749,6 @@ function draw() {
   drawHUD();
 
   // Overlays
-  if (gameState === 'paused') drawPauseScreen();
   if (gameState === 'levelIntro') drawLevelIntro();
   if (gameState === 'dead') drawDeathScreen();
   if (gameState === 'levelComplete') drawLevelComplete();
@@ -5592,36 +3909,15 @@ function drawMenu() {
     // Controls
     ctx.fillStyle = '#78909c';
     ctx.font = '11px monospace';
-    ctx.fillText("P1: Arrows+Space | .: Fire | ,: Wrath", GAME_W / 2, 305);
-    ctx.fillText('P2: WASD | E: Fire | Q: Wrath | Jump on enemies!', GAME_W / 2, 323);
+    ctx.fillText('Arrow Keys / WASD to Move | Space: Jump (x2!)', GAME_W / 2, 305);
+    ctx.fillText('F: Throw Fireball | Jump on enemies', GAME_W / 2, 323);
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText('C: Customize | K: Key Config | 2: Two Players', GAME_W / 2, 346);
-
-    // Two-player status
-    ctx.fillStyle = twoPlayerMode ? '#66bb6a' : '#546e7a';
-    ctx.font = '10px monospace';
-    ctx.fillText(`Two Players: ${twoPlayerMode ? 'ON (P2: WASD+E+Q | TAB: swap controls)' : 'OFF'}`, GAME_W / 2, 362);
-
-    // Show P2 character preview if enabled
-    if (twoPlayerMode) {
-      const savedApp = playerAppearance;
-      playerAppearance = player2Appearance;
-      drawPlayer(GAME_W / 2 + 25, 195, 26, 32, Math.floor(Date.now() / 250) % 4, false, false, false);
-      playerAppearance = savedApp;
-      ctx.fillStyle = '#42a5f5';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText('P2', GAME_W / 2 + 38, 190);
-    }
-  }
-
-  if (keyConfigActive) {
-    drawKeyConfig();
-    ctx.textAlign = 'left';
-    return;
+    ctx.fillText('C: Customize Character', GAME_W / 2, 346);
   }
 
   if (customizing) {
+    // Don't show level path / legend when customizing
     ctx.textAlign = 'left';
     return;
   }
@@ -5708,329 +4004,8 @@ function drawMenu() {
 }
 
 // ============================================================
-// MENTOR'S WRATH DRAWING (Golden Axe-style fire magic)
-// ============================================================
-function drawMentorsWrath() {
-  const progress = magicTimer / magicDuration;
-  const fadeIn = Math.min(1, magicTimer / 15);
-  const fadeOut = magicTimer > magicDuration - 20 ? (magicDuration - magicTimer) / 20 : 1;
-  const alpha = fadeIn * fadeOut;
-
-  // Phase 1: Screen darkens + caster glows (first 20%)
-  // Phase 2: Fire columns erupt from ground (20-60%)
-  // Phase 3: Peak — screen flash + damage (40%)
-  // Phase 4: Columns recede, embers drift (60-100%)
-
-  // Dark overlay — dramatic dimming
-  ctx.fillStyle = `rgba(20,0,0,${0.3 * alpha})`;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  // Bottom heat haze
-  const hazeGrad = ctx.createLinearGradient(0, GAME_H * 0.5, 0, GAME_H);
-  hazeGrad.addColorStop(0, 'rgba(255,87,34,0)');
-  hazeGrad.addColorStop(0.5, `rgba(255,87,34,${0.08 * alpha * magicLevel})`);
-  hazeGrad.addColorStop(1, `rgba(255,152,0,${0.15 * alpha * magicLevel})`);
-  ctx.fillStyle = hazeGrad;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  // Caster aura (player glow)
-  const casterSX = magicCasterX - camera.x;
-  const casterSY = magicCasterY - camera.y;
-  if (progress < 0.5) {
-    const auraSize = 30 + magicLevel * 15 + Math.sin(magicTimer * 0.3) * 10;
-    const auraGrad = ctx.createRadialGradient(casterSX, casterSY + 16, 5, casterSX, casterSY + 16, auraSize);
-    auraGrad.addColorStop(0, `rgba(255,152,0,${0.5 * alpha})`);
-    auraGrad.addColorStop(0.4, `rgba(255,87,34,${0.3 * alpha})`);
-    auraGrad.addColorStop(1, 'rgba(255,87,34,0)');
-    ctx.fillStyle = auraGrad;
-    drawCircle(casterSX, casterSY + 16, auraSize);
-    ctx.fill();
-  }
-
-  // Fire columns erupting from the ground
-  for (const col of magicColumns) {
-    if (magicTimer <= col.delay) continue;
-    const colAge = magicTimer - col.delay;
-    const colFade = colAge > magicDuration * 0.6 ? Math.max(0, 1 - (colAge - magicDuration * 0.6) / (magicDuration * 0.3)) : 1;
-    if (colFade <= 0) continue;
-
-    const baseY = GAME_H;
-    const h = col.height * colFade;
-    const w = col.width;
-    const cx = col.screenX;
-
-    // Column glow (wide, soft)
-    ctx.save();
-    ctx.globalAlpha = 0.3 * colFade * alpha;
-    const glowGrad = ctx.createRadialGradient(cx, baseY - h * 0.4, 5, cx, baseY - h * 0.3, w * 2);
-    glowGrad.addColorStop(0, `rgba(255,200,50,0.6)`);
-    glowGrad.addColorStop(0.5, `rgba(255,87,34,0.2)`);
-    glowGrad.addColorStop(1, 'rgba(255,87,34,0)');
-    ctx.fillStyle = glowGrad;
-    drawCircle(cx, baseY - h * 0.3, w * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // Main fire column (gradient from white-hot base to orange tip)
-    ctx.save();
-    ctx.globalAlpha = colFade * alpha;
-
-    const colGrad = ctx.createLinearGradient(cx, baseY, cx, baseY - h);
-    colGrad.addColorStop(0, '#fff9c4');
-    colGrad.addColorStop(0.1, '#ffeb3b');
-    colGrad.addColorStop(0.3, '#ff9800');
-    colGrad.addColorStop(0.6, '#ff5722');
-    colGrad.addColorStop(0.85, '#d84315');
-    colGrad.addColorStop(1, 'rgba(183,28,28,0)');
-    ctx.fillStyle = colGrad;
-
-    // Wavy fire shape
-    ctx.beginPath();
-    const waveT = magicTimer * 0.15 + col.screenX * 0.1;
-    const halfW = w / 2;
-    ctx.moveTo(cx - halfW, baseY);
-    // Left edge going up with flickering
-    for (let fy = 0; fy <= h; fy += 5) {
-      const waveX = Math.sin(waveT + fy * 0.08) * (halfW * 0.3) + Math.sin(waveT * 1.7 + fy * 0.12) * (halfW * 0.15);
-      const taper = 1 - (fy / h) * 0.7; // narrow toward top
-      ctx.lineTo(cx - halfW * taper + waveX, baseY - fy);
-    }
-    // Top flicker tip
-    const tipWave = Math.sin(waveT * 2.3) * (halfW * 0.4);
-    ctx.lineTo(cx + tipWave, baseY - h - 5 - Math.random() * 8);
-    // Right edge going down
-    for (let fy = h; fy >= 0; fy -= 5) {
-      const waveX = Math.sin(waveT + fy * 0.08 + 2) * (halfW * 0.25) + Math.sin(waveT * 1.3 + fy * 0.1) * (halfW * 0.15);
-      const taper = 1 - (fy / h) * 0.7;
-      ctx.lineTo(cx + halfW * taper + waveX, baseY - fy);
-    }
-    ctx.closePath();
-    ctx.fill();
-
-    // Inner bright core (white-hot center)
-    const coreGrad = ctx.createLinearGradient(cx, baseY, cx, baseY - h * 0.7);
-    coreGrad.addColorStop(0, 'rgba(255,255,255,0.6)');
-    coreGrad.addColorStop(0.3, 'rgba(255,255,200,0.3)');
-    coreGrad.addColorStop(1, 'rgba(255,200,100,0)');
-    ctx.fillStyle = coreGrad;
-    ctx.beginPath();
-    const coreW = halfW * 0.35;
-    ctx.moveTo(cx - coreW, baseY);
-    ctx.quadraticCurveTo(cx - coreW + Math.sin(waveT * 1.5) * 3, baseY - h * 0.35, cx, baseY - h * 0.65);
-    ctx.quadraticCurveTo(cx + coreW + Math.sin(waveT * 1.8) * 3, baseY - h * 0.35, cx + coreW, baseY);
-    ctx.closePath();
-    ctx.fill();
-
-    // Embers rising from each column
-    if (magicLevel >= 2) {
-      for (let ei = 0; ei < magicLevel; ei++) {
-        const emberY = baseY - h * 0.3 - (colAge * 1.5 + ei * 20) % (h + 30);
-        const emberX = cx + Math.sin(colAge * 0.1 + ei * 3) * halfW;
-        if (emberY > baseY - h - 30 && emberY < baseY) {
-          const eAlpha = Math.max(0, 1 - Math.abs(emberY - (baseY - h * 0.5)) / (h * 0.5));
-          ctx.fillStyle = `rgba(255,200,50,${eAlpha * 0.8})`;
-          drawCircle(emberX, emberY, 1.5 + Math.random());
-          ctx.fill();
-        }
-      }
-    }
-
-    ctx.restore();
-  }
-
-  // Ground fire line (connects all columns at base)
-  if (progress > 0.15 && progress < 0.85) {
-    const lineAlpha = alpha * (progress < 0.3 ? (progress - 0.15) / 0.15 : progress > 0.7 ? (0.85 - progress) / 0.15 : 1);
-    const lineGrad = ctx.createLinearGradient(0, GAME_H - 15, 0, GAME_H);
-    lineGrad.addColorStop(0, `rgba(255,152,0,${lineAlpha * 0.6})`);
-    lineGrad.addColorStop(0.5, `rgba(255,87,34,${lineAlpha * 0.8})`);
-    lineGrad.addColorStop(1, `rgba(255,235,59,${lineAlpha})`);
-    ctx.fillStyle = lineGrad;
-    ctx.fillRect(0, GAME_H - 12 - magicLevel * 2, GAME_W, 12 + magicLevel * 2);
-  }
-
-  // Screen flash at damage moment
-  if (Math.abs(magicTimer - magicDuration * 0.4) < 5) {
-    const flashAlpha = (1 - Math.abs(magicTimer - magicDuration * 0.4) / 5) * 0.4 * magicLevel / 4;
-    ctx.fillStyle = `rgba(255,255,200,${flashAlpha})`;
-    ctx.fillRect(0, 0, GAME_W, GAME_H);
-  }
-
-  // Title text at start of magic
-  if (progress < 0.35) {
-    const textAlpha = progress < 0.05 ? progress / 0.05 : progress > 0.25 ? (0.35 - progress) / 0.1 : 1;
-    ctx.save();
-    ctx.globalAlpha = textAlpha;
-    ctx.textAlign = 'center';
-
-    // Title with glow and outline
-    const titleSize = 18 + magicLevel * 4;
-    ctx.font = `bold ${titleSize}px monospace`;
-
-    // Shadow/glow behind text
-    ctx.shadowColor = '#ff5722';
-    ctx.shadowBlur = 20 + magicLevel * 5;
-
-    // Text outline
-    ctx.strokeStyle = '#8B0000';
-    ctx.lineWidth = 3;
-    ctx.lineJoin = 'round';
-    const wrathNames = ["MENTOR'S WRATH", "MENTOR'S FURY", "MENTOR'S INFERNO", "MENTOR'S APOCALYPSE"];
-    const title = wrathNames[magicLevel - 1];
-    ctx.strokeText(title, GAME_W / 2, GAME_H * 0.3);
-    ctx.fillStyle = '#ffd54f';
-    ctx.fillText(title, GAME_W / 2, GAME_H * 0.3);
-
-    // Subtitle
-    ctx.shadowBlur = 0;
-    ctx.font = 'bold 11px monospace';
-    ctx.fillStyle = '#ff9800';
-    const subtitles = [
-      '"Your methods section is inadequate"',
-      '"This lacks theoretical contribution"',
-      '"Reject: insufficient novelty"',
-      '"REVISE AND RESUBMIT... TO OBLIVION"'
-    ];
-    ctx.fillText(subtitles[magicLevel - 1], GAME_W / 2, GAME_H * 0.3 + titleSize + 5);
-
-    ctx.textAlign = 'left';
-    ctx.restore();
-  }
-
-  // Level 3-4: floating burning papers (rejection letters raining down)
-  if (magicLevel >= 3 && progress > 0.2 && progress < 0.8) {
-    const paperAlpha = alpha * 0.7;
-    ctx.save();
-    ctx.globalAlpha = paperAlpha;
-    for (let pi = 0; pi < magicLevel * 3; pi++) {
-      const paperX = (Math.sin(magicTimer * 0.05 + pi * 2.7) * 0.5 + 0.5) * GAME_W;
-      const paperY = ((magicTimer * 1.5 + pi * 80) % (GAME_H + 40)) - 20;
-      const paperRot = magicTimer * 0.03 + pi * 1.1;
-      ctx.save();
-      ctx.translate(paperX, paperY);
-      ctx.rotate(paperRot);
-      // Burning paper
-      ctx.fillStyle = '#fff';
-      drawRoundRect(-6, -4, 12, 8, 1);
-      ctx.fill();
-      ctx.fillStyle = '#d84315';
-      ctx.font = 'bold 5px monospace';
-      ctx.fillText('REJ', -5, 2);
-      // Fire edge
-      ctx.fillStyle = 'rgba(255,152,0,0.7)';
-      ctx.beginPath();
-      ctx.moveTo(4, -4);
-      ctx.lineTo(6, -6 + Math.sin(magicTimer * 0.3 + pi) * 2);
-      ctx.lineTo(8, -3);
-      ctx.fill();
-      ctx.restore();
-    }
-    ctx.restore();
-  }
-
-  // Level 4: anime-style radial burst lines
-  if (magicLevel >= 4 && progress > 0.35 && progress < 0.5) {
-    const burstAlpha = (1 - Math.abs(progress - 0.425) / 0.075) * 0.15;
-    ctx.save();
-    ctx.globalAlpha = burstAlpha;
-    ctx.strokeStyle = '#ffd54f';
-    ctx.lineWidth = 2;
-    for (let ri = 0; ri < 24; ri++) {
-      const angle = ri * Math.PI / 12 + magicTimer * 0.02;
-      ctx.beginPath();
-      ctx.moveTo(GAME_W / 2 + Math.cos(angle) * 50, GAME_H / 2 + Math.sin(angle) * 30);
-      ctx.lineTo(GAME_W / 2 + Math.cos(angle) * 500, GAME_H / 2 + Math.sin(angle) * 300);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-}
-
-// ============================================================
 // OVERLAY SCREENS
 // ============================================================
-function drawPauseScreen() {
-  ctx.fillStyle = 'rgba(10,10,30,0.8)';
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  ctx.textAlign = 'center';
-
-  // Pause icon (two bars)
-  ctx.fillStyle = 'rgba(233,69,96,0.15)';
-  drawRoundRect(GAME_W / 2 - 30, GAME_H / 2 - 60, 20, 50, 5);
-  ctx.fill();
-  drawRoundRect(GAME_W / 2 + 10, GAME_H / 2 - 60, 20, 50, 5);
-  ctx.fill();
-
-  ctx.fillStyle = '#e94560';
-  ctx.font = 'bold 36px monospace';
-  ctx.fillText('PAUSED', GAME_W / 2, GAME_H / 2 + 20);
-
-  ctx.fillStyle = '#b0bec5';
-  ctx.font = '12px monospace';
-  ctx.fillText(`${LEVEL_NAMES[currentLevel]}`, GAME_W / 2, GAME_H / 2 + 50);
-
-  // Stats summary
-  ctx.fillStyle = '#78909c';
-  ctx.font = '10px monospace';
-  if (twoPlayerMode) {
-    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | M ${p1Stats.mentored} | Score ${p1Stats.score} | Lives ${p1Stats.lives}`, GAME_W / 2, GAME_H / 2 + 70);
-    ctx.fillStyle = '#42a5f5';
-    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | M ${p2Stats.mentored} | Score ${p2Stats.score} | Lives ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 88);
-  } else {
-    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 75);
-    ctx.fillText(`Wrath Potions: ${stats.potions} | Lives: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 95);
-  }
-
-  const blink = Math.sin(Date.now() * 0.005) > 0;
-  if (blink) {
-    ctx.fillStyle = '#ffd54f';
-    ctx.font = 'bold 13px monospace';
-    ctx.fillText('Press ESC or SPACE to resume', GAME_W / 2, GAME_H / 2 + 130);
-  }
-  ctx.fillStyle = '#ef5350';
-  ctx.font = '11px monospace';
-  ctx.fillText('Press X to quit to menu', GAME_W / 2, GAME_H / 2 + 155);
-
-  ctx.textAlign = 'left';
-}
-
-function drawKeyConfig() {
-  ctx.fillStyle = 'rgba(10,10,30,0.92)';
-  drawRoundRect(GAME_W / 2 - 220, 180, 440, 220, 10);
-  ctx.fill();
-  ctx.strokeStyle = '#e94560';
-  ctx.lineWidth = 2;
-  drawRoundRect(GAME_W / 2 - 220, 180, 440, 220, 10);
-  ctx.stroke();
-
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#ffd54f';
-  ctx.font = 'bold 14px monospace';
-  ctx.fillText('KEYBOARD CONFIG', GAME_W / 2, 200);
-
-  ctx.font = '10px monospace';
-  for (let i = 0; i < BINDABLE_ACTIONS.length; i++) {
-    const y = 220 + i * 18;
-    const action = BINDABLE_ACTIONS[i];
-    const isSel = keyConfigIndex === i;
-    ctx.fillStyle = isSel ? '#ffd54f' : '#b0bec5';
-    ctx.font = isSel ? 'bold 10px monospace' : '10px monospace';
-    const keysStr = keyBindings[action].map(keyName).join(', ');
-    const label = ACTION_LABELS[action];
-    if (isSel && keyConfigWaiting) {
-      ctx.fillText(`${label}: [ Press a key... ]`, GAME_W / 2, y);
-    } else {
-      ctx.fillText(`${isSel ? '> ' : '  '}${label}: ${keysStr}`, GAME_W / 2, y);
-    }
-  }
-
-  ctx.fillStyle = '#78909c';
-  ctx.font = '8px monospace';
-  ctx.fillText('Up/Down: select  |  Enter: rebind  |  ESC: back', GAME_W / 2, 398);
-  ctx.textAlign = 'left';
-}
-
 function drawLevelIntro() {
   ctx.fillStyle = 'rgba(15,10,26,0.88)';
   ctx.fillRect(0, 0, GAME_W, GAME_H);
@@ -6058,11 +4033,10 @@ function drawLevelIntro() {
     ctx.fillText('To get an offer you need:', GAME_W / 2, GAME_H / 2 + 40);
     ctx.fillStyle = '#b0bec5';
     ctx.font = '10px monospace';
-    ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | ${t.mentored} mentored | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
+    ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
     ctx.fillStyle = '#78909c';
     ctx.font = '9px monospace';
-    const liSt = twoPlayerMode ? combinedStats() : stats;
-    ctx.fillText(`You have: ${liSt.publications} pubs, ${liSt.grants} grants, ${liSt.citations} cites, h=${liSt.hIndex}, ${liSt.mentored} mentored`, GAME_W / 2, GAME_H / 2 + 75);
+    ctx.fillText(`You have: ${stats.publications} pubs, ${stats.grants} grants, ${stats.citations} cites, h=${stats.hIndex}`, GAME_W / 2, GAME_H / 2 + 75);
     if (postdocCount > 0) {
       ctx.fillStyle = '#ffa726';
       ctx.fillText(`Postdoc attempt #${postdocCount + 1}`, GAME_W / 2, GAME_H / 2 + 92);
@@ -6081,10 +4055,8 @@ function drawLevelIntro() {
 
 function drawDeathScreen() {
   const progress = 1 - deathTimer / 120;
-  const ds = twoPlayerMode ? combinedStats() : stats;
-  const dsLives = twoPlayerMode ? p1Stats.lives + p2Stats.lives : stats.lives;
 
-  if (dsLives > 0) {
+  if (stats.lives > 0) {
     // Just a setback — brief overlay
     ctx.fillStyle = `rgba(120, 10, 20, ${0.5 + progress * 0.2})`;
     ctx.fillRect(0, 0, GAME_W, GAME_H);
@@ -6095,11 +4067,7 @@ function drawDeathScreen() {
     ctx.fillText('CAREER SETBACK!', GAME_W / 2, GAME_H / 2 - 20);
     ctx.fillStyle = '#ffd54f';
     ctx.font = '13px monospace';
-    if (twoPlayerMode) {
-      ctx.fillText(`P1 Lives: ${p1Stats.lives} | P2 Lives: ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
-    } else {
-      ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
-    }
+    ctx.fillText(`Lives remaining: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 20);
     ctx.textAlign = 'left';
   } else {
     // Game over — full screen with leaderboard
@@ -6117,15 +4085,7 @@ function drawDeathScreen() {
 
     ctx.fillStyle = '#b0bec5';
     ctx.font = '11px monospace';
-    if (twoPlayerMode) {
-      ctx.fillText(`P1: Score ${p1Stats.score} | Pubs ${p1Stats.publications} | Grants ${p1Stats.grants} | h=${p1Stats.hIndex}`, GAME_W / 2, 100);
-      ctx.fillStyle = '#42a5f5';
-      ctx.fillText(`P2: Score ${p2Stats.score} | Pubs ${p2Stats.publications} | Grants ${p2Stats.grants} | h=${p2Stats.hIndex}`, GAME_W / 2, 118);
-      ctx.fillStyle = '#ffa726';
-      ctx.fillText(`Combined Score: ${ds.score}`, GAME_W / 2, 136);
-    } else {
-      ctx.fillText(`Score: ${stats.score} | Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored}`, GAME_W / 2, 108);
-    }
+    ctx.fillText(`Final Score: ${stats.score}  |  Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  h-index: ${stats.hIndex}`, GAME_W / 2, 108);
     if (leaderboardRank) {
       ctx.fillStyle = '#ffd54f';
       ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W / 2, 128);
@@ -6174,13 +4134,7 @@ function drawLevelComplete() {
 
   ctx.fillStyle = '#b0bec5';
   ctx.font = '11px monospace';
-  if (twoPlayerMode) {
-    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | Score ${p1Stats.score}`, GAME_W / 2, GAME_H / 2 + 35);
-    ctx.fillStyle = '#42a5f5';
-    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | Score ${p2Stats.score}`, GAME_W / 2, GAME_H / 2 + 53);
-  } else {
-    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
-  }
+  ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h-index: ${stats.hIndex} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
   ctx.textAlign = 'left';
 }
 
@@ -6289,21 +4243,11 @@ function drawWinScreen() {
   ctx.fillText('FINAL STATS', GAME_W / 4, 280);
   ctx.fillStyle = '#fff';
   ctx.font = '10px monospace';
-  if (twoPlayerMode) {
-    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | M ${p1Stats.mentored} | C ${p1Stats.citations} | h=${p1Stats.hIndex}`, GAME_W / 4, 296);
-    ctx.fillStyle = '#42a5f5';
-    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | M ${p2Stats.mentored} | C ${p2Stats.citations} | h=${p2Stats.hIndex}`, GAME_W / 4, 312);
-    const cs = combinedStats();
-    ctx.fillStyle = '#ffa726';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`P1 Score: ${p1Stats.score}  |  P2 Score: ${p2Stats.score}  |  Total: ${cs.score}`, GAME_W / 4, 332);
-  } else {
-    ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  Mentored: ${stats.mentored}`, GAME_W / 4, 298);
-    ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
-    ctx.fillStyle = '#ffa726';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`Score: ${stats.score}`, GAME_W / 4, 332);
-  }
+  ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}`, GAME_W / 4, 298);
+  ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
+  ctx.fillStyle = '#ffa726';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(`Score: ${stats.score}`, GAME_W / 4, 332);
 
   // Right column: leaderboard
   if (leaderboardData.length > 0) {
@@ -6362,17 +4306,16 @@ async function fetchRank(score) {
 
 async function submitScore() {
   try {
-    const st = twoPlayerMode ? combinedStats() : stats;
     const res = await fetch(LEADERBOARD_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: playerName || 'Anonymous',
-        score: st.score,
-        publications: st.publications,
-        grants: st.grants,
-        citations: st.citations,
-        hIndex: st.hIndex,
+        score: stats.score,
+        publications: stats.publications,
+        grants: stats.grants,
+        citations: stats.citations,
+        hIndex: stats.hIndex,
       }),
     });
     const data = await res.json();
@@ -6384,17 +4327,15 @@ async function submitScore() {
 
 async function checkJobMarket() {
   const t = JOB_MARKET_THRESHOLDS;
-  const st = twoPlayerMode ? combinedStats() : stats;
   const failReasons = [];
 
-  if (st.publications < t.publications) failReasons.push(`Pubs: ${st.publications}/${t.publications}`);
-  if (st.grants < t.grants) failReasons.push(`Grants: ${st.grants}/${t.grants}`);
-  if (st.citations < t.citations) failReasons.push(`Cites: ${st.citations}/${t.citations}`);
-  if (st.hIndex < t.hIndex) failReasons.push(`h-index: ${st.hIndex}/${t.hIndex}`);
-  if (st.mentored < t.mentored) failReasons.push(`Mentored: ${st.mentored}/${t.mentored}`);
+  if (stats.publications < t.publications) failReasons.push(`Pubs: ${stats.publications}/${t.publications}`);
+  if (stats.grants < t.grants) failReasons.push(`Grants: ${stats.grants}/${t.grants}`);
+  if (stats.citations < t.citations) failReasons.push(`Cites: ${stats.citations}/${t.citations}`);
+  if (stats.hIndex < t.hIndex) failReasons.push(`h-index: ${stats.hIndex}/${t.hIndex}`);
 
   // Check leaderboard rank
-  const rank = await fetchRank(st.score);
+  const rank = await fetchRank(stats.score);
   leaderboardRank = rank;
   if (rank > t.leaderboardRank) failReasons.push(`Rank: #${rank} (need top ${t.leaderboardRank})`);
 
@@ -6509,10 +4450,9 @@ function drawJobMarketResult() {
     ctx.font = '14px monospace';
     ctx.fillText('The search committee was impressed!', GAME_W / 2, 160);
 
-    const jmSt = twoPlayerMode ? combinedStats() : stats;
     ctx.fillStyle = '#ffd54f';
     ctx.font = '12px monospace';
-    ctx.fillText(`Pubs: ${jmSt.publications} | Grants: ${jmSt.grants} | Cites: ${jmSt.citations} | h=${jmSt.hIndex} | Mentored: ${jmSt.mentored}`, GAME_W / 2, 200);
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | Cites: ${stats.citations} | h=${stats.hIndex}`, GAME_W / 2, 200);
     if (leaderboardRank) {
       ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 225);
     }
@@ -6542,7 +4482,7 @@ function drawJobMarketResult() {
     ctx.fillStyle = '#78909c';
     ctx.font = '10px monospace';
     const t = JOB_MARKET_THRESHOLDS;
-    ctx.fillText(`Required: ${t.publications} pubs, ${t.grants} grants, ${t.citations} cites, h>=${t.hIndex}, ${t.mentored} mentored, top ${t.leaderboardRank} rank`, GAME_W / 2, 240);
+    ctx.fillText(`Required: ${t.publications} pubs, ${t.grants} grants, ${t.citations} cites, h>=${t.hIndex}, top ${t.leaderboardRank} rank`, GAME_W / 2, 240);
 
     if (leaderboardRank) {
       ctx.fillStyle = '#ffa726';
@@ -6700,12 +4640,9 @@ function drawMiniLeaderboard(startX, startY, maxRows) {
 }
 
 function startGame() {
-  p1Stats = newStats();
-  p2Stats = newStats();
-  stats = p1Stats;
+  stats = { publications: 0, grants: 0, citations: 0, hIndex: 0, lives: 3, coffee: 0, score: 0 };
   postdocCount = 0;
   jobMarketPassed = null;
-  swappedControls = false;
   // playerAppearance is already set by customization or random default
 
   // Start name input
