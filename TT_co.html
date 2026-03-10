@@ -3957,10 +3957,10 @@ function drawHUD() {
       ctx.font = 'bold 9px monospace';
       ctx.fillText(`h=${st.hIndex}`, 210, baseY);
 
-      // Mentored
+      // Students
       ctx.fillStyle = '#81c784';
       ctx.font = 'bold 8px monospace';
-      ctx.fillText(`M${st.mentored}`, 250, baseY);
+      ctx.fillText(`S${st.mentored}`, 250, baseY);
 
       // Score
       ctx.fillStyle = '#ffa726';
@@ -4063,21 +4063,21 @@ function drawHUD() {
     ctx.fillText(`h=${stats.hIndex}`, 225, 26);
     ctx.shadowBlur = 0;
 
-    // Mentored
+    // Students
     ctx.fillStyle = '#66bb6a';
     ctx.font = 'bold 9px monospace';
-    ctx.fillText('MENT', 185, 36);
+    ctx.fillText('STUDENTS', 175, 36);
     ctx.fillStyle = '#81c784';
     ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.mentored}`, 215, 36);
+    ctx.fillText(`${stats.mentored}`, 228, 36);
 
     // Score
     ctx.fillStyle = '#78909c';
     ctx.font = 'bold 8px monospace';
-    ctx.fillText('SCORE', 225, 37);
+    ctx.fillText('SCORE', 248, 37);
     ctx.fillStyle = '#ffa726';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText(`${stats.score}`, 262, 37);
+    ctx.fillText(`${stats.score}`, 285, 37);
 
     // Mentoring timer
     if (player && player.mentoring) {
@@ -5550,20 +5550,25 @@ function update() {
             spawnFloatingText(e.x, e.y, `-${dmg} HP`, '#ff5722');
             if (e.hp <= 0) {
               e.alive = false;
-              magicSt.score += e.type === 'dean' ? 5000 : 500;
+              const pts = e.type === 'dean' ? 5000 : 500;
+              magicSt.score += pts;
               spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ffd54f', 25);
+              spawnFloatingText(e.x, e.y - 10, `+${pts}`, '#ffd54f');
               if (e.type === 'dean') {
                 spawnFloatingText(e.x, e.y, 'TENURE GRANTED!', '#ffd54f');
                 showMessage('The Dean has been vanquished!');
                 gameState = 'levelComplete'; winTimer = 180;
                 if (flagObj) flagObj.reached = true;
+              } else {
+                SFX.enemyDefeat();
               }
             }
           } else {
             e.alive = false;
             magicSt.score += 200;
             spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 15);
-            spawnFloatingText(e.x, e.y, 'BURNED!', '#ff5722');
+            spawnFloatingText(e.x, e.y, '+200 BURNED!', '#ff5722');
+            SFX.enemyDefeat();
           }
         }
       }
@@ -6600,11 +6605,11 @@ function drawPauseScreen() {
   ctx.fillStyle = '#78909c';
   ctx.font = '10px monospace';
   if (twoPlayerMode) {
-    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | M ${p1Stats.mentored} | Score ${p1Stats.score} | Lives ${p1Stats.lives}`, GAME_W / 2, GAME_H / 2 + 70);
+    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | h=${p1Stats.hIndex} | Students ${p1Stats.mentored} | Score ${p1Stats.score} | Lives ${p1Stats.lives}`, GAME_W / 2, GAME_H / 2 + 70);
     ctx.fillStyle = '#42a5f5';
-    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | M ${p2Stats.mentored} | Score ${p2Stats.score} | Lives ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 88);
+    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | Students ${p2Stats.mentored} | Score ${p2Stats.score} | Lives ${p2Stats.lives}`, GAME_W / 2, GAME_H / 2 + 88);
   } else {
-    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 75);
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Students: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 75);
     ctx.fillText(`Wrath Potions: ${stats.potions} | Lives: ${stats.lives}`, GAME_W / 2, GAME_H / 2 + 95);
   }
 
@@ -6693,11 +6698,11 @@ function drawLevelIntro() {
     ctx.fillText('To get an offer you need:', GAME_W / 2, GAME_H / 2 + 40);
     ctx.fillStyle = '#b0bec5';
     ctx.font = '10px monospace';
-    ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | ${t.mentored} mentored | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
+    ctx.fillText(`${t.publications} pubs | ${t.grants} grants | ${t.citations} cites | h>=${t.hIndex} | ${t.mentored} students | Top ${t.leaderboardRank} rank`, GAME_W / 2, GAME_H / 2 + 58);
     ctx.fillStyle = '#78909c';
     ctx.font = '9px monospace';
     const liSt = twoPlayerMode ? combinedStats() : stats;
-    ctx.fillText(`You have: ${liSt.publications} pubs, ${liSt.grants} grants, ${liSt.citations} cites, h=${liSt.hIndex}, ${liSt.mentored} mentored`, GAME_W / 2, GAME_H / 2 + 75);
+    ctx.fillText(`You have: ${liSt.publications} pubs, ${liSt.grants} grants, ${liSt.citations} cites, h=${liSt.hIndex}, ${liSt.mentored} students`, GAME_W / 2, GAME_H / 2 + 75);
     if (postdocCount > 0) {
       ctx.fillStyle = '#ffa726';
       ctx.fillText(`Postdoc attempt #${postdocCount + 1}`, GAME_W / 2, GAME_H / 2 + 92);
@@ -6759,7 +6764,7 @@ function drawDeathScreen() {
       ctx.fillStyle = '#ffa726';
       ctx.fillText(`Combined Score: ${ds.score}`, GAME_W / 2, 136);
     } else {
-      ctx.fillText(`Score: ${stats.score} | Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored}`, GAME_W / 2, 108);
+      ctx.fillText(`Score: ${stats.score} | Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Students: ${stats.mentored}`, GAME_W / 2, 108);
     }
     if (leaderboardRank) {
       ctx.fillStyle = '#ffd54f';
@@ -6814,7 +6819,7 @@ function drawLevelComplete() {
     ctx.fillStyle = '#42a5f5';
     ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | h=${p2Stats.hIndex} | Score ${p2Stats.score}`, GAME_W / 2, GAME_H / 2 + 53);
   } else {
-    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Mentored: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
+    ctx.fillText(`Pubs: ${stats.publications} | Grants: ${stats.grants} | h=${stats.hIndex} | Students: ${stats.mentored} | Score: ${stats.score}`, GAME_W / 2, GAME_H / 2 + 40);
   }
   ctx.textAlign = 'left';
 }
@@ -6925,15 +6930,15 @@ function drawWinScreen() {
   ctx.fillStyle = '#fff';
   ctx.font = '10px monospace';
   if (twoPlayerMode) {
-    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | M ${p1Stats.mentored} | C ${p1Stats.citations} | h=${p1Stats.hIndex}`, GAME_W / 4, 296);
+    ctx.fillText(`P1: Pubs ${p1Stats.publications} | G ${p1Stats.grants} | S ${p1Stats.mentored} | C ${p1Stats.citations} | h=${p1Stats.hIndex}`, GAME_W / 4, 296);
     ctx.fillStyle = '#42a5f5';
-    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | M ${p2Stats.mentored} | C ${p2Stats.citations} | h=${p2Stats.hIndex}`, GAME_W / 4, 312);
+    ctx.fillText(`P2: Pubs ${p2Stats.publications} | G ${p2Stats.grants} | S ${p2Stats.mentored} | C ${p2Stats.citations} | h=${p2Stats.hIndex}`, GAME_W / 4, 312);
     const cs = combinedStats();
     ctx.fillStyle = '#ffa726';
     ctx.font = 'bold 12px monospace';
     ctx.fillText(`P1 Score: ${p1Stats.score}  |  P2 Score: ${p2Stats.score}  |  Total: ${cs.score}`, GAME_W / 4, 332);
   } else {
-    ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  Mentored: ${stats.mentored}`, GAME_W / 4, 298);
+    ctx.fillText(`Pubs: ${stats.publications}  |  Grants: ${stats.grants}  |  Students: ${stats.mentored}`, GAME_W / 4, 298);
     ctx.fillText(`Citations: ${stats.citations}  |  h-index: ${stats.hIndex}`, GAME_W / 4, 314);
     ctx.fillStyle = '#ffa726';
     ctx.font = 'bold 12px monospace';
@@ -7026,7 +7031,7 @@ async function checkJobMarket() {
   if (st.grants < t.grants) failReasons.push(`Grants: ${st.grants}/${t.grants}`);
   if (st.citations < t.citations) failReasons.push(`Cites: ${st.citations}/${t.citations}`);
   if (st.hIndex < t.hIndex) failReasons.push(`h-index: ${st.hIndex}/${t.hIndex}`);
-  if (st.mentored < t.mentored) failReasons.push(`Mentored: ${st.mentored}/${t.mentored}`);
+  if (st.mentored < t.mentored) failReasons.push(`Students: ${st.mentored}/${t.mentored}`);
 
   // Check leaderboard rank
   const rank = await fetchRank(st.score);
@@ -7152,7 +7157,7 @@ function drawJobMarketResult() {
     const jmSt = twoPlayerMode ? combinedStats() : stats;
     ctx.fillStyle = '#ffd54f';
     ctx.font = '12px monospace';
-    ctx.fillText(`Pubs: ${jmSt.publications} | Grants: ${jmSt.grants} | Cites: ${jmSt.citations} | h=${jmSt.hIndex} | Mentored: ${jmSt.mentored}`, GAME_W / 2, 200);
+    ctx.fillText(`Pubs: ${jmSt.publications} | Grants: ${jmSt.grants} | Cites: ${jmSt.citations} | h=${jmSt.hIndex} | Students: ${jmSt.mentored}`, GAME_W / 2, 200);
     if (leaderboardRank) {
       ctx.fillText(`Leaderboard Rank: #${leaderboardRank}`, GAME_W / 2, 225);
     }
@@ -7182,7 +7187,7 @@ function drawJobMarketResult() {
     ctx.fillStyle = '#78909c';
     ctx.font = '10px monospace';
     const t = JOB_MARKET_THRESHOLDS;
-    ctx.fillText(`Required: ${t.publications} pubs, ${t.grants} grants, ${t.citations} cites, h>=${t.hIndex}, ${t.mentored} mentored, top ${t.leaderboardRank} rank`, GAME_W / 2, 240);
+    ctx.fillText(`Required: ${t.publications} pubs, ${t.grants} grants, ${t.citations} cites, h>=${t.hIndex}, ${t.mentored} students, top ${t.leaderboardRank} rank`, GAME_W / 2, 240);
 
     if (leaderboardRank) {
       ctx.fillStyle = '#ffa726';
