@@ -5226,25 +5226,38 @@ function generateLevel(levelIdx) {
     }
   }
 
-  // Emotional support pets (random placement, 0-3 per level)
+  // Emotional support pets (random placement, 0-3 per level, on ground or platforms)
   const petCount = Math.floor(Math.random() * 3) + 1; // 1-3 pets per level
   for (let i = 0; i < petCount; i++) {
-    // Try placing on ground
-    let px, placed = false;
-    for (let attempt = 0; attempt < 20; attempt++) {
-      px = 8 + Math.floor(Math.random() * (w - 16));
-      if (tiles[groundY][px] === 1) {
-        entities.push({ type: 'pet', x: px, y: groundY - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
-        placed = true;
-        break;
-      }
-    }
-    // Try placing on a platform if ground didn't work
-    if (!placed && platforms.length > 0) {
+    const petKind = Math.random() < 0.5 ? 'dog' : 'cat';
+    let placed = false;
+    // 40% chance to place on a platform if available
+    if (Math.random() < 0.4 && platforms.length > 0) {
       const plat = platforms[Math.floor(Math.random() * platforms.length)];
       const pw3 = plat.x2 - plat.x1 + 1;
       if (pw3 >= 3) {
-        entities.push({ type: 'pet', x: plat.x1 + Math.floor(pw3 / 2), y: plat.y - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
+        entities.push({ type: 'pet', x: plat.x1 + Math.floor(pw3 / 2), y: plat.y - 1, petKind });
+        placed = true;
+      }
+    }
+    // Otherwise place on ground
+    if (!placed) {
+      let px;
+      for (let attempt = 0; attempt < 20; attempt++) {
+        px = 8 + Math.floor(Math.random() * (w - 16));
+        if (tiles[groundY][px] === 1) {
+          entities.push({ type: 'pet', x: px, y: groundY - 1, petKind });
+          placed = true;
+          break;
+        }
+      }
+      // Fallback to platform if ground didn't work
+      if (!placed && platforms.length > 0) {
+        const plat = platforms[Math.floor(Math.random() * platforms.length)];
+        const pw3 = plat.x2 - plat.x1 + 1;
+        if (pw3 >= 3) {
+          entities.push({ type: 'pet', x: plat.x1 + Math.floor(pw3 / 2), y: plat.y - 1, petKind });
+        }
       }
     }
   }
@@ -6332,6 +6345,20 @@ function update() {
         gs.onGround = true;
       }
     }
+    // Check if grad student fell off the map (kills riding player too)
+    if (gs.y > level.height * TILE) {
+      if (gs.mentee) {
+        const rider = gs.mentee;
+        rider.mentoring = null;
+        rider.headbutting = false;
+        gs.mentee = null;
+        if (rider === player) { playerDie('Fell into industry... with your grad student!'); }
+        else { p2Die('P2 fell with their grad student!'); }
+      }
+      gradStudents = gradStudents.filter(g => g !== gs);
+      continue;
+    }
+
     gs.frameTimer++;
     if (gs.frameTimer > 10) { gs.frame = (gs.frame + 1) % 2; gs.frameTimer = 0; }
 
@@ -7511,6 +7538,10 @@ function drawMenu() {
   ctx.fillStyle = '#b0bec5';
   ctx.font = '13px monospace';
   ctx.fillText('A Platformer Parody of Academic Life', GAME_W / 2, 172);
+
+  ctx.fillStyle = '#546e7a';
+  ctx.font = '9px monospace';
+  ctx.fillText('V5', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
