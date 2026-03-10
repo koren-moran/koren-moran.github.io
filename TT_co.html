@@ -341,13 +341,13 @@ let keyBindings = {
   p1_left:  ['ArrowLeft'],
   p1_right: ['ArrowRight'],
   p1_jump:  ['ArrowUp', 'Space'],
-  p1_fire:  ['Period'],
-  p1_potion:['Comma'],
+  p1_fire:  ['Period', 'KeyF'],
+  p1_potion:['Comma', 'KeyQ'],
   p2_left:  ['KeyA'],
   p2_right: ['KeyD'],
   p2_jump:  ['KeyW'],
   p2_fire:  ['KeyE'],
-  p2_potion:['KeyQ'],
+  p2_potion:['KeyR'],
 };
 const BINDABLE_ACTIONS = ['p1_left','p1_right','p1_jump','p1_fire','p1_potion','p2_left','p2_right','p2_jump','p2_fire','p2_potion'];
 const ACTION_LABELS = {
@@ -7541,7 +7541,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V5', GAME_W / 2, 188);
+  ctx.fillText('V5.1', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
@@ -7602,8 +7602,8 @@ function drawMenu() {
       ctx.fillText('Use on-screen buttons to play', GAME_W / 2, 305);
       ctx.fillText('Jump on enemies to defeat them!', GAME_W / 2, 323);
     } else {
-      ctx.fillText("P1: Arrows+Space | .: Fire | ,: Wrath", GAME_W / 2, 305);
-      ctx.fillText('P2: WASD | E: Fire | Q: Wrath | Jump on enemies!', GAME_W / 2, 323);
+      ctx.fillText("P1: Arrows+Space | F/.: Fire | Q/,: Wrath", GAME_W / 2, 305);
+      ctx.fillText('P2: WASD | E: Fire | R: Wrath | Jump on enemies!', GAME_W / 2, 323);
     }
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 11px monospace';
@@ -7611,14 +7611,14 @@ function drawMenu() {
       ctx.fillText('C: Customize | K: Keys | 2: Two Players | D: Difficulty | T: Training', GAME_W / 2, 346);
     }
 
-    // Two-player status and difficulty
-    ctx.fillStyle = twoPlayerMode ? '#66bb6a' : '#546e7a';
+    // Two-player status and difficulty (same line)
     ctx.font = '10px monospace';
-    ctx.fillText(`Two Players: ${twoPlayerMode ? 'ON (P2: WASD+E+Q | TAB: swap controls)' : 'OFF'}`, GAME_W / 2, 362);
-
+    ctx.fillStyle = twoPlayerMode ? '#66bb6a' : '#546e7a';
+    const twoPlayerText = twoPlayerMode ? '2P: ON' : '2P: OFF';
+    ctx.fillText(twoPlayerText, GAME_W / 2 - 80, 356);
     ctx.fillStyle = DIFFICULTY_COLORS[difficulty];
     ctx.font = 'bold 10px monospace';
-    ctx.fillText(`Difficulty: ${DIFFICULTY_LABELS[difficulty]}`, GAME_W / 2, 376);
+    ctx.fillText(`Diff: ${DIFFICULTY_LABELS[difficulty]}`, GAME_W / 2 + 40, 356);
 
     // Show P2 character preview if enabled
     if (twoPlayerMode) {
@@ -7646,7 +7646,7 @@ function drawMenu() {
   // Level path
   ctx.font = '10px monospace';
   const levels = ['PhD', 'Postdoc', 'Market', 'Asst.Prof', 'Assoc.Prof', 'TENURE!'];
-  const pathY = 395;
+  const pathY = 380;
   for (let i = 0; i < levels.length; i++) {
     const lx = 68 + i * 115;
     // Node
@@ -7659,7 +7659,7 @@ function drawMenu() {
     // Label
     ctx.fillStyle = '#b0bec5';
     ctx.font = '8px monospace';
-    ctx.fillText(levels[i], lx, pathY + 20);
+    ctx.fillText(levels[i], lx, pathY + 18);
     // Arrow (with loop-back indicator for job market)
     if (i < 5) {
       ctx.strokeStyle = '#546e7a';
@@ -7681,7 +7681,7 @@ function drawMenu() {
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
       ctx.moveTo(lx, pathY + 10);
-      ctx.quadraticCurveTo(lx - 57, pathY + 30, lx - 115, pathY + 10);
+      ctx.quadraticCurveTo(lx - 57, pathY + 25, lx - 115, pathY + 10);
       ctx.stroke();
       ctx.setLineDash([]);
       // arrowhead
@@ -7692,33 +7692,32 @@ function drawMenu() {
       ctx.stroke();
       ctx.fillStyle = '#ef5350';
       ctx.font = '6px monospace';
-      ctx.fillText('fail', lx - 70, pathY + 32);
+      ctx.fillText('fail', lx - 70, pathY + 27);
     }
   }
 
-  // Mini leaderboard on menu
+  // Bottom section: legend and leaderboard side by side
+  const bottomY = 420;
+  ctx.textAlign = 'left';
+  ctx.font = '9px monospace';
+  ctx.fillStyle = '#78909c';
+  ctx.fillText('Collect: Pubs | Grants | Citations | Coffee', 20, bottomY);
+  ctx.fillStyle = '#ef5350';
+  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Predatory Journals', 20, bottomY + 14);
+
   if (leaderboardData.length > 0) {
-    drawMiniLeaderboard(420, 290, 8);
+    drawMiniLeaderboard(420, bottomY - 10, 3);
   } else {
     ctx.fillStyle = '#42a5f5';
     ctx.font = '10px monospace';
-    ctx.fillText('Press L for Leaderboard', GAME_W / 2, 430);
+    ctx.textAlign = 'center';
+    ctx.fillText('L: Leaderboard', GAME_W * 3 / 4, bottomY + 5);
   }
-
-  // Collectibles legend (left side when leaderboard shown, center otherwise)
-  const legendX = leaderboardData.length > 0 ? 30 : GAME_W / 2;
-  const legendAlign = leaderboardData.length > 0 ? 'left' : 'center';
-  ctx.textAlign = legendAlign;
-  ctx.font = '9px monospace';
-  ctx.fillStyle = '#78909c';
-  ctx.fillText('Collect: Pubs | Grants | Citations | Coffee', legendX, 430);
-  ctx.fillStyle = '#ef5350';
-  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Predatory Journals', legendX, 446);
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#37474f';
   ctx.font = '9px monospace';
-  ctx.fillText('No academics were harmed in the making of this game', GAME_W / 2, 472);
+  ctx.fillText('No academics were harmed in the making of this game', GAME_W / 2, 470);
 
   ctx.textAlign = 'left';
 
