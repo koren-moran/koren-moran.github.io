@@ -4012,7 +4012,7 @@ function drawHUD() {
     // Divider lines between sections
     ctx.strokeStyle = 'rgba(255,255,255,0.06)';
     ctx.lineWidth = 1;
-    for (const divX of [105, 215, 320]) {
+    for (const divX of [68, 155, 260]) {
       ctx.beginPath();
       ctx.moveTo(divX, 10);
       ctx.lineTo(divX, 38);
@@ -4027,7 +4027,7 @@ function drawHUD() {
       ctx.shadowBlur = 4;
       ctx.fillStyle = '#ef5350';
       ctx.font = '14px serif';
-      ctx.fillText('\u2665', 14 + i * 18, 24);
+      ctx.fillText('\u2665', 14 + i * 15, 24);
       ctx.shadowBlur = 0;
     }
 
@@ -4042,42 +4042,42 @@ function drawHUD() {
     // Grants
     ctx.fillStyle = '#4caf50';
     ctx.font = 'bold 9px monospace';
-    ctx.fillText('GRANT', 115, 22);
+    ctx.fillText('GRANT', 76, 22);
     ctx.fillStyle = '#66bb6a';
     ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.grants}`, 165, 22);
+    ctx.fillText(`${stats.grants}`, 120, 22);
 
     // Citations
     ctx.fillStyle = '#29b6f6';
     ctx.font = 'bold 9px monospace';
-    ctx.fillText('CITE', 115, 36);
+    ctx.fillText('CITE', 76, 36);
     ctx.fillStyle = '#4fc3f7';
     ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.citations}`, 148, 36);
+    ctx.fillText(`${stats.citations}`, 109, 36);
 
     // h-index
     ctx.shadowColor = '#ffd54f';
     ctx.shadowBlur = 6;
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 14px monospace';
-    ctx.fillText(`h=${stats.hIndex}`, 225, 26);
+    ctx.fillText(`h=${stats.hIndex}`, 163, 26);
     ctx.shadowBlur = 0;
 
     // Students
     ctx.fillStyle = '#66bb6a';
     ctx.font = 'bold 9px monospace';
-    ctx.fillText('STUDENTS', 175, 36);
+    ctx.fillText('STUDENTS', 135, 36);
     ctx.fillStyle = '#81c784';
     ctx.font = 'bold 12px monospace';
-    ctx.fillText(`${stats.mentored}`, 228, 36);
+    ctx.fillText(`${stats.mentored}`, 188, 36);
 
     // Score
     ctx.fillStyle = '#78909c';
     ctx.font = 'bold 8px monospace';
-    ctx.fillText('SCORE', 248, 37);
+    ctx.fillText('SCORE', 210, 37);
     ctx.fillStyle = '#ffa726';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText(`${stats.score}`, 285, 37);
+    ctx.fillText(`${stats.score}`, 247, 37);
 
     // Mentoring timer
     if (player && player.mentoring) {
