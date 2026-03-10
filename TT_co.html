@@ -1886,38 +1886,52 @@ function drawEnemy(e, x, y) {
     }
 
     case 'rival': {
-      // Rival researcher — competitive academic with distinct personality
+      // Rival researcher — competitive academic with anime style
       const ra = e.appearance || { skin: SKIN_TONES[0], jacket: JACKET_COLORS[0], hair: HAIR_COLORS[0], gender: 'masc', glasses: 'none', accessory: 'none' };
       const rivalTitle = e.rivalTitle || 'RIVAL';
       const rivalColor = e.rivalColor || '#ff9800';
 
-      // Intimidation aura
-      const rAuraAlpha = 0.1 + Math.sin(levelTimer * 0.06) * 0.05;
-      ctx.fillStyle = `rgba(255,152,0,${rAuraAlpha})`;
-      drawCircle(x + e.w / 2, dy + e.h / 2, 30);
+      // Intimidation aura (soft radial glow)
+      ctx.shadowColor = rivalColor;
+      ctx.shadowBlur = 10;
+      const rAuraAlpha = 0.12 + Math.sin(levelTimer * 0.06) * 0.06;
+      const rAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 5, x + e.w / 2, dy + e.h / 2, 32);
+      rAuraGrad.addColorStop(0, `rgba(255,152,0,${rAuraAlpha})`);
+      rAuraGrad.addColorStop(1, 'rgba(255,152,0,0)');
+      ctx.fillStyle = rAuraGrad;
+      drawCircle(x + e.w / 2, dy + e.h / 2, 32);
       ctx.fill();
+      ctx.shadowBlur = 0;
 
       // Lab coat body contour
-      ctx.fillStyle = '#9e9e9e';
-      drawRoundRect(x + 1, dy + 13, e.w - 2, e.h - 14, 7);
+      ctx.fillStyle = '#7a7a7a';
+      drawRoundRect(x + 1, dy + 13, e.w - 2, e.h - 14, 9);
       ctx.fill();
-      // Lab coat body (large)
-      const labGrad = ctx.createLinearGradient(x, dy + 14, x + e.w, dy + e.h);
-      labGrad.addColorStop(0, '#fafafa');
-      labGrad.addColorStop(0.7, '#e0e0e0');
+      // Lab coat body with smooth gradient
+      const labGrad = ctx.createRadialGradient(x + e.w / 2, dy + 20, 4, x + e.w / 2, dy + 30, 24);
+      labGrad.addColorStop(0, '#ffffff');
+      labGrad.addColorStop(0.5, '#f5f5f5');
+      labGrad.addColorStop(0.8, '#e0e0e0');
       labGrad.addColorStop(1, '#bdbdbd');
       ctx.fillStyle = labGrad;
-      drawRoundRect(x + 2, dy + 14, e.w - 4, e.h - 16, 6);
+      drawRoundRect(x + 2, dy + 14, e.w - 4, e.h - 16, 8);
+      ctx.fill();
+      // Rim light on coat
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      drawRoundRect(x + 4, dy + 15, e.w - 8, 5, 5);
       ctx.fill();
 
-      // Coat buttons
-      ctx.fillStyle = '#9e9e9e';
+      // Coat buttons (gradient dots)
       for (let bi = 0; bi < 3; bi++) {
-        drawCircle(x + e.w / 2, dy + 20 + bi * 7, 1.5);
+        ctx.fillStyle = '#9e9e9e';
+        drawCircle(x + e.w / 2, dy + 20 + bi * 7, 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        drawCircle(x + e.w / 2 - 0.5, dy + 19.5 + bi * 7, 0.8);
         ctx.fill();
       }
 
-      // Accessory: scarf or necklace on body
+      // Accessory on body
       if (ra.accessory === 'scarf') {
         ctx.fillStyle = ra.tie || '#ef5350';
         drawRoundRect(x + 8, dy + 14, e.w - 16, 4, 2);
@@ -1947,192 +1961,194 @@ function drawEnemy(e, x, y) {
         ctx.fill();
       }
 
-      // Hair — gender-diverse styles (drawn behind head, must extend beyond head bounds)
+      // Hair behind head
       ctx.fillStyle = ra.hair;
       if (ra.hairStyle === 'long' || ra.hairStyle === 'bob') {
-        drawRoundRect(x + 3, dy - 6, e.w - 6, 10, 5);
-        ctx.fill();
-        // Side hair flowing past head
-        drawRoundRect(x + 2, dy + 2, 5, 14, 3);
-        ctx.fill();
-        drawRoundRect(x + e.w - 7, dy + 2, 5, 14, 3);
-        ctx.fill();
+        drawRoundRect(x + 3, dy - 6, e.w - 6, 10, 5); ctx.fill();
+        drawRoundRect(x + 2, dy + 2, 5, 14, 3); ctx.fill();
+        drawRoundRect(x + e.w - 7, dy + 2, 5, 14, 3); ctx.fill();
       } else if (ra.hairStyle === 'bun') {
-        drawRoundRect(x + 5, dy - 6, e.w - 10, 8, 5);
-        ctx.fill();
-        drawCircle(x + e.w / 2, dy - 9, 6);
-        ctx.fill();
+        drawRoundRect(x + 5, dy - 6, e.w - 10, 8, 5); ctx.fill();
+        drawCircle(x + e.w / 2, dy - 9, 6); ctx.fill();
       } else if (ra.hairStyle === 'afro') {
-        drawCircle(x + e.w / 2, dy + 4, 18);
-        ctx.fill();
+        drawCircle(x + e.w / 2, dy + 4, 18); ctx.fill();
       } else if (ra.hairStyle === 'curly') {
-        for (let ci = 0; ci < 5; ci++) {
-          drawCircle(x + 7 + ci * 5, dy - 4, 5);
-          ctx.fill();
-        }
+        for (let ci = 0; ci < 5; ci++) { drawCircle(x + 7 + ci * 5, dy - 4, 5); ctx.fill(); }
       } else if (ra.hairStyle === 'mohawk') {
-        drawRoundRect(x + 6, dy - 4, e.w - 12, 6, 4);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 4, dy - 3);
-        ctx.lineTo(x + e.w / 2, dy - 14);
-        ctx.lineTo(x + e.w / 2 + 4, dy - 3);
-        ctx.fill();
+        drawRoundRect(x + 6, dy - 4, e.w - 12, 6, 4); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x + e.w / 2 - 4, dy - 3); ctx.lineTo(x + e.w / 2, dy - 14); ctx.lineTo(x + e.w / 2 + 4, dy - 3); ctx.fill();
       } else if (ra.hairStyle === 'messy') {
-        drawRoundRect(x + 4, dy - 6, e.w - 8, 10, 5);
-        ctx.fill();
-        ctx.fillRect(x + 6, dy - 9, 4, 5);
-        ctx.fillRect(x + e.w / 2 - 2, dy - 10, 4, 6);
-        ctx.fillRect(x + e.w - 10, dy - 8, 4, 4);
+        drawRoundRect(x + 4, dy - 6, e.w - 8, 10, 5); ctx.fill();
+        ctx.fillRect(x + 6, dy - 9, 4, 5); ctx.fillRect(x + e.w / 2 - 2, dy - 10, 4, 6); ctx.fillRect(x + e.w - 10, dy - 8, 4, 4);
       } else {
-        // short/default
-        drawRoundRect(x + 4, dy - 5, e.w - 8, 8, 5);
-        ctx.fill();
+        drawRoundRect(x + 4, dy - 5, e.w - 8, 8, 5); ctx.fill();
       }
 
-      // Head contour (drawn on top of hair)
+      // Head contour
       ctx.fillStyle = darkenColor(ra.skin.shadow, 60);
-      drawRoundRect(x + 5, dy - 2, e.w - 10, 20, 9);
+      drawRoundRect(x + 5, dy - 2, e.w - 10, 20, 10);
       ctx.fill();
-      // Head
-      const rHeadGrad = ctx.createRadialGradient(x + e.w / 2, dy + 7, 2, x + e.w / 2, dy + 9, 11);
-      rHeadGrad.addColorStop(0, lightenColor(ra.skin.base, 10));
+      // Head with radial gradient
+      const rHeadGrad = ctx.createRadialGradient(x + e.w / 2, dy + 5, 2, x + e.w / 2, dy + 8, 12);
+      rHeadGrad.addColorStop(0, lightenColor(ra.skin.base, 15));
+      rHeadGrad.addColorStop(0.7, ra.skin.base);
       rHeadGrad.addColorStop(1, ra.skin.shadow);
       ctx.fillStyle = rHeadGrad;
-      drawRoundRect(x + 6, dy - 1, e.w - 12, 18, 8);
+      drawRoundRect(x + 6, dy - 1, e.w - 12, 18, 9);
       ctx.fill();
 
-      // Earrings accessory
+      // Earrings
       if (ra.accessory === 'earrings') {
         ctx.fillStyle = '#ffd54f';
-        drawCircle(x + 6, dy + 10, 2);
-        ctx.fill();
-        drawCircle(x + e.w - 6, dy + 10, 2);
-        ctx.fill();
+        drawCircle(x + 6, dy + 10, 2); ctx.fill();
+        drawCircle(x + e.w - 6, dy + 10, 2); ctx.fill();
       }
 
       // Glasses
       if (ra.glasses === 'round') {
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        drawCircle(x + e.w / 2 - 5, dy + 8, 4);
-        ctx.stroke();
-        drawCircle(x + e.w / 2 + 5, dy + 8, 4);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 1, dy + 8);
-        ctx.lineTo(x + e.w / 2 + 1, dy + 8);
-        ctx.stroke();
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+        drawCircle(x + e.w / 2 - 5, dy + 8, 4); ctx.stroke();
+        drawCircle(x + e.w / 2 + 5, dy + 8, 4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + e.w / 2 - 1, dy + 8); ctx.lineTo(x + e.w / 2 + 1, dy + 8); ctx.stroke();
       } else if (ra.glasses === 'rectangular') {
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
         ctx.strokeRect(x + e.w / 2 - 9, dy + 6, 7, 5);
         ctx.strokeRect(x + e.w / 2 + 2, dy + 6, 7, 5);
       } else if (ra.glasses === 'cat-eye') {
-        ctx.strokeStyle = '#880e4f';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 - 9, dy + 6);
-        ctx.lineTo(x + e.w / 2 - 2, dy + 6);
-        ctx.lineTo(x + e.w / 2 - 2, dy + 11);
-        ctx.lineTo(x + e.w / 2 - 9, dy + 10);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w / 2 + 2, dy + 6);
-        ctx.lineTo(x + e.w / 2 + 9, dy + 6);
-        ctx.lineTo(x + e.w / 2 + 9, dy + 10);
-        ctx.lineTo(x + e.w / 2 + 2, dy + 11);
-        ctx.closePath();
-        ctx.stroke();
+        ctx.strokeStyle = '#880e4f'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x + e.w / 2 - 9, dy + 6); ctx.lineTo(x + e.w / 2 - 2, dy + 6); ctx.lineTo(x + e.w / 2 - 2, dy + 11); ctx.lineTo(x + e.w / 2 - 9, dy + 10); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + e.w / 2 + 2, dy + 6); ctx.lineTo(x + e.w / 2 + 9, dy + 6); ctx.lineTo(x + e.w / 2 + 9, dy + 10); ctx.lineTo(x + e.w / 2 + 2, dy + 11); ctx.closePath(); ctx.stroke();
       }
 
-      // Competitive eyes (narrowed, intense)
+      // Anime eyes (large, intense, gradient iris)
       for (const rex of [x + e.w / 2 - 6, x + e.w / 2 + 4]) {
+        // White sclera
         ctx.fillStyle = '#fff';
-        drawEllipse(rex, dy + 8, 4, 3);
+        drawEllipse(rex, dy + 8, 5, 4);
         ctx.fill();
-        ctx.fillStyle = '#e65100';
-        drawCircle(rex, dy + 8.5, 2.2);
+        // Gradient iris
+        const riGrad = ctx.createRadialGradient(rex, dy + 8.5, 0.5, rex, dy + 8.5, 3);
+        riGrad.addColorStop(0, '#ffab40');
+        riGrad.addColorStop(0.6, '#e65100');
+        riGrad.addColorStop(1, '#bf360c');
+        ctx.fillStyle = riGrad;
+        drawCircle(rex, dy + 8.5, 2.8);
         ctx.fill();
-        ctx.fillStyle = '#000';
-        drawCircle(rex, dy + 8.5, 1.2);
+        // Pupil
+        ctx.fillStyle = '#1a0a00';
+        drawCircle(rex + 0.3, dy + 8.8, 1.3);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        drawCircle(rex - 0.8, dy + 7.5, 0.9);
+        // Large highlight top-left
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        drawCircle(rex - 1.2, dy + 7.2, 1.2);
+        ctx.fill();
+        // Small highlight bottom-right
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCircle(rex + 1.2, dy + 9.8, 0.6);
         ctx.fill();
       }
-      // Fem: longer eyelashes with flicks
+      // Fem eyelashes
       if (ra.gender === 'fem') {
-        ctx.strokeStyle = '#1a1a2e';
-        ctx.lineWidth = 1.3;
-        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
         for (const rex of [x + e.w / 2 - 6, x + e.w / 2 + 4]) {
-          ctx.beginPath();
-          ctx.moveTo(rex + 3.5, dy + 6);
-          ctx.lineTo(rex + 5.5, dy + 4);
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(rex + 3.5, dy + 6); ctx.lineTo(rex + 5.5, dy + 4); ctx.stroke();
         }
         ctx.lineCap = 'butt';
       }
 
-      // Mouth — competitive expression
+      // Manga eyebrows (thick, angled)
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x + e.w / 2 - 12, dy + 2); ctx.lineTo(x + e.w / 2 - 3, dy + 5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + e.w / 2 + 10, dy + 2); ctx.lineTo(x + e.w / 2 + 1, dy + 5); ctx.stroke();
+      ctx.lineCap = 'butt';
+
+      // Mouth — confident smirk
       ctx.strokeStyle = ra.gender === 'fem' ? '#c0392b' : '#5d4037';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 - 4, dy + 13);
-      ctx.quadraticCurveTo(x + e.w / 2 + 2, dy + 15, x + e.w / 2 + 5, dy + 12);
+      ctx.moveTo(x + e.w / 2 - 5, dy + 13);
+      ctx.quadraticCurveTo(x + e.w / 2 + 2, dy + 16, x + e.w / 2 + 6, dy + 12);
       ctx.stroke();
-      // Fem: lip color
       if (ra.gender === 'fem') {
         ctx.fillStyle = 'rgba(192,57,43,0.2)';
         drawEllipse(x + e.w / 2, dy + 13.5, 4, 2);
         ctx.fill();
       }
 
-      // Paper they're waving (their competing paper)
+      // Blush marks
+      ctx.fillStyle = 'rgba(255,120,100,0.2)';
+      drawEllipse(x + e.w / 2 - 10, dy + 11, 3, 1.5); ctx.fill();
+      drawEllipse(x + e.w / 2 + 8, dy + 11, 3, 1.5); ctx.fill();
+
+      // Paper waving (with contour)
       const paperWave = Math.sin(levelTimer * 0.15) * 5;
-      ctx.fillStyle = '#fff';
       ctx.save();
       ctx.translate(x + e.w - 2, dy + 20);
       ctx.rotate(paperWave * 0.05);
-      drawRoundRect(0, 0, 12, 16, 2);
-      ctx.fill();
+      ctx.fillStyle = '#bdbdbd';
+      drawRoundRect(-1, -1, 14, 18, 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      drawRoundRect(0, 0, 12, 16, 2); ctx.fill();
+      // Text lines on paper
+      ctx.fillStyle = rivalColor;
+      ctx.fillRect(2, 3, 8, 1.5);
+      ctx.fillRect(2, 6, 6, 1);
+      ctx.fillRect(2, 9, 7, 1);
       ctx.fillStyle = '#e65100';
       ctx.font = 'bold 5px monospace';
-      ctx.fillText('MY', 2, 6);
-      ctx.fillText('PUB', 1, 12);
+      ctx.fillText('PUB', 1, 15);
       ctx.restore();
 
-      // Shooting indicator (flash when about to shoot)
+      // Shooting indicator (radial glow when about to shoot)
       if (e.shootTimer !== undefined && e.shootTimer > 140) {
-        ctx.fillStyle = `rgba(255,0,0,${0.3 + Math.sin(levelTimer * 0.3) * 0.2})`;
-        drawCircle(x + (e.vx > 0 ? e.w + 4 : -4), dy + 18, 4);
+        const shGrad = ctx.createRadialGradient(x + (e.vx > 0 ? e.w + 2 : -2), dy + 18, 0, x + (e.vx > 0 ? e.w + 2 : -2), dy + 18, 8);
+        shGrad.addColorStop(0, `rgba(255,60,0,${0.4 + Math.sin(levelTimer * 0.3) * 0.2})`);
+        shGrad.addColorStop(1, 'rgba(255,60,0,0)');
+        ctx.fillStyle = shGrad;
+        drawCircle(x + (e.vx > 0 ? e.w + 2 : -2), dy + 18, 8);
         ctx.fill();
       }
 
-      // HP bar
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      // HP bar with contour
+      ctx.fillStyle = '#1a1a1a';
+      drawRoundRect(x - 1, dy - 11, e.w + 2, 8, 4);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
       drawRoundRect(x, dy - 10, e.w, 6, 3);
       ctx.fill();
-      ctx.fillStyle = e.hp > 1 ? rivalColor : '#ef5350';
-      drawRoundRect(x + 1, dy - 9, (e.w - 2) * (e.hp / e.maxHp), 4, 2);
+      const hpFrac = e.hp / e.maxHp;
+      const hpGrad = ctx.createLinearGradient(x + 1, 0, x + 1 + (e.w - 2) * hpFrac, 0);
+      hpGrad.addColorStop(0, e.hp > 1 ? lightenColor(rivalColor, 20) : '#ff6659');
+      hpGrad.addColorStop(1, e.hp > 1 ? rivalColor : '#ef5350');
+      ctx.fillStyle = hpGrad;
+      drawRoundRect(x + 1, dy - 9, (e.w - 2) * hpFrac, 4, 2);
+      ctx.fill();
+      // HP bar shine
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      drawRoundRect(x + 2, dy - 9, (e.w - 4) * hpFrac, 2, 1);
       ctx.fill();
 
-      // Label with rival subtype
+      // Label
       ctx.fillStyle = rivalColor;
       ctx.font = 'bold 7px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(rivalTitle, x + e.w / 2, dy - 12);
+      ctx.fillText(rivalTitle, x + e.w / 2, dy - 13);
       ctx.textAlign = 'left';
 
-      // Charging indicator
+      // Charging speed lines
       if (e.charging) {
-        ctx.fillStyle = 'rgba(255,87,34,0.3)';
         const chargeDir = e.vx > 0 ? 1 : -1;
-        for (let ci = 0; ci < 5; ci++) {
-          drawCircle(x + e.w / 2 - chargeDir * (ci * 5 + 8), dy + e.h / 2, 3 - ci * 0.4);
-          ctx.fill();
+        for (let ci = 0; ci < 6; ci++) {
+          const cAlpha = 0.35 - ci * 0.05;
+          ctx.strokeStyle = `rgba(255,152,0,${cAlpha})`;
+          ctx.lineWidth = 2 - ci * 0.25;
+          ctx.beginPath();
+          const lx = x + e.w / 2 - chargeDir * (ci * 6 + 10);
+          ctx.moveTo(lx, dy + 8 + ci * 4);
+          ctx.lineTo(lx - chargeDir * 6, dy + 8 + ci * 4);
+          ctx.stroke();
         }
       }
       break;
@@ -2141,149 +2157,209 @@ function drawEnemy(e, x, y) {
     case 'dean': {
       const da = e.appearance || { skin: SKIN_TONES[0], hair: '#9e9e9e' };
 
-      // Menacing aura (anime boss glow) — intensifies with phase
+      // Phase-based aura (anime boss glow)
       const phaseIntensity = e.phase ? e.phase / 3 : 0.33;
-      ctx.shadowColor = e.phase >= 3 ? '#ff0000' : e.phase >= 2 ? '#ff6f00' : '#880e4f';
-      ctx.shadowBlur = 15 + phaseIntensity * 10;
-      const dAuraAlpha = (0.15 + phaseIntensity * 0.15) + Math.sin(levelTimer * (0.08 + phaseIntensity * 0.06)) * 0.08;
-      const auraR = e.phase >= 3 ? 200 : e.phase >= 2 ? 160 : 136;
-      const auraG = e.phase >= 3 ? 0 : e.phase >= 2 ? 40 : 14;
-      const auraB = e.phase >= 3 ? 0 : e.phase >= 2 ? 0 : 79;
-      const dAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 10, x + e.w / 2, dy + e.h / 2, 40 + phaseIntensity * 15);
-      dAuraGrad.addColorStop(0, `rgba(${auraR},${auraG},${auraB},${dAuraAlpha})`);
-      dAuraGrad.addColorStop(1, `rgba(${auraR},${auraG},${auraB},0)`);
+      const auraCol = e.phase >= 3 ? [220, 20, 20] : e.phase >= 2 ? [200, 80, 0] : [136, 14, 79];
+      ctx.shadowColor = `rgb(${auraCol[0]},${auraCol[1]},${auraCol[2]})`;
+      ctx.shadowBlur = 12 + phaseIntensity * 12;
+      const dAuraAlpha = (0.12 + phaseIntensity * 0.12) + Math.sin(levelTimer * (0.07 + phaseIntensity * 0.05)) * 0.06;
+      const dAuraGrad = ctx.createRadialGradient(x + e.w / 2, dy + e.h / 2, 8, x + e.w / 2, dy + e.h / 2, 42 + phaseIntensity * 12);
+      dAuraGrad.addColorStop(0, `rgba(${auraCol[0]},${auraCol[1]},${auraCol[2]},${dAuraAlpha})`);
+      dAuraGrad.addColorStop(0.6, `rgba(${auraCol[0]},${auraCol[1]},${auraCol[2]},${dAuraAlpha * 0.3})`);
+      dAuraGrad.addColorStop(1, `rgba(${auraCol[0]},${auraCol[1]},${auraCol[2]},0)`);
       ctx.fillStyle = dAuraGrad;
-      drawCircle(x + e.w / 2, dy + e.h / 2, 40);
+      drawCircle(x + e.w / 2, dy + e.h / 2, 42 + phaseIntensity * 12);
       ctx.fill();
       ctx.shadowBlur = 0;
 
       // Robe contour
-      ctx.fillStyle = '#1a0010';
-      drawRoundRect(x + 3, dy + 19, e.w - 6, e.h - 20, 7);
+      ctx.fillStyle = '#0e000a';
+      drawRoundRect(x + 3, dy + 18, e.w - 6, e.h - 19, 9);
       ctx.fill();
-      // Robe with richer gradient
-      const robeGrad = ctx.createLinearGradient(x, dy + 20, x + e.w, dy + e.h);
-      robeGrad.addColorStop(0, '#ad1457');
-      robeGrad.addColorStop(0.5, '#880e4f');
+      // Robe with rich radial gradient
+      const robeGrad = ctx.createRadialGradient(x + e.w / 2, dy + 28, 4, x + e.w / 2, dy + 38, 30);
+      robeGrad.addColorStop(0, '#c2185b');
+      robeGrad.addColorStop(0.4, '#ad1457');
+      robeGrad.addColorStop(0.7, '#880e4f');
       robeGrad.addColorStop(1, '#3c0020');
       ctx.fillStyle = robeGrad;
-      drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
+      drawRoundRect(x + 4, dy + 19, e.w - 8, e.h - 21, 8);
+      ctx.fill();
+      // Robe rim light
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      drawRoundRect(x + 6, dy + 20, e.w - 12, 6, 5);
       ctx.fill();
 
       // Gold trim with glow
       ctx.shadowColor = '#ffd54f';
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 5;
       ctx.strokeStyle = '#ffd54f';
-      ctx.lineWidth = 2;
-      drawRoundRect(x + 4, dy + 20, e.w - 8, e.h - 22, 6);
+      ctx.lineWidth = 1.8;
+      drawRoundRect(x + 4, dy + 19, e.w - 8, e.h - 21, 8);
       ctx.stroke();
-      // Gold epaulettes
-      ctx.fillStyle = '#ffd54f';
-      drawCircle(x + 8, dy + 22, 4);
-      ctx.fill();
-      drawCircle(x + e.w - 8, dy + 22, 4);
-      ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Side hair behind head (distinguished)
+      // Gold epaulettes with gradient
+      for (const epX of [x + 8, x + e.w - 8]) {
+        const epGrad = ctx.createRadialGradient(epX, dy + 21, 0, epX, dy + 21, 4.5);
+        epGrad.addColorStop(0, '#fff9c4');
+        epGrad.addColorStop(0.4, '#ffd54f');
+        epGrad.addColorStop(1, '#c17900');
+        ctx.fillStyle = epGrad;
+        drawCircle(epX, dy + 21, 4.5);
+        ctx.fill();
+        // Epaulette contour
+        ctx.strokeStyle = '#a06800';
+        ctx.lineWidth = 0.8;
+        drawCircle(epX, dy + 21, 4.5);
+        ctx.stroke();
+      }
+
+      // Gold chain across chest
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x + 8, dy + 25);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 30, x + e.w - 8, dy + 25);
+      ctx.stroke();
+      // Chain pendant
+      ctx.fillStyle = '#ffd54f';
+      drawCircle(x + e.w / 2, dy + 29, 2.5);
+      ctx.fill();
+      ctx.fillStyle = '#c17900';
+      drawCircle(x + e.w / 2, dy + 29, 1.5);
+      ctx.fill();
+
+      // Side hair (distinguished silver/gray)
       ctx.fillStyle = da.hair;
-      drawRoundRect(x + 7, dy + 8, 6, 14, 3);
-      ctx.fill();
-      drawRoundRect(x + e.w - 13, dy + 8, 6, 14, 3);
-      ctx.fill();
-      // Hair on top
-      drawRoundRect(x + 9, dy - 2, e.w - 18, 7, 5);
-      ctx.fill();
+      drawRoundRect(x + 8, dy + 6, 6, 16, 3); ctx.fill();
+      drawRoundRect(x + e.w - 14, dy + 6, 6, 16, 3); ctx.fill();
+      drawRoundRect(x + 10, dy - 3, e.w - 20, 7, 5); ctx.fill();
 
       // Head contour
       ctx.fillStyle = darkenColor(da.skin.shadow, 60);
-      drawRoundRect(x + 9, dy + 1, e.w - 18, 24, 11);
+      drawRoundRect(x + 9, dy, e.w - 18, 24, 12);
       ctx.fill();
-      // Head
-      const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 10, 3, x + e.w / 2, dy + 12, 14);
-      headGrad2.addColorStop(0, da.skin.base);
+      // Head with rich radial gradient
+      const headGrad2 = ctx.createRadialGradient(x + e.w / 2, dy + 8, 2, x + e.w / 2, dy + 12, 14);
+      headGrad2.addColorStop(0, lightenColor(da.skin.base, 10));
+      headGrad2.addColorStop(0.6, da.skin.base);
       headGrad2.addColorStop(1, da.skin.shadow);
       ctx.fillStyle = headGrad2;
-      drawRoundRect(x + 10, dy + 2, e.w - 20, 22, 10);
+      drawRoundRect(x + 10, dy + 1, e.w - 20, 22, 11);
       ctx.fill();
 
-      // Anime eyes for the Dean (intimidating)
-      for (const dex of [x + e.w / 2 - 5, x + e.w / 2 + 6]) {
+      // Anime eyes (large, piercing, with gradient iris)
+      for (const dex of [x + e.w / 2 - 6, x + e.w / 2 + 5]) {
+        // Sclera
         ctx.fillStyle = '#fff';
-        drawEllipse(dex, dy + 10, 4.5, 4);
+        drawEllipse(dex, dy + 10, 5.5, 5);
         ctx.fill();
-        // Piercing dark iris
-        const diGrad = ctx.createRadialGradient(dex, dy + 10, 0.5, dex, dy + 10, 3);
-        diGrad.addColorStop(0, '#4a148c');
-        diGrad.addColorStop(1, '#1a0533');
+        // Gradient iris (deep purple to crimson based on phase)
+        const diGrad = ctx.createRadialGradient(dex, dy + 10.5, 0.5, dex, dy + 10.5, 3.5);
+        if (e.phase >= 3) {
+          diGrad.addColorStop(0, '#ff5252');
+          diGrad.addColorStop(0.6, '#c62828');
+          diGrad.addColorStop(1, '#7f0000');
+        } else if (e.phase >= 2) {
+          diGrad.addColorStop(0, '#ff7043');
+          diGrad.addColorStop(0.6, '#bf360c');
+          diGrad.addColorStop(1, '#7f0000');
+        } else {
+          diGrad.addColorStop(0, '#ce93d8');
+          diGrad.addColorStop(0.6, '#6a1b9a');
+          diGrad.addColorStop(1, '#1a0533');
+        }
         ctx.fillStyle = diGrad;
-        drawCircle(dex, dy + 10.5, 2.8);
+        drawCircle(dex, dy + 10.5, 3.2);
         ctx.fill();
-        ctx.fillStyle = '#000';
-        drawCircle(dex, dy + 10.5, 1.3);
+        // Pupil
+        ctx.fillStyle = '#0a0010';
+        drawCircle(dex + 0.3, dy + 10.8, 1.5);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        drawCircle(dex - 1, dy + 9.2, 1.1);
+        // Large highlight top-left
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        drawCircle(dex - 1.5, dy + 9, 1.4);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255,200,200,0.4)';
-        drawCircle(dex + 1, dy + 11.5, 0.6);
+        // Small highlight bottom-right
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCircle(dex + 1.5, dy + 12, 0.7);
         ctx.fill();
       }
 
-      // Sharp eyebrows
+      // Sharp manga eyebrows
       ctx.strokeStyle = '#1a0533';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 - 10, dy + 5);
-      ctx.lineTo(x + e.w / 2 - 2, dy + 7);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 + 13, dy + 5);
-      ctx.lineTo(x + e.w / 2 + 3, dy + 7);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + e.w / 2 - 12, dy + 3); ctx.lineTo(x + e.w / 2 - 3, dy + 6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + e.w / 2 + 14, dy + 3); ctx.lineTo(x + e.w / 2 + 2, dy + 6); ctx.stroke();
       ctx.lineCap = 'butt';
 
-      // Monocle (fancier)
-      ctx.strokeStyle = '#ffd54f';
-      ctx.lineWidth = 1.5;
-      drawCircle(x + e.w / 2 + 6, dy + 10, 5.5);
+      // Monocle (refined with contour and glint)
+      ctx.strokeStyle = '#c17900';
+      ctx.lineWidth = 1.8;
+      drawCircle(x + e.w / 2 + 5, dy + 10, 6);
       ctx.stroke();
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 1.2;
+      drawCircle(x + e.w / 2 + 5, dy + 10, 5.5);
+      ctx.stroke();
+      // Monocle chain
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 0.8;
       ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 + 6, dy + 15.5);
-      ctx.quadraticCurveTo(x + e.w / 2 + 8, dy + 20, x + e.w / 2 + 6, dy + 24);
+      ctx.moveTo(x + e.w / 2 + 5, dy + 15.5);
+      ctx.quadraticCurveTo(x + e.w / 2 + 8, dy + 20, x + e.w / 2 + 5, dy + 25);
       ctx.stroke();
       // Monocle glint
-      ctx.fillStyle = 'rgba(255,255,200,0.3)';
-      drawCircle(x + e.w / 2 + 4, dy + 8, 1.5);
+      ctx.fillStyle = 'rgba(255,255,220,0.45)';
+      drawCircle(x + e.w / 2 + 3, dy + 8.5, 1.5);
       ctx.fill();
 
       // Stern frown
-      ctx.strokeStyle = '#333';
+      ctx.strokeStyle = '#2a0020';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x + e.w / 2 - 6, dy + 18);
-      ctx.quadraticCurveTo(x + e.w / 2, dy + 16, x + e.w / 2 + 6, dy + 18);
+      ctx.moveTo(x + e.w / 2 - 7, dy + 18);
+      ctx.quadraticCurveTo(x + e.w / 2, dy + 15.5, x + e.w / 2 + 7, dy + 18);
       ctx.stroke();
 
-      // HP bar
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      drawRoundRect(x - 2, dy - 12, e.w + 4, 8, 3);
+      // Blush (subtle, even bosses get the anime treatment)
+      ctx.fillStyle = 'rgba(200,100,120,0.15)';
+      drawEllipse(x + e.w / 2 - 12, dy + 14, 3, 1.5); ctx.fill();
+      drawEllipse(x + e.w / 2 + 10, dy + 14, 3, 1.5); ctx.fill();
+
+      // HP bar with contour and gradient
+      ctx.fillStyle = '#0a0010';
+      drawRoundRect(x - 3, dy - 13, e.w + 6, 10, 5);
       ctx.fill();
-      ctx.fillStyle = e.hp > e.maxHp / 2 ? '#66bb6a' : e.hp > 1 ? '#ffa726' : '#ef5350';
-      drawRoundRect(x, dy - 10, (e.w) * (e.hp / e.maxHp), 4, 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      drawRoundRect(x - 2, dy - 12, e.w + 4, 8, 4);
+      ctx.fill();
+      const dHpFrac = e.hp / e.maxHp;
+      const dHpGrad = ctx.createLinearGradient(x, 0, x + e.w * dHpFrac, 0);
+      if (dHpFrac > 0.5) { dHpGrad.addColorStop(0, '#81c784'); dHpGrad.addColorStop(1, '#43a047'); }
+      else if (dHpFrac > 0.15) { dHpGrad.addColorStop(0, '#ffcc80'); dHpGrad.addColorStop(1, '#fb8c00'); }
+      else { dHpGrad.addColorStop(0, '#ff8a80'); dHpGrad.addColorStop(1, '#d32f2f'); }
+      ctx.fillStyle = dHpGrad;
+      drawRoundRect(x, dy - 10, e.w * dHpFrac, 4, 2);
+      ctx.fill();
+      // HP shine
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      drawRoundRect(x + 1, dy - 10, e.w * dHpFrac - 2, 2, 1);
       ctx.fill();
 
+      // Boss label
       ctx.fillStyle = '#ffd54f';
       ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('THE DEAN', x + e.w / 2, dy - 14);
+      ctx.fillText('THE DEAN', x + e.w / 2, dy - 15);
       ctx.textAlign = 'left';
       break;
     }
 
     case 'predatory_journal': {
-      // Filing cabinet trap — manuscript monster pops out of a drawer
+      // Filing cabinet trap — manuscript creature pops from drawer, anime style
       const cabW = 36;
       const cabH = 34;
       const cabX = x + e.w / 2 - cabW / 2;
@@ -2291,338 +2367,250 @@ function drawEnemy(e, x, y) {
       const isShooter = e.variant === 'shooter';
 
       // === FILING CABINET (always visible) ===
-      // Cabinet contour (dark outline)
-      ctx.fillStyle = '#3e3232';
-      drawRoundRect(cabX - 1, cabBaseY - cabH - 1, cabW + 2, cabH + 10, 3);
+      // Cabinet contour
+      ctx.fillStyle = '#2a2420';
+      drawRoundRect(cabX - 1, cabBaseY - cabH - 1, cabW + 2, cabH + 10, 4);
       ctx.fill();
-
-      // Cabinet body — institutional beige/gray metal
-      const cabGrad = ctx.createLinearGradient(cabX, 0, cabX + cabW, 0);
-      cabGrad.addColorStop(0, '#8d8272');
-      cabGrad.addColorStop(0.15, '#b8ad9e');
-      cabGrad.addColorStop(0.35, '#d1c7b8');
-      cabGrad.addColorStop(0.5, '#d6ccbd');
-      cabGrad.addColorStop(0.65, '#d1c7b8');
-      cabGrad.addColorStop(0.85, '#b8ad9e');
+      // Cabinet body — smooth radial gradient
+      const cabGrad = ctx.createRadialGradient(cabX + cabW / 2, cabBaseY - cabH / 2, 4, cabX + cabW / 2, cabBaseY - cabH / 2, cabW);
+      cabGrad.addColorStop(0, '#d6ccbd');
+      cabGrad.addColorStop(0.5, '#c4b9aa');
       cabGrad.addColorStop(1, '#8d8272');
       ctx.fillStyle = cabGrad;
-      ctx.fillRect(cabX, cabBaseY - cabH, cabW, cabH + 8);
+      drawRoundRect(cabX, cabBaseY - cabH, cabW, cabH + 8, 3);
+      ctx.fill();
+      // Rim light
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      drawRoundRect(cabX + 1, cabBaseY - cabH, cabW - 2, 3, 2);
+      ctx.fill();
 
-      // Top edge bevel (lighter strip)
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
-      ctx.fillRect(cabX + 1, cabBaseY - cabH, cabW - 2, 2);
-
-      // Drawer lines (horizontal grooves)
-      ctx.strokeStyle = '#7a7064';
-      ctx.lineWidth = 1;
+      // Drawer grooves
+      ctx.strokeStyle = 'rgba(90,80,70,0.4)';
+      ctx.lineWidth = 0.8;
       for (let di = 0; di < 3; di++) {
-        const lineY = cabBaseY - cabH + 6 + di * 10;
-        ctx.beginPath();
-        ctx.moveTo(cabX + 2, lineY);
-        ctx.lineTo(cabX + cabW - 2, lineY);
-        ctx.stroke();
+        const lineY = cabBaseY - cabH + 7 + di * 9;
+        ctx.beginPath(); ctx.moveTo(cabX + 3, lineY); ctx.lineTo(cabX + cabW - 3, lineY); ctx.stroke();
       }
 
-      // Drawer handle (small metallic rectangle)
-      const handleY = cabBaseY - cabH + 14;
-      ctx.fillStyle = '#5d5347';
-      drawRoundRect(cabX + cabW / 2 - 5, handleY, 10, 4, 1.5);
-      ctx.fill();
+      // Handle — gradient metallic
+      const hY = cabBaseY - cabH + 14;
+      ctx.fillStyle = '#3e3632';
+      drawRoundRect(cabX + cabW / 2 - 6, hY - 1, 12, 6, 2); ctx.fill();
+      const hGrad = ctx.createLinearGradient(0, hY, 0, hY + 4);
+      hGrad.addColorStop(0, '#b8ad9e'); hGrad.addColorStop(0.5, '#d6ccbd'); hGrad.addColorStop(1, '#9e9688');
+      ctx.fillStyle = hGrad;
+      drawRoundRect(cabX + cabW / 2 - 5, hY, 10, 4, 1.5); ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,0.25)';
-      drawRoundRect(cabX + cabW / 2 - 4, handleY, 8, 2, 1);
-      ctx.fill();
+      drawRoundRect(cabX + cabW / 2 - 4, hY, 8, 1.5, 1); ctx.fill();
 
-      // Label slot on cabinet face
-      ctx.fillStyle = '#e8e0d4';
-      drawRoundRect(cabX + cabW / 2 - 8, cabBaseY - cabH + 22, 16, 7, 1);
-      ctx.fill();
-      ctx.strokeStyle = '#9e9688';
-      ctx.lineWidth = 0.5;
-      drawRoundRect(cabX + cabW / 2 - 8, cabBaseY - cabH + 22, 16, 7, 1);
-      ctx.stroke();
-      ctx.fillStyle = '#7a7064';
-      ctx.font = '4px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('A-Z', cabX + cabW / 2, cabBaseY - cabH + 28);
-      ctx.textAlign = 'left';
+      // Label slot
+      ctx.fillStyle = '#ede5d8';
+      drawRoundRect(cabX + cabW / 2 - 7, cabBaseY - cabH + 23, 14, 6, 1.5); ctx.fill();
+      ctx.strokeStyle = '#9e9688'; ctx.lineWidth = 0.6;
+      drawRoundRect(cabX + cabW / 2 - 7, cabBaseY - cabH + 23, 14, 6, 1.5); ctx.stroke();
 
-      // Open drawer top — the gap the manuscript emerges from
-      const drawerLipY = cabBaseY - cabH - 1;
       // Drawer lip contour
-      ctx.fillStyle = '#3e3232';
-      drawRoundRect(cabX - 3, drawerLipY - 2, cabW + 6, 7, 2);
-      ctx.fill();
-      // Drawer lip surface
-      const lipGrad = ctx.createLinearGradient(cabX - 2, 0, cabX + cabW + 2, 0);
-      lipGrad.addColorStop(0, '#8d8272');
-      lipGrad.addColorStop(0.2, '#c4b9aa');
-      lipGrad.addColorStop(0.5, '#d6ccbd');
-      lipGrad.addColorStop(0.8, '#c4b9aa');
-      lipGrad.addColorStop(1, '#8d8272');
+      ctx.fillStyle = '#2a2420';
+      drawRoundRect(cabX - 3, cabBaseY - cabH - 4, cabW + 6, 8, 3); ctx.fill();
+      // Drawer lip surface with gradient
+      const lipGrad = ctx.createRadialGradient(cabX + cabW / 2, cabBaseY - cabH - 1, 2, cabX + cabW / 2, cabBaseY - cabH - 1, cabW / 2 + 4);
+      lipGrad.addColorStop(0, '#d6ccbd'); lipGrad.addColorStop(1, '#8d8272');
       ctx.fillStyle = lipGrad;
-      drawRoundRect(cabX - 2, drawerLipY - 1, cabW + 4, 5, 2);
-      ctx.fill();
-      // Top highlight on lip
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
-      ctx.fillRect(cabX, drawerLipY - 1, cabW, 1.5);
+      drawRoundRect(cabX - 2, cabBaseY - cabH - 3, cabW + 4, 6, 2.5); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(cabX, cabBaseY - cabH - 3, cabW, 1.5);
+      // Dark drawer gap
+      ctx.fillStyle = '#100e0a';
+      drawRoundRect(cabX + 2, cabBaseY - cabH + 2, cabW - 4, 3, 1); ctx.fill();
 
-      // Dark interior of open drawer (visible gap)
-      ctx.fillStyle = '#1a1612';
-      ctx.fillRect(cabX + 2, drawerLipY + 3, cabW - 4, 3);
-
-      // === MANUSCRIPT MONSTER (only when not hidden) ===
+      // === MANUSCRIPT CREATURE (only when not hidden) ===
       if (e.pipeState !== 'hidden') {
         const headH = e.h;
-        ctx.save();
 
-        // --- Manuscript body (yellowed old paper, book-shaped) ---
-        // Contour
-        ctx.fillStyle = '#3e3020';
-        drawRoundRect(x + 1, dy + 1, e.w - 2, headH - 6, 6);
-        ctx.fill();
+        // Danger glow behind creature
+        ctx.shadowColor = isShooter ? '#ff8f00' : '#c62828';
+        ctx.shadowBlur = 8;
+        const dangerGrad = ctx.createRadialGradient(x + e.w / 2, dy + headH / 2, 3, x + e.w / 2, dy + headH / 2, 22);
+        dangerGrad.addColorStop(0, isShooter ? 'rgba(255,143,0,0.15)' : 'rgba(198,40,40,0.15)');
+        dangerGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = dangerGrad;
+        drawCircle(x + e.w / 2, dy + headH / 2, 22); ctx.fill();
+        ctx.shadowBlur = 0;
 
-        // Main body — yellowed parchment gradient
-        const bodyGrad = ctx.createLinearGradient(x, dy, x + e.w, dy + headH);
-        bodyGrad.addColorStop(0, isShooter ? '#fff3e0' : '#fff8e1');
-        bodyGrad.addColorStop(0.3, isShooter ? '#ffe0b2' : '#ffecb3');
-        bodyGrad.addColorStop(0.7, isShooter ? '#ffcc80' : '#ffe082');
-        bodyGrad.addColorStop(1, isShooter ? '#e6a54a' : '#c9a43e');
+        // Body contour
+        ctx.fillStyle = isShooter ? '#5a3000' : '#4a1010';
+        drawRoundRect(x, dy, e.w, headH - 4, 12); ctx.fill();
+        // Body — smooth radial gradient (parchment creature)
+        const bodyGrad = ctx.createRadialGradient(x + e.w / 2, dy + 10, 3, x + e.w / 2, dy + headH / 2, 22);
+        bodyGrad.addColorStop(0, isShooter ? '#fff8e1' : '#fff3e0');
+        bodyGrad.addColorStop(0.4, isShooter ? '#ffe0b2' : '#ffccbc');
+        bodyGrad.addColorStop(0.8, isShooter ? '#ffb74d' : '#ef9a9a');
+        bodyGrad.addColorStop(1, isShooter ? '#e65100' : '#c62828');
         ctx.fillStyle = bodyGrad;
-        drawRoundRect(x + 2, dy + 2, e.w - 4, headH - 8, 5);
-        ctx.fill();
+        drawRoundRect(x + 1, dy + 1, e.w - 2, headH - 6, 11); ctx.fill();
+        // Rim light
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        drawRoundRect(x + 3, dy + 2, e.w - 6, 6, 6); ctx.fill();
 
-        // Paper texture — faint horizontal lines (like ruled paper)
-        ctx.strokeStyle = 'rgba(120,100,70,0.15)';
+        // Paper texture lines (faint)
+        ctx.strokeStyle = 'rgba(100,80,60,0.1)';
         ctx.lineWidth = 0.5;
-        for (let li = 0; li < 6; li++) {
-          const lineY2 = dy + 6 + li * 5;
-          ctx.beginPath();
-          ctx.moveTo(x + 5, lineY2);
-          ctx.lineTo(x + e.w - 5, lineY2);
-          ctx.stroke();
+        for (let li = 0; li < 5; li++) {
+          const ly = dy + 7 + li * 5;
+          ctx.beginPath(); ctx.moveTo(x + 6, ly); ctx.lineTo(x + e.w - 6, ly); ctx.stroke();
         }
 
-        // Book spine on left edge
-        ctx.fillStyle = isShooter ? '#bf5b00' : '#8d6e2e';
-        ctx.fillRect(x + 2, dy + 3, 3, headH - 12);
-        // Spine highlight
+        // Spine line on left
+        ctx.fillStyle = isShooter ? '#bf5b00' : '#8d2020';
+        drawRoundRect(x + 1, dy + 3, 3, headH - 10, 2); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.fillRect(x + 3, dy + 4, 1, headH - 14);
+        ctx.fillRect(x + 2, dy + 4, 1, headH - 12);
 
-        // Pages edge on right (layered look)
-        ctx.fillStyle = '#f5f0e0';
+        // Pages edge on right
         for (let pi = 0; pi < 3; pi++) {
-          ctx.fillRect(x + e.w - 4 + pi, dy + 4 + pi, 1, headH - 12 - pi * 2);
+          ctx.fillStyle = `rgba(245,240,224,${0.6 - pi * 0.15})`;
+          ctx.fillRect(x + e.w - 3 + pi, dy + 4 + pi, 1, headH - 12 - pi * 2);
         }
 
-        // --- "ACCEPTED!" red stamp on forehead ---
-        const stampY = dy + 3;
+        // "ACCEPTED!" stamp (tilted)
         ctx.save();
-        ctx.translate(x + e.w / 2, stampY + 4);
-        ctx.rotate(-0.15);
-        // Stamp border
-        ctx.strokeStyle = '#c62828';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(-10, -4, 20, 9);
-        // Stamp text
-        ctx.fillStyle = '#c62828';
-        ctx.font = 'bold 5px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('ACCEPTED', 0, 2.5);
-        ctx.textAlign = 'left';
+        ctx.translate(x + e.w / 2, dy + 6);
+        ctx.rotate(-0.12);
+        ctx.strokeStyle = 'rgba(198,40,40,0.7)'; ctx.lineWidth = 1.2;
+        drawRoundRect(-9, -3.5, 18, 8, 1.5); ctx.stroke();
+        ctx.fillStyle = '#c62828'; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ACCEPTED', 0, 2); ctx.textAlign = 'left';
         ctx.restore();
 
-        // --- Greedy gold-coin eyes ---
+        // Anime eyes — large, with coin-gold gradient iris
         for (const ex2 of [x + 9, x + e.w - 11]) {
           // Eye contour
-          ctx.fillStyle = '#2a2010';
-          drawCircle(ex2, dy + 16, 5.5);
-          ctx.fill();
-          // Gold coin eye base
-          const coinGrad = ctx.createRadialGradient(ex2, dy + 16, 0.5, ex2, dy + 16, 5);
-          coinGrad.addColorStop(0, '#fff9c4');
-          coinGrad.addColorStop(0.3, '#ffd54f');
-          coinGrad.addColorStop(0.7, '#f9a825');
-          coinGrad.addColorStop(1, '#c17900');
-          ctx.fillStyle = coinGrad;
-          drawCircle(ex2, dy + 16, 4.8);
-          ctx.fill();
-          // Coin rim ring
-          ctx.strokeStyle = '#a06800';
-          ctx.lineWidth = 0.8;
-          drawCircle(ex2, dy + 16, 3.5);
-          ctx.stroke();
-          // $ sign in center of coin
-          ctx.fillStyle = '#5d4037';
-          ctx.font = 'bold 6px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText('$', ex2, dy + 18.5);
-          ctx.textAlign = 'left';
-          // Coin shine highlight
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          drawCircle(ex2 - 1.5, dy + 14.5, 1.3);
-          ctx.fill();
-          ctx.fillStyle = 'rgba(255,255,255,0.3)';
-          drawCircle(ex2 + 2, dy + 17.5, 0.7);
-          ctx.fill();
+          ctx.fillStyle = '#1a1000';
+          drawEllipse(ex2, dy + 17, 6, 5.5); ctx.fill();
+          // White sclera
+          ctx.fillStyle = '#fff';
+          drawEllipse(ex2, dy + 17, 5.5, 5); ctx.fill();
+          // Gold gradient iris
+          const iGrad = ctx.createRadialGradient(ex2, dy + 17.5, 0.5, ex2, dy + 17.5, 3.5);
+          iGrad.addColorStop(0, '#fff9c4');
+          iGrad.addColorStop(0.3, '#ffd54f');
+          iGrad.addColorStop(0.7, '#f9a825');
+          iGrad.addColorStop(1, isShooter ? '#e65100' : '#c62828');
+          ctx.fillStyle = iGrad;
+          drawCircle(ex2 + 0.3, dy + 17.5, 3); ctx.fill();
+          // $ pupil
+          ctx.fillStyle = '#1a0a00';
+          ctx.font = 'bold 4px monospace'; ctx.textAlign = 'center';
+          ctx.fillText('$', ex2 + 0.3, dy + 19); ctx.textAlign = 'left';
+          // Large highlight top-left
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          drawCircle(ex2 - 1.5, dy + 15.5, 1.5); ctx.fill();
+          // Small highlight bottom-right
+          ctx.fillStyle = 'rgba(255,255,255,0.45)';
+          drawCircle(ex2 + 1.8, dy + 19, 0.7); ctx.fill();
         }
 
-        // Angry eyebrows (thick, manga style)
-        ctx.strokeStyle = '#2a2010';
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(x + 4, dy + 10);
-        ctx.lineTo(x + 13, dy + 13);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + e.w - 4, dy + 10);
-        ctx.lineTo(x + e.w - 13, dy + 13);
-        ctx.stroke();
+        // Manga eyebrows
+        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x + 3, dy + 11); ctx.lineTo(x + 13, dy + 14); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + e.w - 3, dy + 11); ctx.lineTo(x + e.w - 13, dy + 14); ctx.stroke();
         ctx.lineCap = 'butt';
 
-        // --- Chomping mouth with teeth ---
+        // Chomping mouth
         const mouthOpen = Math.abs(Math.sin(levelTimer * 0.08)) * 5;
-        const mouthY = dy + 24;
-
-        // Mouth interior (dark)
-        ctx.fillStyle = '#1a0a00';
+        const mY = dy + 26;
+        // Mouth interior
+        ctx.fillStyle = '#1a0500';
         ctx.beginPath();
-        ctx.moveTo(x + 6, mouthY);
-        ctx.quadraticCurveTo(x + e.w / 2, mouthY - mouthOpen - 2, x + e.w - 6, mouthY);
-        ctx.quadraticCurveTo(x + e.w / 2, mouthY + mouthOpen + 2, x + 6, mouthY);
+        ctx.moveTo(x + 6, mY);
+        ctx.quadraticCurveTo(x + e.w / 2, mY - mouthOpen - 2, x + e.w - 6, mY);
+        ctx.quadraticCurveTo(x + e.w / 2, mY + mouthOpen + 2, x + 6, mY);
         ctx.fill();
-
-        // Tongue (inside mouth when open)
+        // Tongue
         if (mouthOpen > 2) {
-          ctx.fillStyle = '#c62828';
-          drawEllipse(x + e.w / 2, mouthY + mouthOpen * 0.3, 4, mouthOpen * 0.4);
-          ctx.fill();
+          const tGrad = ctx.createRadialGradient(x + e.w / 2, mY + mouthOpen * 0.3, 0, x + e.w / 2, mY + mouthOpen * 0.3, 4);
+          tGrad.addColorStop(0, '#ef5350'); tGrad.addColorStop(1, '#b71c1c');
+          ctx.fillStyle = tGrad;
+          drawEllipse(x + e.w / 2, mY + mouthOpen * 0.3, 4, mouthOpen * 0.4); ctx.fill();
         }
-
-        // Upper teeth (sharp, white)
+        // Teeth
         ctx.fillStyle = '#fff';
-        ctx.strokeStyle = '#bbb';
-        ctx.lineWidth = 0.5;
         for (let ti = 0; ti < 4; ti++) {
           const tx2 = x + 8 + ti * 5;
-          ctx.beginPath();
-          ctx.moveTo(tx2, mouthY - mouthOpen * 0.3 - 1);
-          ctx.lineTo(tx2 + 2, mouthY + mouthOpen * 0.15);
-          ctx.lineTo(tx2 + 4, mouthY - mouthOpen * 0.3 - 1);
-          ctx.fill();
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(tx2, mY - mouthOpen * 0.3 - 1); ctx.lineTo(tx2 + 2, mY + mouthOpen * 0.15); ctx.lineTo(tx2 + 4, mY - mouthOpen * 0.3 - 1); ctx.fill();
         }
-        // Lower teeth
         for (let ti = 0; ti < 3; ti++) {
           const tx2 = x + 10 + ti * 5;
-          ctx.beginPath();
-          ctx.moveTo(tx2, mouthY + mouthOpen * 0.3 + 1);
-          ctx.lineTo(tx2 + 2, mouthY - mouthOpen * 0.15);
-          ctx.lineTo(tx2 + 4, mouthY + mouthOpen * 0.3 + 1);
-          ctx.fill();
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(tx2, mY + mouthOpen * 0.3 + 1); ctx.lineTo(tx2 + 2, mY - mouthOpen * 0.15); ctx.lineTo(tx2 + 4, mY + mouthOpen * 0.3 + 1); ctx.fill();
         }
 
-        // --- Fake impact factor badge (bottom right) ---
+        // Blush marks
+        ctx.fillStyle = isShooter ? 'rgba(255,160,80,0.25)' : 'rgba(255,100,100,0.25)';
+        drawEllipse(x + 3, dy + 20, 3, 1.5); ctx.fill();
+        drawEllipse(x + e.w - 3, dy + 20, 3, 1.5); ctx.fill();
+
+        // Gold badge (bottom right)
         ctx.save();
-        ctx.translate(x + e.w - 5, dy + headH - 12);
+        ctx.translate(x + e.w - 4, dy + headH - 10);
         ctx.rotate(0.2);
-        // Badge contour
-        ctx.fillStyle = '#5d4037';
-        drawCircle(0, 0, 6);
-        ctx.fill();
-        // Badge gold fill
-        const badgeGrad = ctx.createRadialGradient(0, -1, 0, 0, 0, 5.5);
-        badgeGrad.addColorStop(0, '#ffd54f');
-        badgeGrad.addColorStop(0.7, '#f9a825');
-        badgeGrad.addColorStop(1, '#c17900');
-        ctx.fillStyle = badgeGrad;
-        drawCircle(0, 0, 5.5);
-        ctx.fill();
-        // Star burst edge (badge notches)
-        ctx.fillStyle = '#e8b800';
-        for (let si = 0; si < 8; si++) {
-          const ang = (si / 8) * Math.PI * 2;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(Math.cos(ang) * 6.5, Math.sin(ang) * 6.5);
-          ctx.lineTo(Math.cos(ang + 0.3) * 4, Math.sin(ang + 0.3) * 4);
-          ctx.fill();
-        }
-        // Badge inner circle
-        ctx.fillStyle = '#f9a825';
-        drawCircle(0, 0, 3.5);
-        ctx.fill();
-        // "IF" text
-        ctx.fillStyle = '#5d4037';
-        ctx.font = 'bold 4px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('IF', 0, 1.5);
-        ctx.textAlign = 'left';
-        // Shine
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        drawCircle(-1.5, -1.5, 1.5);
-        ctx.fill();
+        ctx.fillStyle = '#5d4037'; drawCircle(0, 0, 5.5); ctx.fill();
+        const badgeGrad = ctx.createRadialGradient(0, -1, 0, 0, 0, 5);
+        badgeGrad.addColorStop(0, '#fff9c4'); badgeGrad.addColorStop(0.5, '#ffd54f'); badgeGrad.addColorStop(1, '#c17900');
+        ctx.fillStyle = badgeGrad; drawCircle(0, 0, 5); ctx.fill();
+        ctx.strokeStyle = '#a06800'; ctx.lineWidth = 0.6; drawCircle(0, 0, 3.5); ctx.stroke();
+        ctx.fillStyle = '#5d4037'; ctx.font = 'bold 4px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('IF', 0, 1.5); ctx.textAlign = 'left';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)'; drawCircle(-1.5, -1.5, 1.2); ctx.fill();
         ctx.restore();
 
-        // Shooter variant: charging glow indicator
+        // Shooter glow
         if (isShooter && e.shootTimer > 60) {
-          const glowAlpha = 0.2 + Math.sin(levelTimer * 0.3) * 0.15;
-          const chargeGrad = ctx.createRadialGradient(x + e.w / 2, dy + 5, 0, x + e.w / 2, dy + 5, 10);
-          chargeGrad.addColorStop(0, `rgba(255,140,0,${glowAlpha + 0.2})`);
-          chargeGrad.addColorStop(1, `rgba(255,140,0,0)`);
-          ctx.fillStyle = chargeGrad;
-          drawCircle(x + e.w / 2, dy + 5, 10);
-          ctx.fill();
+          const shGrad = ctx.createRadialGradient(x + e.w / 2, dy + 4, 0, x + e.w / 2, dy + 4, 12);
+          shGrad.addColorStop(0, `rgba(255,140,0,${0.35 + Math.sin(levelTimer * 0.3) * 0.15})`);
+          shGrad.addColorStop(1, 'rgba(255,140,0,0)');
+          ctx.fillStyle = shGrad; drawCircle(x + e.w / 2, dy + 4, 12); ctx.fill();
         }
 
-        // --- Label ---
-        ctx.fillStyle = isShooter ? '#ff9800' : '#c62828';
-        ctx.font = 'bold 6px monospace';
-        ctx.textAlign = 'center';
+        // Label
+        ctx.fillStyle = isShooter ? '#ff9800' : '#ef5350';
+        ctx.font = 'bold 6px monospace'; ctx.textAlign = 'center';
         ctx.fillText(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 3);
         ctx.textAlign = 'left';
-
-        ctx.restore();
       }
       break;
     }
 
     case 'spam_email': {
-      // Invoice/spam paper projectile — flying fee demand
+      // Invoice projectile — spinning, with glow trail
       const srot = Math.atan2(e.vy || 0, e.vx || 1);
-      ctx.save();
-      ctx.translate(x + e.w / 2, dy + e.h / 2);
-      ctx.rotate(srot * 0.3 + levelTimer * 0.12);
-      // Paper contour
-      ctx.fillStyle = '#5d4037';
-      drawRoundRect(-e.w / 2 - 1, -e.h / 2 - 1, e.w + 2, e.h + 2, 2);
-      ctx.fill();
-      // Yellowed paper body
-      ctx.fillStyle = '#fff8e1';
-      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 1.5);
-      ctx.fill();
-      // Red "INVOICE" header line
-      ctx.fillStyle = '#c62828';
-      ctx.fillRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, 3);
-      // $ sign
-      ctx.fillStyle = '#c17900';
-      ctx.font = 'bold 7px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('$', 0, 4);
-      ctx.textAlign = 'left';
       // Trail glow
-      ctx.restore();
-      // Trailing particles
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = '#ffd54f';
-      for (let ti = 0; ti < 3; ti++) {
-        const tdir = e.vx > 0 ? -1 : 1;
-        drawCircle(x + e.w / 2 + tdir * (ti * 4 + 5), dy + e.h / 2 + Math.sin(levelTimer * 0.4 + ti) * 2, 2 - ti * 0.5);
+      const tdir = e.vx > 0 ? -1 : 1;
+      for (let ti = 0; ti < 4; ti++) {
+        ctx.globalAlpha = 0.3 - ti * 0.07;
+        ctx.fillStyle = ti < 2 ? '#ffd54f' : '#ffb74d';
+        drawCircle(x + e.w / 2 + tdir * (ti * 4 + 5), dy + e.h / 2 + Math.sin(levelTimer * 0.4 + ti) * 2, 2.5 - ti * 0.5);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
+      ctx.save();
+      ctx.translate(x + e.w / 2, dy + e.h / 2);
+      ctx.rotate(srot * 0.3 + levelTimer * 0.12);
+      // Contour
+      ctx.fillStyle = '#3e3020';
+      drawRoundRect(-e.w / 2 - 1, -e.h / 2 - 1, e.w + 2, e.h + 2, 2.5); ctx.fill();
+      // Paper body with gradient
+      const spGrad = ctx.createLinearGradient(-e.w / 2, -e.h / 2, e.w / 2, e.h / 2);
+      spGrad.addColorStop(0, '#fff8e1'); spGrad.addColorStop(1, '#ffe0b2');
+      ctx.fillStyle = spGrad;
+      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2); ctx.fill();
+      // Red header
+      ctx.fillStyle = '#c62828';
+      drawRoundRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, 3, 1); ctx.fill();
+      // $ sign
+      ctx.fillStyle = '#bf360c';
+      ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('$', 0, 4); ctx.textAlign = 'left';
+      ctx.restore();
       break;
     }
 
@@ -2687,6 +2675,457 @@ function drawEnemy(e, x, y) {
 // ============================================================
 // GRAD STUDENT DRAWING (mentorable NPC)
 // ============================================================
+function drawPet(pet, x, y) {
+  const bob = pet.collected ? 0 : Math.sin(pet.bobOffset) * 3;
+  const dy = y + bob;
+
+  ctx.save();
+  if (!pet.facingRight) {
+    ctx.translate(x + pet.w, 0);
+    ctx.scale(-1, 1);
+    x = 0;
+  }
+
+  const cx = x + pet.w / 2;
+  const cy2 = dy + pet.h / 2;
+
+  // Soft shadow
+  const shadowGrad = ctx.createRadialGradient(cx, dy + pet.h + 1, 1, cx, dy + pet.h + 1, pet.w * 0.5);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.25)');
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = shadowGrad;
+  drawEllipse(cx, dy + pet.h + 1, pet.w * 0.45, 4);
+  ctx.fill();
+
+  // Uncollected glow aura (pulsing pink heart-like glow)
+  if (!pet.collected) {
+    ctx.globalAlpha = 0.25 + Math.sin(levelTimer * 0.08) * 0.1;
+    const auraGrad = ctx.createRadialGradient(cx, cy2, 2, cx, cy2, 18);
+    auraGrad.addColorStop(0, 'rgba(255,128,171,0.4)');
+    auraGrad.addColorStop(0.6, 'rgba(255,128,171,0.1)');
+    auraGrad.addColorStop(1, 'rgba(255,128,171,0)');
+    ctx.fillStyle = auraGrad;
+    drawCircle(cx, cy2, 18);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  if (pet.kind === 'dog') {
+    // === ANIME DOG ===
+    const furMain = '#d4a35a';
+    const furLight = '#e8c88a';
+    const furDark = '#a07830';
+    const belly = '#f5e6cc';
+    const nose = '#3e2723';
+
+    // Body contour
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 2, dy + 7, pet.w - 4, pet.h - 8, 5);
+    ctx.fill();
+
+    // Body with radial gradient
+    const bodyGrad = ctx.createRadialGradient(cx - 2, cy2 + 1, 2, cx, cy2 + 2, 14);
+    bodyGrad.addColorStop(0, furLight);
+    bodyGrad.addColorStop(0.7, furMain);
+    bodyGrad.addColorStop(1, furDark);
+    ctx.fillStyle = bodyGrad;
+    drawRoundRect(x + 3, dy + 8, pet.w - 6, pet.h - 9, 4);
+    ctx.fill();
+
+    // Belly patch
+    ctx.fillStyle = belly;
+    drawEllipse(cx, dy + pet.h - 5, 5, 3);
+    ctx.fill();
+
+    // Rim light
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#fff';
+    drawRoundRect(x + 4, dy + 8, 3, pet.h - 12, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Legs (little stubs, walking animation)
+    const legOffset = pet.collected ? Math.sin(pet.frame * Math.PI / 2) * 2 : 0;
+    ctx.fillStyle = furDark;
+    // Front legs
+    drawRoundRect(x + 4, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + 8, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    // Back legs
+    drawRoundRect(x + pet.w - 11, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 7, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+
+    // Paws
+    ctx.fillStyle = belly;
+    drawCircle(x + 5.5, dy + pet.h + legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + 9.5, dy + pet.h - legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + pet.w - 9.5, dy + pet.h - legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + pet.w - 5.5, dy + pet.h + legOffset, 1.5);
+    ctx.fill();
+
+    // Head contour
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 3, dy + 6, 7.5);
+    ctx.fill();
+
+    // Head fill
+    const headGrad = ctx.createRadialGradient(cx + 2, dy + 4, 1, cx + 3, dy + 6, 8);
+    headGrad.addColorStop(0, furLight);
+    headGrad.addColorStop(0.6, furMain);
+    headGrad.addColorStop(1, furDark);
+    ctx.fillStyle = headGrad;
+    drawCircle(cx + 3, dy + 6, 6.5);
+    ctx.fill();
+
+    // Ears (floppy, cute)
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, dy + 1, 3, 5, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, dy + 1, 2, 4, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner ear pink
+    ctx.fillStyle = '#f8bbd0';
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, dy + 1.5, 1, 2.5, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.ellipse(cx + 8, dy + 1, 3, 5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.ellipse(cx + 8, dy + 1, 2, 4, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f8bbd0';
+    ctx.beginPath();
+    ctx.ellipse(cx + 8, dy + 1.5, 1, 2.5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes — anime style (large, gradient iris, dual highlights)
+    const eyeY = dy + 5;
+    for (let ei = 0; ei < 2; ei++) {
+      const ex = cx + (ei === 0 ? 0 : 6);
+      // White
+      ctx.fillStyle = '#fff';
+      drawEllipse(ex, eyeY, 3, 2.8);
+      ctx.fill();
+      // Iris gradient
+      const irisGrad = ctx.createRadialGradient(ex, eyeY, 0.5, ex, eyeY, 2.5);
+      irisGrad.addColorStop(0, '#5d4037');
+      irisGrad.addColorStop(0.7, '#3e2723');
+      irisGrad.addColorStop(1, '#1b0000');
+      ctx.fillStyle = irisGrad;
+      drawEllipse(ex, eyeY, 2.2, 2.2);
+      ctx.fill();
+      // Pupil
+      ctx.fillStyle = '#000';
+      drawCircle(ex, eyeY + 0.3, 1);
+      ctx.fill();
+      // Highlights
+      ctx.fillStyle = '#fff';
+      drawCircle(ex - 0.8, eyeY - 0.8, 0.8);
+      ctx.fill();
+      ctx.globalAlpha = 0.6;
+      drawCircle(ex + 0.5, eyeY + 0.8, 0.4);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Nose
+    ctx.fillStyle = nose;
+    drawCircle(cx + 6, dy + 7.5, 1.2);
+    ctx.fill();
+    // Nose shine
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    drawCircle(cx + 5.7, dy + 7, 0.5);
+    ctx.fill();
+
+    // Mouth (little smile)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(cx + 5, dy + 9, 2, 0.1, Math.PI - 0.1);
+    ctx.stroke();
+
+    // Blush marks
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#f48fb1';
+    drawEllipse(cx - 1.5, dy + 8, 1.8, 1);
+    ctx.fill();
+    drawEllipse(cx + 7.5, dy + 8, 1.8, 1);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Tail (wagging)
+    const tailAngle = Math.sin(pet.tailWag * (pet.collected ? 3 : 1)) * 0.6;
+    ctx.save();
+    ctx.translate(x + 1, dy + 10);
+    ctx.rotate(-0.8 + tailAngle);
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.ellipse(0, -4, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+
+    // Tongue (when collected, happy!)
+    if (pet.collected && Math.sin(levelTimer * 0.1) > 0) {
+      ctx.fillStyle = '#ef5350';
+      ctx.beginPath();
+      ctx.ellipse(cx + 6, dy + 10.5, 1.2, 2, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#c62828';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+  } else {
+    // === ANIME CAT ===
+    const furMain = '#9e9e9e';
+    const furLight = '#bdbdbd';
+    const furDark = '#616161';
+    const belly = '#e0e0e0';
+    const nose = '#f48fb1';
+
+    // Body contour
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 2, dy + 7, pet.w - 4, pet.h - 8, 5);
+    ctx.fill();
+
+    // Body with radial gradient
+    const bodyGrad = ctx.createRadialGradient(cx - 2, cy2 + 1, 2, cx, cy2 + 2, 14);
+    bodyGrad.addColorStop(0, furLight);
+    bodyGrad.addColorStop(0.7, furMain);
+    bodyGrad.addColorStop(1, furDark);
+    ctx.fillStyle = bodyGrad;
+    drawRoundRect(x + 3, dy + 8, pet.w - 6, pet.h - 9, 4);
+    ctx.fill();
+
+    // Belly patch
+    ctx.fillStyle = belly;
+    drawEllipse(cx, dy + pet.h - 5, 5, 3);
+    ctx.fill();
+
+    // Rim light
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#fff';
+    drawRoundRect(x + 4, dy + 8, 3, pet.h - 12, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Legs
+    const legOffset = pet.collected ? Math.sin(pet.frame * Math.PI / 2) * 2 : 0;
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 4, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + 8, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 11, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 7, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+
+    // Paws
+    ctx.fillStyle = belly;
+    drawCircle(x + 5.5, dy + pet.h + legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + 9.5, dy + pet.h - legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + pet.w - 9.5, dy + pet.h - legOffset, 1.5);
+    ctx.fill();
+    drawCircle(x + pet.w - 5.5, dy + pet.h + legOffset, 1.5);
+    ctx.fill();
+
+    // Head contour
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 3, dy + 6, 7.5);
+    ctx.fill();
+
+    // Head fill
+    const headGrad = ctx.createRadialGradient(cx + 2, dy + 4, 1, cx + 3, dy + 6, 8);
+    headGrad.addColorStop(0, furLight);
+    headGrad.addColorStop(0.6, furMain);
+    headGrad.addColorStop(1, furDark);
+    ctx.fillStyle = headGrad;
+    drawCircle(cx + 3, dy + 6, 6.5);
+    ctx.fill();
+
+    // Ears (pointy cat ears with inner pink)
+    // Left ear
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, dy + 2);
+    ctx.lineTo(cx - 5, dy - 5);
+    ctx.lineTo(cx + 1, dy + 1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, dy + 1.5);
+    ctx.lineTo(cx - 4.5, dy - 4);
+    ctx.lineTo(cx + 0.5, dy + 0.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#f8bbd0';
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, dy + 0.5);
+    ctx.lineTo(cx - 3.5, dy - 2.5);
+    ctx.lineTo(cx + 0, dy);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right ear
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.moveTo(cx + 8, dy + 2);
+    ctx.lineTo(cx + 11, dy - 5);
+    ctx.lineTo(cx + 5, dy + 1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.moveTo(cx + 8, dy + 1.5);
+    ctx.lineTo(cx + 10.5, dy - 4);
+    ctx.lineTo(cx + 5.5, dy + 0.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#f8bbd0';
+    ctx.beginPath();
+    ctx.moveTo(cx + 8, dy + 0.5);
+    ctx.lineTo(cx + 9.5, dy - 2.5);
+    ctx.lineTo(cx + 6, dy);
+    ctx.closePath();
+    ctx.fill();
+
+    // Eyes — anime style (large, green gradient iris)
+    const eyeY = dy + 5;
+    for (let ei = 0; ei < 2; ei++) {
+      const ex = cx + (ei === 0 ? 0 : 6);
+      // White
+      ctx.fillStyle = '#fff';
+      drawEllipse(ex, eyeY, 3, 3);
+      ctx.fill();
+      // Iris gradient (cat green)
+      const irisGrad = ctx.createRadialGradient(ex, eyeY, 0.5, ex, eyeY, 2.5);
+      irisGrad.addColorStop(0, '#66bb6a');
+      irisGrad.addColorStop(0.6, '#2e7d32');
+      irisGrad.addColorStop(1, '#1b5e20');
+      ctx.fillStyle = irisGrad;
+      drawEllipse(ex, eyeY, 2.3, 2.5);
+      ctx.fill();
+      // Cat slit pupil
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY + 0.2, 0.6, 1.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Highlights
+      ctx.fillStyle = '#fff';
+      drawCircle(ex - 0.8, eyeY - 0.8, 0.8);
+      ctx.fill();
+      ctx.globalAlpha = 0.6;
+      drawCircle(ex + 0.5, eyeY + 0.8, 0.4);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Nose (pink triangle)
+    ctx.fillStyle = nose;
+    ctx.beginPath();
+    ctx.moveTo(cx + 3, dy + 7);
+    ctx.lineTo(cx + 2, dy + 8.2);
+    ctx.lineTo(cx + 4, dy + 8.2);
+    ctx.closePath();
+    ctx.fill();
+    // Nose shine
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    drawCircle(cx + 2.8, dy + 7.2, 0.4);
+    ctx.fill();
+
+    // Mouth (cat W shape)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(cx + 1, dy + 9);
+    ctx.lineTo(cx + 3, dy + 8.3);
+    ctx.lineTo(cx + 5, dy + 9);
+    ctx.stroke();
+
+    // Whiskers
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.5;
+    // Left whiskers
+    ctx.beginPath(); ctx.moveTo(cx - 2, dy + 7.5); ctx.lineTo(cx - 7, dy + 6.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 2, dy + 8.5); ctx.lineTo(cx - 7, dy + 8.5); ctx.stroke();
+    // Right whiskers
+    ctx.beginPath(); ctx.moveTo(cx + 8, dy + 7.5); ctx.lineTo(cx + 13, dy + 6.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 8, dy + 8.5); ctx.lineTo(cx + 13, dy + 8.5); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Blush marks
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#f48fb1';
+    drawEllipse(cx - 1.5, dy + 8, 1.8, 1);
+    ctx.fill();
+    drawEllipse(cx + 7.5, dy + 8, 1.8, 1);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Tail (sinuous, cat-like)
+    const tailWave = Math.sin(pet.tailWag * (pet.collected ? 2 : 0.5)) * 0.5;
+    ctx.save();
+    ctx.translate(x + 1, dy + 10);
+    ctx.strokeStyle = furMain;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-3, -4 + tailWave * 3, -5, -8 + tailWave * 5, -3, -11 + tailWave * 3);
+    ctx.stroke();
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Heart icon floating above uncollected pets
+  if (!pet.collected) {
+    const heartY = dy - 8 + Math.sin(levelTimer * 0.06) * 2;
+    ctx.fillStyle = '#ff4081';
+    ctx.globalAlpha = 0.7 + Math.sin(levelTimer * 0.1) * 0.2;
+    ctx.beginPath();
+    const hx = cx + 3;
+    ctx.moveTo(hx, heartY + 2);
+    ctx.bezierCurveTo(hx - 3, heartY - 1, hx - 5, heartY + 2, hx, heartY + 5);
+    ctx.bezierCurveTo(hx + 5, heartY + 2, hx + 3, heartY - 1, hx, heartY + 2);
+    ctx.fill();
+    // Heart shine
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    drawCircle(hx - 1.5, heartY + 1, 1);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Small heart particles when following (occasionally)
+  if (pet.collected && Math.random() < 0.02) {
+    spawnParticles(pet.x + pet.w / 2, pet.y, '#ff80ab', 1);
+  }
+
+  ctx.restore();
+}
+
 function drawGradStudent(gs, x, y) {
   const bob = gs.panicked ? 0 : Math.sin(levelTimer * 0.05 + gs.startX * 0.1) * 1.5;
   const dy = y + bob;
@@ -4787,6 +5226,29 @@ function generateLevel(levelIdx) {
     }
   }
 
+  // Emotional support pets (random placement, 0-3 per level)
+  const petCount = Math.floor(Math.random() * 3) + 1; // 1-3 pets per level
+  for (let i = 0; i < petCount; i++) {
+    // Try placing on ground
+    let px, placed = false;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      px = 8 + Math.floor(Math.random() * (w - 16));
+      if (tiles[groundY][px] === 1) {
+        entities.push({ type: 'pet', x: px, y: groundY - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
+        placed = true;
+        break;
+      }
+    }
+    // Try placing on a platform if ground didn't work
+    if (!placed && platforms.length > 0) {
+      const plat = platforms[Math.floor(Math.random() * platforms.length)];
+      const pw3 = plat.x2 - plat.x1 + 1;
+      if (pw3 >= 3) {
+        entities.push({ type: 'pet', x: plat.x1 + Math.floor(pw3 / 2), y: plat.y - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
+      }
+    }
+  }
+
   // Signs
   const signMsgs = [
     ['"Sleep is for the tenured"', '"Free food in seminar room"', '"Advisor meeting: cancelled (again)"', '"IRB approval pending since 2019"'],
@@ -4886,6 +5348,10 @@ function generateTrainingLevel() {
   for (let dx = 0; dx < 3; dx++) tiles[highPlat2Y][86 + dx] = 2;
   entities.push({ type: 'coffee', x: 87, y: highPlat2Y - 1 });
   entities.push({ type: 'sign', x: 77, y: groundY - 1, text: '"Double-jump in mid-air!"' });
+
+  // Emotional support pet to collect
+  entities.push({ type: 'pet', x: 70, y: groundY - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
+  entities.push({ type: 'sign', x: 68, y: groundY - 1, text: '"Collect a pet for emotional support!"' });
 
   // Section 6 (x: 95-115): Collectibles and a predatory journal
   entities.push({ type: 'predatory_journal', x: 100, y: groundY - 1.5, patrolRange: 0 });
@@ -5063,6 +5529,9 @@ let swappedControls = false; // Tab swaps which player P1/P2 keys control
 // Grad students (mentorable NPCs)
 let gradStudents = [];
 
+// Emotional support pets (dogs & cats that follow the player)
+let pets = [];
+
 // Mentor's Wrath magic system (Golden Axe style)
 let magicActive = false;
 let magicTimer = 0;
@@ -5098,6 +5567,7 @@ function initLevel(idx) {
   floatingTexts = [];
   fireballs = [];
   gradStudents = [];
+  pets = [];
   flagObj = null;
   messageQueue = [];
   currentMessage = null;
@@ -5219,6 +5689,19 @@ function initLevel(idx) {
           pencilCooldown: 0, panicked: false, panicTimer: 0, spent: false,
           gsLabel: gsNames[Math.floor(Math.random() * gsNames.length)],
           appearance: randomAppearance()
+        });
+        break;
+      }
+      case 'pet': {
+        pets.push({
+          x: wx, y: wy, w: 20, h: 18, vx: 0, vy: 0,
+          onGround: false, facingRight: true,
+          frame: 0, frameTimer: 0,
+          kind: ent.petKind || (Math.random() < 0.5 ? 'dog' : 'cat'),
+          collected: false, owner: null,
+          bobOffset: Math.random() * Math.PI * 2,
+          trail: [],
+          tailWag: 0,
         });
         break;
       }
@@ -5973,6 +6456,90 @@ function update() {
     if (!collectItem(c, cy, player)) collectItem(c, cy, player2);
   }
 
+  // Emotional support pets
+  const PET_FOLLOW_DIST = 28;
+  const PET_TRAIL_LENGTH = 15;
+  for (const pet of pets) {
+    pet.tailWag += 0.15;
+    if (!pet.collected) {
+      // Uncollected: bob in place, check for player pickup
+      pet.bobOffset += 0.05;
+      // Apply gravity
+      pet.vy += 0.5;
+      if (pet.vy > 12) pet.vy = 12;
+      pet.y += pet.vy;
+      // Ground collision
+      const petBottom = Math.floor((pet.y + pet.h) / TILE);
+      const petLeft = Math.floor(pet.x / TILE);
+      const petRight = Math.floor((pet.x + pet.w - 1) / TILE);
+      for (let tx = petLeft; tx <= petRight; tx++) {
+        if (isSolid(tx, petBottom)) {
+          pet.y = petBottom * TILE - pet.h;
+          pet.vy = 0;
+          pet.onGround = true;
+        }
+        if (isPlatform(tx, petBottom) && pet.vy >= 0) {
+          const platTop = petBottom * TILE;
+          if (pet.y + pet.h - pet.vy <= platTop + 2) {
+            pet.y = platTop - pet.h;
+            pet.vy = 0;
+            pet.onGround = true;
+          }
+        }
+      }
+      // Check collection by player
+      for (const pl of [player, player2]) {
+        if (!pl || pl.dead) continue;
+        if (rectCollide(pl, pet)) {
+          pet.collected = true;
+          pet.owner = pl;
+          // Fill trail with current player position
+          for (let i = 0; i < PET_TRAIL_LENGTH; i++) {
+            pet.trail.push({ x: pl.x, y: pl.y });
+          }
+          const petName = pet.kind === 'dog' ? 'Emotional Support Dog' : 'Emotional Support Cat';
+          spawnParticles(pet.x + 10, pet.y + 9, pet.kind === 'dog' ? '#c8a26a' : '#9e9e9e', 12);
+          spawnFloatingText(pet.x, pet.y - 10, petName + '!', '#ff80ab');
+          SFX.collectCitation();
+          showMessage(petName + ' is now following you!');
+          break;
+        }
+      }
+    } else {
+      // Following the owner — track owner position in trail
+      const owner = pet.owner;
+      if (owner && !owner.dead) {
+        // Push current owner position to trail
+        pet.trail.push({ x: owner.x, y: owner.y });
+        if (pet.trail.length > PET_TRAIL_LENGTH) pet.trail.shift();
+        // Follow the oldest trail position (delayed follow)
+        const target = pet.trail[0];
+        const dx = target.x - pet.x;
+        const dy = target.y - pet.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > PET_FOLLOW_DIST) {
+          // Move towards target smoothly
+          pet.vx = dx * 0.15;
+          pet.vy = dy * 0.15;
+          pet.x += pet.vx;
+          pet.y += pet.vy;
+        } else {
+          pet.vx *= 0.8;
+          pet.vy *= 0.8;
+          pet.x += pet.vx;
+          pet.y += pet.vy;
+        }
+        // Face same direction as owner
+        pet.facingRight = owner.facingRight;
+        // Animate walking
+        if (Math.abs(pet.vx) > 0.3) {
+          pet.frameTimer++;
+          if (pet.frameTimer > 10) { pet.frame = (pet.frame + 1) % 4; pet.frameTimer = 0; }
+        }
+      }
+    }
+  }
+
   // Enemies
   for (const e of enemies) {
     if (!e.alive) continue;
@@ -6539,6 +7106,11 @@ function draw() {
   // Grad students
   for (const gs of gradStudents) {
     drawGradStudent(gs, gs.x - camera.x, gs.y - camera.y);
+  }
+
+  // Emotional support pets
+  for (const pet of pets) {
+    drawPet(pet, pet.x - camera.x, pet.y - camera.y);
   }
 
   // Enemies
