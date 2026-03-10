@@ -2283,148 +2283,305 @@ function drawEnemy(e, x, y) {
     }
 
     case 'predatory_journal': {
-      // Piranha Plant style - journal that pops out of a pipe
-      const pipeW = 36;
-      const pipeH = 32;
-      const pipeX = x + e.w / 2 - pipeW / 2;
-      const pipeBaseY = y + e.h;
+      // Filing cabinet trap — manuscript monster pops out of a drawer
+      const cabW = 36;
+      const cabH = 34;
+      const cabX = x + e.w / 2 - cabW / 2;
+      const cabBaseY = y + e.h;
+      const isShooter = e.variant === 'shooter';
 
-      // Draw pipe (green warp pipe)
-      const pipeGrad = ctx.createLinearGradient(pipeX, 0, pipeX + pipeW, 0);
-      pipeGrad.addColorStop(0, '#2e7d32');
-      pipeGrad.addColorStop(0.3, '#66bb6a');
-      pipeGrad.addColorStop(0.5, '#81c784');
-      pipeGrad.addColorStop(0.7, '#66bb6a');
-      pipeGrad.addColorStop(1, '#1b5e20');
-      ctx.fillStyle = pipeGrad;
-      ctx.fillRect(pipeX + 2, pipeBaseY - pipeH, pipeW - 4, pipeH + 8);
-      // Pipe lip (wider)
-      const lipGrad = ctx.createLinearGradient(pipeX - 2, 0, pipeX + pipeW + 2, 0);
-      lipGrad.addColorStop(0, '#1b5e20');
-      lipGrad.addColorStop(0.3, '#4caf50');
-      lipGrad.addColorStop(0.5, '#66bb6a');
-      lipGrad.addColorStop(0.7, '#4caf50');
-      lipGrad.addColorStop(1, '#1b5e20');
-      ctx.fillStyle = lipGrad;
-      drawRoundRect(pipeX - 2, pipeBaseY - pipeH, pipeW + 4, 8, 3);
+      // === FILING CABINET (always visible) ===
+      // Cabinet contour (dark outline)
+      ctx.fillStyle = '#3e3232';
+      drawRoundRect(cabX - 1, cabBaseY - cabH - 1, cabW + 2, cabH + 10, 3);
       ctx.fill();
 
-      // Only draw the journal "head" when not fully hidden
+      // Cabinet body — institutional beige/gray metal
+      const cabGrad = ctx.createLinearGradient(cabX, 0, cabX + cabW, 0);
+      cabGrad.addColorStop(0, '#8d8272');
+      cabGrad.addColorStop(0.15, '#b8ad9e');
+      cabGrad.addColorStop(0.35, '#d1c7b8');
+      cabGrad.addColorStop(0.5, '#d6ccbd');
+      cabGrad.addColorStop(0.65, '#d1c7b8');
+      cabGrad.addColorStop(0.85, '#b8ad9e');
+      cabGrad.addColorStop(1, '#8d8272');
+      ctx.fillStyle = cabGrad;
+      ctx.fillRect(cabX, cabBaseY - cabH, cabW, cabH + 8);
+
+      // Top edge bevel (lighter strip)
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillRect(cabX + 1, cabBaseY - cabH, cabW - 2, 2);
+
+      // Drawer lines (horizontal grooves)
+      ctx.strokeStyle = '#7a7064';
+      ctx.lineWidth = 1;
+      for (let di = 0; di < 3; di++) {
+        const lineY = cabBaseY - cabH + 6 + di * 10;
+        ctx.beginPath();
+        ctx.moveTo(cabX + 2, lineY);
+        ctx.lineTo(cabX + cabW - 2, lineY);
+        ctx.stroke();
+      }
+
+      // Drawer handle (small metallic rectangle)
+      const handleY = cabBaseY - cabH + 14;
+      ctx.fillStyle = '#5d5347';
+      drawRoundRect(cabX + cabW / 2 - 5, handleY, 10, 4, 1.5);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      drawRoundRect(cabX + cabW / 2 - 4, handleY, 8, 2, 1);
+      ctx.fill();
+
+      // Label slot on cabinet face
+      ctx.fillStyle = '#e8e0d4';
+      drawRoundRect(cabX + cabW / 2 - 8, cabBaseY - cabH + 22, 16, 7, 1);
+      ctx.fill();
+      ctx.strokeStyle = '#9e9688';
+      ctx.lineWidth = 0.5;
+      drawRoundRect(cabX + cabW / 2 - 8, cabBaseY - cabH + 22, 16, 7, 1);
+      ctx.stroke();
+      ctx.fillStyle = '#7a7064';
+      ctx.font = '4px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('A-Z', cabX + cabW / 2, cabBaseY - cabH + 28);
+      ctx.textAlign = 'left';
+
+      // Open drawer top — the gap the manuscript emerges from
+      const drawerLipY = cabBaseY - cabH - 1;
+      // Drawer lip contour
+      ctx.fillStyle = '#3e3232';
+      drawRoundRect(cabX - 3, drawerLipY - 2, cabW + 6, 7, 2);
+      ctx.fill();
+      // Drawer lip surface
+      const lipGrad = ctx.createLinearGradient(cabX - 2, 0, cabX + cabW + 2, 0);
+      lipGrad.addColorStop(0, '#8d8272');
+      lipGrad.addColorStop(0.2, '#c4b9aa');
+      lipGrad.addColorStop(0.5, '#d6ccbd');
+      lipGrad.addColorStop(0.8, '#c4b9aa');
+      lipGrad.addColorStop(1, '#8d8272');
+      ctx.fillStyle = lipGrad;
+      drawRoundRect(cabX - 2, drawerLipY - 1, cabW + 4, 5, 2);
+      ctx.fill();
+      // Top highlight on lip
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillRect(cabX, drawerLipY - 1, cabW, 1.5);
+
+      // Dark interior of open drawer (visible gap)
+      ctx.fillStyle = '#1a1612';
+      ctx.fillRect(cabX + 2, drawerLipY + 3, cabW - 4, 3);
+
+      // === MANUSCRIPT MONSTER (only when not hidden) ===
       if (e.pipeState !== 'hidden') {
         const headH = e.h;
-        const isShooter = e.variant === 'shooter';
-        const baseColor = isShooter ? '#e65100' : '#c62828';
-        const lightColor = isShooter ? '#ff9800' : '#ef5350';
-        const darkColor = isShooter ? '#bf360c' : '#b71c1c';
-
-        // Journal body (like a chomping book/plant mouth)
         ctx.save();
 
-        // Body glow
-        ctx.shadowColor = baseColor;
-        ctx.shadowBlur = 8;
+        // --- Manuscript body (yellowed old paper, book-shaped) ---
+        // Contour
+        ctx.fillStyle = '#3e3020';
+        drawRoundRect(x + 1, dy + 1, e.w - 2, headH - 6, 6);
+        ctx.fill();
 
-        // Main body (rounded book shape)
-        const bodyGrad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 2, x + e.w / 2, dy + headH / 2, 20);
-        bodyGrad.addColorStop(0, lightColor);
-        bodyGrad.addColorStop(0.6, baseColor);
-        bodyGrad.addColorStop(1, darkColor);
+        // Main body — yellowed parchment gradient
+        const bodyGrad = ctx.createLinearGradient(x, dy, x + e.w, dy + headH);
+        bodyGrad.addColorStop(0, isShooter ? '#fff3e0' : '#fff8e1');
+        bodyGrad.addColorStop(0.3, isShooter ? '#ffe0b2' : '#ffecb3');
+        bodyGrad.addColorStop(0.7, isShooter ? '#ffcc80' : '#ffe082');
+        bodyGrad.addColorStop(1, isShooter ? '#e6a54a' : '#c9a43e');
         ctx.fillStyle = bodyGrad;
-        drawRoundRect(x + 2, dy + 2, e.w - 4, headH - 8, 8);
+        drawRoundRect(x + 2, dy + 2, e.w - 4, headH - 8, 5);
         ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Spots/dots (like a piranha plant)
-        ctx.fillStyle = isShooter ? '#fff3e0' : '#ffcdd2';
-        for (let si = 0; si < 5; si++) {
-          const sx2 = x + 6 + (si % 3) * 8;
-          const sy2 = dy + 8 + Math.floor(si / 3) * 10;
-          drawCircle(sx2, sy2, 2.5);
-          ctx.fill();
+        // Paper texture — faint horizontal lines (like ruled paper)
+        ctx.strokeStyle = 'rgba(120,100,70,0.15)';
+        ctx.lineWidth = 0.5;
+        for (let li = 0; li < 6; li++) {
+          const lineY2 = dy + 6 + li * 5;
+          ctx.beginPath();
+          ctx.moveTo(x + 5, lineY2);
+          ctx.lineTo(x + e.w - 5, lineY2);
+          ctx.stroke();
         }
 
-        // Mouth (chomping animation)
-        const mouthOpen = Math.abs(Math.sin(levelTimer * 0.08)) * 6;
-        // Upper jaw
-        ctx.fillStyle = darkColor;
-        ctx.beginPath();
-        ctx.moveTo(x + 3, dy + headH / 2);
-        ctx.quadraticCurveTo(x + e.w / 2, dy + headH / 2 - mouthOpen - 4, x + e.w - 3, dy + headH / 2);
-        ctx.lineTo(x + e.w - 3, dy + headH / 2 - 2);
-        ctx.lineTo(x + 3, dy + headH / 2 - 2);
-        ctx.fill();
-        // Lower jaw
-        ctx.beginPath();
-        ctx.moveTo(x + 3, dy + headH / 2);
-        ctx.quadraticCurveTo(x + e.w / 2, dy + headH / 2 + mouthOpen + 4, x + e.w - 3, dy + headH / 2);
-        ctx.lineTo(x + e.w - 3, dy + headH / 2 + 2);
-        ctx.lineTo(x + 3, dy + headH / 2 + 2);
-        ctx.fill();
-        // Teeth (pointy like piranha)
-        ctx.fillStyle = '#fff';
-        for (let ti = 0; ti < 4; ti++) {
-          const tx2 = x + 7 + ti * 6;
-          // Upper teeth
-          ctx.beginPath();
-          ctx.moveTo(tx2, dy + headH / 2 - 2);
-          ctx.lineTo(tx2 + 2, dy + headH / 2 + mouthOpen * 0.3);
-          ctx.lineTo(tx2 + 4, dy + headH / 2 - 2);
-          ctx.fill();
-          // Lower teeth
-          ctx.beginPath();
-          ctx.moveTo(tx2 + 1, dy + headH / 2 + 2);
-          ctx.lineTo(tx2 + 3, dy + headH / 2 - mouthOpen * 0.3);
-          ctx.lineTo(tx2 + 5, dy + headH / 2 + 2);
-          ctx.fill();
+        // Book spine on left edge
+        ctx.fillStyle = isShooter ? '#bf5b00' : '#8d6e2e';
+        ctx.fillRect(x + 2, dy + 3, 3, headH - 12);
+        // Spine highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(x + 3, dy + 4, 1, headH - 14);
+
+        // Pages edge on right (layered look)
+        ctx.fillStyle = '#f5f0e0';
+        for (let pi = 0; pi < 3; pi++) {
+          ctx.fillRect(x + e.w - 4 + pi, dy + 4 + pi, 1, headH - 12 - pi * 2);
         }
 
-        // Eyes (angry anime style)
+        // --- "ACCEPTED!" red stamp on forehead ---
+        const stampY = dy + 3;
+        ctx.save();
+        ctx.translate(x + e.w / 2, stampY + 4);
+        ctx.rotate(-0.15);
+        // Stamp border
+        ctx.strokeStyle = '#c62828';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(-10, -4, 20, 9);
+        // Stamp text
+        ctx.fillStyle = '#c62828';
+        ctx.font = 'bold 5px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('ACCEPTED', 0, 2.5);
+        ctx.textAlign = 'left';
+        ctx.restore();
+
+        // --- Greedy gold-coin eyes ---
         for (const ex2 of [x + 9, x + e.w - 11]) {
-          ctx.fillStyle = '#fff';
-          drawEllipse(ex2, dy + 9, 5, 4);
+          // Eye contour
+          ctx.fillStyle = '#2a2010';
+          drawCircle(ex2, dy + 16, 5.5);
           ctx.fill();
-          const irisColor = isShooter ? '#ff6f00' : '#d50000';
-          const iGrad2 = ctx.createRadialGradient(ex2, dy + 9, 0.5, ex2, dy + 9, 3);
-          iGrad2.addColorStop(0, '#ffeb3b');
-          iGrad2.addColorStop(1, irisColor);
-          ctx.fillStyle = iGrad2;
-          drawCircle(ex2 + 0.5, dy + 9.5, 2.8);
+          // Gold coin eye base
+          const coinGrad = ctx.createRadialGradient(ex2, dy + 16, 0.5, ex2, dy + 16, 5);
+          coinGrad.addColorStop(0, '#fff9c4');
+          coinGrad.addColorStop(0.3, '#ffd54f');
+          coinGrad.addColorStop(0.7, '#f9a825');
+          coinGrad.addColorStop(1, '#c17900');
+          ctx.fillStyle = coinGrad;
+          drawCircle(ex2, dy + 16, 4.8);
           ctx.fill();
-          ctx.fillStyle = '#000';
-          drawCircle(ex2 + 0.5, dy + 9.5, 1.2);
+          // Coin rim ring
+          ctx.strokeStyle = '#a06800';
+          ctx.lineWidth = 0.8;
+          drawCircle(ex2, dy + 16, 3.5);
+          ctx.stroke();
+          // $ sign in center of coin
+          ctx.fillStyle = '#5d4037';
+          ctx.font = 'bold 6px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('$', ex2, dy + 18.5);
+          ctx.textAlign = 'left';
+          // Coin shine highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          drawCircle(ex2 - 1.5, dy + 14.5, 1.3);
           ctx.fill();
-          // Highlight
-          ctx.fillStyle = 'rgba(255,255,255,0.85)';
-          drawCircle(ex2 - 1, dy + 8, 1);
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          drawCircle(ex2 + 2, dy + 17.5, 0.7);
           ctx.fill();
         }
 
-        // Angry eyebrows
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 2;
+        // Angry eyebrows (thick, manga style)
+        ctx.strokeStyle = '#2a2010';
+        ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(x + 4, dy + 4);
-        ctx.lineTo(x + 12, dy + 7);
+        ctx.moveTo(x + 4, dy + 10);
+        ctx.lineTo(x + 13, dy + 13);
         ctx.stroke();
         ctx.beginPath();
-        ctx.moveTo(x + e.w - 4, dy + 4);
-        ctx.lineTo(x + e.w - 12, dy + 7);
+        ctx.moveTo(x + e.w - 4, dy + 10);
+        ctx.lineTo(x + e.w - 13, dy + 13);
         ctx.stroke();
         ctx.lineCap = 'butt';
 
-        // Shooter variant: glow indicator
-        if (isShooter && e.shootTimer > 60) {
-          ctx.fillStyle = `rgba(255,100,0,${0.3 + Math.sin(levelTimer * 0.3) * 0.2})`;
-          drawCircle(x + e.w / 2, dy + 4, 5);
+        // --- Chomping mouth with teeth ---
+        const mouthOpen = Math.abs(Math.sin(levelTimer * 0.08)) * 5;
+        const mouthY = dy + 24;
+
+        // Mouth interior (dark)
+        ctx.fillStyle = '#1a0a00';
+        ctx.beginPath();
+        ctx.moveTo(x + 6, mouthY);
+        ctx.quadraticCurveTo(x + e.w / 2, mouthY - mouthOpen - 2, x + e.w - 6, mouthY);
+        ctx.quadraticCurveTo(x + e.w / 2, mouthY + mouthOpen + 2, x + 6, mouthY);
+        ctx.fill();
+
+        // Tongue (inside mouth when open)
+        if (mouthOpen > 2) {
+          ctx.fillStyle = '#c62828';
+          drawEllipse(x + e.w / 2, mouthY + mouthOpen * 0.3, 4, mouthOpen * 0.4);
           ctx.fill();
         }
 
-        // Label
-        ctx.fillStyle = isShooter ? '#ff9800' : '#ef5350';
+        // Upper teeth (sharp, white)
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#bbb';
+        ctx.lineWidth = 0.5;
+        for (let ti = 0; ti < 4; ti++) {
+          const tx2 = x + 8 + ti * 5;
+          ctx.beginPath();
+          ctx.moveTo(tx2, mouthY - mouthOpen * 0.3 - 1);
+          ctx.lineTo(tx2 + 2, mouthY + mouthOpen * 0.15);
+          ctx.lineTo(tx2 + 4, mouthY - mouthOpen * 0.3 - 1);
+          ctx.fill();
+          ctx.stroke();
+        }
+        // Lower teeth
+        for (let ti = 0; ti < 3; ti++) {
+          const tx2 = x + 10 + ti * 5;
+          ctx.beginPath();
+          ctx.moveTo(tx2, mouthY + mouthOpen * 0.3 + 1);
+          ctx.lineTo(tx2 + 2, mouthY - mouthOpen * 0.15);
+          ctx.lineTo(tx2 + 4, mouthY + mouthOpen * 0.3 + 1);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        // --- Fake impact factor badge (bottom right) ---
+        ctx.save();
+        ctx.translate(x + e.w - 5, dy + headH - 12);
+        ctx.rotate(0.2);
+        // Badge contour
+        ctx.fillStyle = '#5d4037';
+        drawCircle(0, 0, 6);
+        ctx.fill();
+        // Badge gold fill
+        const badgeGrad = ctx.createRadialGradient(0, -1, 0, 0, 0, 5.5);
+        badgeGrad.addColorStop(0, '#ffd54f');
+        badgeGrad.addColorStop(0.7, '#f9a825');
+        badgeGrad.addColorStop(1, '#c17900');
+        ctx.fillStyle = badgeGrad;
+        drawCircle(0, 0, 5.5);
+        ctx.fill();
+        // Star burst edge (badge notches)
+        ctx.fillStyle = '#e8b800';
+        for (let si = 0; si < 8; si++) {
+          const ang = (si / 8) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(ang) * 6.5, Math.sin(ang) * 6.5);
+          ctx.lineTo(Math.cos(ang + 0.3) * 4, Math.sin(ang + 0.3) * 4);
+          ctx.fill();
+        }
+        // Badge inner circle
+        ctx.fillStyle = '#f9a825';
+        drawCircle(0, 0, 3.5);
+        ctx.fill();
+        // "IF" text
+        ctx.fillStyle = '#5d4037';
+        ctx.font = 'bold 4px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('IF', 0, 1.5);
+        ctx.textAlign = 'left';
+        // Shine
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        drawCircle(-1.5, -1.5, 1.5);
+        ctx.fill();
+        ctx.restore();
+
+        // Shooter variant: charging glow indicator
+        if (isShooter && e.shootTimer > 60) {
+          const glowAlpha = 0.2 + Math.sin(levelTimer * 0.3) * 0.15;
+          const chargeGrad = ctx.createRadialGradient(x + e.w / 2, dy + 5, 0, x + e.w / 2, dy + 5, 10);
+          chargeGrad.addColorStop(0, `rgba(255,140,0,${glowAlpha + 0.2})`);
+          chargeGrad.addColorStop(1, `rgba(255,140,0,0)`);
+          ctx.fillStyle = chargeGrad;
+          drawCircle(x + e.w / 2, dy + 5, 10);
+          ctx.fill();
+        }
+
+        // --- Label ---
+        ctx.fillStyle = isShooter ? '#ff9800' : '#c62828';
         ctx.font = 'bold 6px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 2);
+        ctx.fillText(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 3);
         ctx.textAlign = 'left';
 
         ctx.restore();
@@ -2433,29 +2590,39 @@ function drawEnemy(e, x, y) {
     }
 
     case 'spam_email': {
-      // Spam email projectile — flying envelope
+      // Invoice/spam paper projectile — flying fee demand
       const srot = Math.atan2(e.vy || 0, e.vx || 1);
       ctx.save();
       ctx.translate(x + e.w / 2, dy + e.h / 2);
-      ctx.rotate(srot * 0.3 + Math.sin(levelTimer * 0.2) * 0.15);
-      // Envelope body
-      ctx.fillStyle = '#fff9c4';
-      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2);
+      ctx.rotate(srot * 0.3 + levelTimer * 0.12);
+      // Paper contour
+      ctx.fillStyle = '#5d4037';
+      drawRoundRect(-e.w / 2 - 1, -e.h / 2 - 1, e.w + 2, e.h + 2, 2);
       ctx.fill();
-      // Envelope flap
-      ctx.fillStyle = '#ffe082';
-      ctx.beginPath();
-      ctx.moveTo(-e.w / 2, -e.h / 2);
-      ctx.lineTo(0, 1);
-      ctx.lineTo(e.w / 2, -e.h / 2);
+      // Yellowed paper body
+      ctx.fillStyle = '#fff8e1';
+      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 1.5);
       ctx.fill();
-      // $ sign (spam indicator)
-      ctx.fillStyle = '#e65100';
+      // Red "INVOICE" header line
+      ctx.fillStyle = '#c62828';
+      ctx.fillRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, 3);
+      // $ sign
+      ctx.fillStyle = '#c17900';
       ctx.font = 'bold 7px monospace';
       ctx.textAlign = 'center';
       ctx.fillText('$', 0, 4);
       ctx.textAlign = 'left';
+      // Trail glow
       ctx.restore();
+      // Trailing particles
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#ffd54f';
+      for (let ti = 0; ti < 3; ti++) {
+        const tdir = e.vx > 0 ? -1 : 1;
+        drawCircle(x + e.w / 2 + tdir * (ti * 4 + 5), dy + e.h / 2 + Math.sin(levelTimer * 0.4 + ti) * 2, 2 - ti * 0.5);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
       break;
     }
 
@@ -4559,23 +4726,46 @@ function generateLevel(levelIdx) {
   const platformEnemyCount = platforms.length > 0 ? Math.floor(enemyCount * 0.4) : 0;
   const groundEnemyCount = enemyCount - platformEnemyCount;
 
+  // Track occupied positions to prevent enemies spawning on top of each other
+  const occupiedPositions = []; // [{x, y}]
+  const MIN_ENEMY_DISTANCE = 4; // minimum tiles apart
+
+  function isPositionFree(ex, ey) {
+    for (const pos of occupiedPositions) {
+      if (Math.abs(pos.x - ex) < MIN_ENEMY_DISTANCE && Math.abs(pos.y - ey) < 2) return false;
+    }
+    return true;
+  }
+
   for (let i = 0; i < groundEnemyCount; i++) {
-    const ex = 10 + Math.floor(Math.random() * (w - 15));
+    let ex, attempts = 0;
+    do {
+      ex = 10 + Math.floor(Math.random() * (w - 15));
+      attempts++;
+    } while (!isPositionFree(ex, groundY) && attempts < 20);
+    if (attempts >= 20) continue; // skip if no free spot found
     if (tiles[groundY][ex] === 1) {
       const types = enemyTypes[levelIdx];
       const eType = types[Math.floor(Math.random() * types.length)];
       entities.push({ type: eType, x: ex, y: groundY - 1.5, patrolRange: 2 + Math.floor(Math.random() * 3) });
+      occupiedPositions.push({ x: ex, y: groundY });
     }
   }
 
   for (let i = 0; i < platformEnemyCount; i++) {
     const plat = platforms[Math.floor(Math.random() * platforms.length)];
     const platWidth = plat.x2 - plat.x1 + 1;
-    const ex = plat.x1 + Math.floor(Math.random() * platWidth);
+    let ex, attempts = 0;
+    do {
+      ex = plat.x1 + Math.floor(Math.random() * platWidth);
+      attempts++;
+    } while (!isPositionFree(ex, plat.y) && attempts < 15);
+    if (attempts >= 15) continue;
     const types = enemyTypes[levelIdx];
     const eType = types[Math.floor(Math.random() * types.length)];
     const patrol = Math.min(2 + Math.floor(Math.random() * 2), Math.floor(platWidth / 2));
     entities.push({ type: eType, x: ex, y: plat.y - 1.5, patrolRange: patrol });
+    occupiedPositions.push({ x: ex, y: plat.y });
   }
 
   // Grad students (mentorable NPCs — rare and valuable)
@@ -4955,15 +5145,26 @@ function initLevel(idx) {
       case 'bureaucrat':
       case 'imposter':
       case 'teaching':
-      case 'committee':
+      case 'committee': {
+        // Each enemy type has a distinct base speed
+        const ENEMY_SPEEDS = {
+          reviewer2: 1.4,    // aggressive, fast
+          bureaucrat: 0.7,   // slow, plodding
+          imposter: 1.8,     // quick, darting
+          teaching: 0.5,     // weighed down by books
+          committee: 1.0,    // moderate, methodical
+        };
+        const baseSpeed = ENEMY_SPEEDS[ent.type] || 1.0;
+        const levelScale = 1 + idx * 0.15;
         enemies.push({
           type: ent.type, x: wx, y: wy, w: 28, h: 30,
-          vx: (Math.random() < 0.5 ? 1 : -1) * (1 + idx * 0.3),
+          vx: (Math.random() < 0.5 ? 1 : -1) * baseSpeed * levelScale,
           startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
           alive: true, frame: 0, frameTimer: 0,
           appearance: randomAppearance()
         });
         break;
+      }
       case 'rival': {
         const rivalSubtypes = [
           { title: 'SCOOPER', color: '#e65100', desc: 'Publishes your idea first' },
