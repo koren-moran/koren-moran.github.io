@@ -2282,6 +2282,183 @@ function drawEnemy(e, x, y) {
       break;
     }
 
+    case 'predatory_journal': {
+      // Piranha Plant style - journal that pops out of a pipe
+      const pipeW = 36;
+      const pipeH = 32;
+      const pipeX = x + e.w / 2 - pipeW / 2;
+      const pipeBaseY = y + e.h;
+
+      // Draw pipe (green warp pipe)
+      const pipeGrad = ctx.createLinearGradient(pipeX, 0, pipeX + pipeW, 0);
+      pipeGrad.addColorStop(0, '#2e7d32');
+      pipeGrad.addColorStop(0.3, '#66bb6a');
+      pipeGrad.addColorStop(0.5, '#81c784');
+      pipeGrad.addColorStop(0.7, '#66bb6a');
+      pipeGrad.addColorStop(1, '#1b5e20');
+      ctx.fillStyle = pipeGrad;
+      ctx.fillRect(pipeX + 2, pipeBaseY - pipeH, pipeW - 4, pipeH + 8);
+      // Pipe lip (wider)
+      const lipGrad = ctx.createLinearGradient(pipeX - 2, 0, pipeX + pipeW + 2, 0);
+      lipGrad.addColorStop(0, '#1b5e20');
+      lipGrad.addColorStop(0.3, '#4caf50');
+      lipGrad.addColorStop(0.5, '#66bb6a');
+      lipGrad.addColorStop(0.7, '#4caf50');
+      lipGrad.addColorStop(1, '#1b5e20');
+      ctx.fillStyle = lipGrad;
+      drawRoundRect(pipeX - 2, pipeBaseY - pipeH, pipeW + 4, 8, 3);
+      ctx.fill();
+
+      // Only draw the journal "head" when not fully hidden
+      if (e.pipeState !== 'hidden') {
+        const headH = e.h;
+        const isShooter = e.variant === 'shooter';
+        const baseColor = isShooter ? '#e65100' : '#c62828';
+        const lightColor = isShooter ? '#ff9800' : '#ef5350';
+        const darkColor = isShooter ? '#bf360c' : '#b71c1c';
+
+        // Journal body (like a chomping book/plant mouth)
+        ctx.save();
+
+        // Body glow
+        ctx.shadowColor = baseColor;
+        ctx.shadowBlur = 8;
+
+        // Main body (rounded book shape)
+        const bodyGrad = ctx.createRadialGradient(x + e.w / 2, dy + 8, 2, x + e.w / 2, dy + headH / 2, 20);
+        bodyGrad.addColorStop(0, lightColor);
+        bodyGrad.addColorStop(0.6, baseColor);
+        bodyGrad.addColorStop(1, darkColor);
+        ctx.fillStyle = bodyGrad;
+        drawRoundRect(x + 2, dy + 2, e.w - 4, headH - 8, 8);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Spots/dots (like a piranha plant)
+        ctx.fillStyle = isShooter ? '#fff3e0' : '#ffcdd2';
+        for (let si = 0; si < 5; si++) {
+          const sx2 = x + 6 + (si % 3) * 8;
+          const sy2 = dy + 8 + Math.floor(si / 3) * 10;
+          drawCircle(sx2, sy2, 2.5);
+          ctx.fill();
+        }
+
+        // Mouth (chomping animation)
+        const mouthOpen = Math.abs(Math.sin(levelTimer * 0.08)) * 6;
+        // Upper jaw
+        ctx.fillStyle = darkColor;
+        ctx.beginPath();
+        ctx.moveTo(x + 3, dy + headH / 2);
+        ctx.quadraticCurveTo(x + e.w / 2, dy + headH / 2 - mouthOpen - 4, x + e.w - 3, dy + headH / 2);
+        ctx.lineTo(x + e.w - 3, dy + headH / 2 - 2);
+        ctx.lineTo(x + 3, dy + headH / 2 - 2);
+        ctx.fill();
+        // Lower jaw
+        ctx.beginPath();
+        ctx.moveTo(x + 3, dy + headH / 2);
+        ctx.quadraticCurveTo(x + e.w / 2, dy + headH / 2 + mouthOpen + 4, x + e.w - 3, dy + headH / 2);
+        ctx.lineTo(x + e.w - 3, dy + headH / 2 + 2);
+        ctx.lineTo(x + 3, dy + headH / 2 + 2);
+        ctx.fill();
+        // Teeth (pointy like piranha)
+        ctx.fillStyle = '#fff';
+        for (let ti = 0; ti < 4; ti++) {
+          const tx2 = x + 7 + ti * 6;
+          // Upper teeth
+          ctx.beginPath();
+          ctx.moveTo(tx2, dy + headH / 2 - 2);
+          ctx.lineTo(tx2 + 2, dy + headH / 2 + mouthOpen * 0.3);
+          ctx.lineTo(tx2 + 4, dy + headH / 2 - 2);
+          ctx.fill();
+          // Lower teeth
+          ctx.beginPath();
+          ctx.moveTo(tx2 + 1, dy + headH / 2 + 2);
+          ctx.lineTo(tx2 + 3, dy + headH / 2 - mouthOpen * 0.3);
+          ctx.lineTo(tx2 + 5, dy + headH / 2 + 2);
+          ctx.fill();
+        }
+
+        // Eyes (angry anime style)
+        for (const ex2 of [x + 9, x + e.w - 11]) {
+          ctx.fillStyle = '#fff';
+          drawEllipse(ex2, dy + 9, 5, 4);
+          ctx.fill();
+          const irisColor = isShooter ? '#ff6f00' : '#d50000';
+          const iGrad2 = ctx.createRadialGradient(ex2, dy + 9, 0.5, ex2, dy + 9, 3);
+          iGrad2.addColorStop(0, '#ffeb3b');
+          iGrad2.addColorStop(1, irisColor);
+          ctx.fillStyle = iGrad2;
+          drawCircle(ex2 + 0.5, dy + 9.5, 2.8);
+          ctx.fill();
+          ctx.fillStyle = '#000';
+          drawCircle(ex2 + 0.5, dy + 9.5, 1.2);
+          ctx.fill();
+          // Highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          drawCircle(ex2 - 1, dy + 8, 1);
+          ctx.fill();
+        }
+
+        // Angry eyebrows
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x + 4, dy + 4);
+        ctx.lineTo(x + 12, dy + 7);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + e.w - 4, dy + 4);
+        ctx.lineTo(x + e.w - 12, dy + 7);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+
+        // Shooter variant: glow indicator
+        if (isShooter && e.shootTimer > 60) {
+          ctx.fillStyle = `rgba(255,100,0,${0.3 + Math.sin(levelTimer * 0.3) * 0.2})`;
+          drawCircle(x + e.w / 2, dy + 4, 5);
+          ctx.fill();
+        }
+
+        // Label
+        ctx.fillStyle = isShooter ? '#ff9800' : '#ef5350';
+        ctx.font = 'bold 6px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 2);
+        ctx.textAlign = 'left';
+
+        ctx.restore();
+      }
+      break;
+    }
+
+    case 'spam_email': {
+      // Spam email projectile — flying envelope
+      const srot = Math.atan2(e.vy || 0, e.vx || 1);
+      ctx.save();
+      ctx.translate(x + e.w / 2, dy + e.h / 2);
+      ctx.rotate(srot * 0.3 + Math.sin(levelTimer * 0.2) * 0.15);
+      // Envelope body
+      ctx.fillStyle = '#fff9c4';
+      drawRoundRect(-e.w / 2, -e.h / 2, e.w, e.h, 2);
+      ctx.fill();
+      // Envelope flap
+      ctx.fillStyle = '#ffe082';
+      ctx.beginPath();
+      ctx.moveTo(-e.w / 2, -e.h / 2);
+      ctx.lineTo(0, 1);
+      ctx.lineTo(e.w / 2, -e.h / 2);
+      ctx.fill();
+      // $ sign (spam indicator)
+      ctx.fillStyle = '#e65100';
+      ctx.font = 'bold 7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('$', 0, 4);
+      ctx.textAlign = 'left';
+      ctx.restore();
+      break;
+    }
+
     case 'rejection': {
       // Flying paper
       const rot = Math.atan2(e.vy || 0, e.vx || 1);
@@ -3877,6 +4054,58 @@ function drawFlag() {
 // ============================================================
 // HUD DRAWING
 // ============================================================
+function drawTrainingTasks() {
+  const panelW = 260;
+  const panelH = 20 + trainingTasks.length * 18;
+  const panelX = GAME_W - panelW - 10;
+  const panelY = 50;
+
+  // Panel background
+  ctx.fillStyle = 'rgba(10,10,30,0.85)';
+  drawRoundRect(panelX, panelY, panelW, panelH, 8);
+  ctx.fill();
+  ctx.strokeStyle = '#ffd54f';
+  ctx.lineWidth = 1.5;
+  drawRoundRect(panelX, panelY, panelW, panelH, 8);
+  ctx.stroke();
+
+  // Title
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 11px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('TRAINING TASKS', panelX + 10, panelY + 14);
+
+  // Tasks
+  for (let i = 0; i < trainingTasks.length; i++) {
+    const task = trainingTasks[i];
+    const ty = panelY + 30 + i * 18;
+    const isCurrent = i === trainingTaskIndex && !trainingCompleted;
+
+    if (task.done) {
+      ctx.fillStyle = '#66bb6a';
+      ctx.font = '10px monospace';
+      ctx.fillText('\u2713 ' + task.text, panelX + 10, ty);
+    } else if (isCurrent) {
+      const blink = Math.sin(Date.now() * 0.005) > 0;
+      ctx.fillStyle = blink ? '#fff' : '#ffd54f';
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText('\u25B6 ' + task.text, panelX + 10, ty);
+    } else {
+      ctx.fillStyle = '#546e7a';
+      ctx.font = '10px monospace';
+      ctx.fillText('  ' + task.text, panelX + 10, ty);
+    }
+  }
+
+  if (trainingCompleted) {
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TRAINING COMPLETE! Press ESC for menu', GAME_W / 2, GAME_H - 30);
+    ctx.textAlign = 'left';
+  }
+}
+
 function drawHUD() {
   const hudH = twoPlayerMode ? 62 : 40;
   // HUD background with glass effect
@@ -4305,11 +4534,11 @@ function generateLevel(levelIdx) {
   // Enemies
   const enemyTypes = [
     ['reviewer2', 'imposter'],
-    ['reviewer2', 'imposter', 'bureaucrat'],
-    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival'],  // Job Market
-    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival'],
-    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival'],
-    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival']
+    ['reviewer2', 'imposter', 'bureaucrat', 'predatory_journal'],
+    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival', 'predatory_journal'],  // Job Market
+    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival', 'predatory_journal'],
+    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival', 'predatory_journal'],
+    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival', 'predatory_journal']
   ];
 
   // Collect platform info for enemy spawning
@@ -4415,10 +4644,177 @@ function generateLevel(levelIdx) {
 }
 
 // ============================================================
+// TRAINING LEVEL GENERATION
+// ============================================================
+function generateTrainingLevel() {
+  const w = 120;
+  const h = 15;
+  const tiles = [];
+  const entities = [];
+
+  for (let y = 0; y < h; y++) {
+    tiles[y] = [];
+    for (let x = 0; x < w; x++) tiles[y][x] = 0;
+  }
+
+  const groundY = h - 2;
+  for (let x = 0; x < w; x++) {
+    tiles[groundY][x] = 1;
+    tiles[groundY + 1][x] = 1;
+  }
+
+  entities.push({ type: 'player', x: 2, y: groundY - 2 });
+
+  // Section 1 (x: 0-20): Open flat ground - learn movement
+  entities.push({ type: 'sign', x: 4, y: groundY - 1, text: '"Use arrow keys to move!"' });
+
+  // Section 2 (x: 20-40): Platforms - learn jumping
+  for (let px = 22; px < 38; px += 5) {
+    const py = groundY - 3 - (px % 2);
+    for (let dx = 0; dx < 3; dx++) tiles[py][px + dx] = 2;
+    entities.push({ type: 'citation', x: px + 1, y: py - 1 });
+  }
+  entities.push({ type: 'sign', x: 20, y: groundY - 1, text: '"Jump with Up/Space!"' });
+
+  // Section 3 (x: 40-55): Small pit - learn crossing gaps
+  for (let dx = 0; dx < 3; dx++) {
+    tiles[groundY][43 + dx] = 0;
+    tiles[groundY + 1][43 + dx] = 0;
+  }
+  entities.push({ type: 'sign', x: 40, y: groundY - 1, text: '"Jump over the pit!"' });
+  entities.push({ type: 'publication', x: 44, y: groundY - 3 });
+
+  // Section 4 (x: 55-75): Stomping - a single slow reviewer2
+  entities.push({ type: 'reviewer2', x: 63, y: groundY - 1.5, patrolRange: 2 });
+  entities.push({ type: 'sign', x: 57, y: groundY - 1, text: '"Jump ON enemies to defeat them!"' });
+
+  // Section 5 (x: 75-95): Double jump area with high platforms
+  const highPlat1Y = groundY - 5;
+  for (let dx = 0; dx < 4; dx++) tiles[highPlat1Y][80 + dx] = 2;
+  entities.push({ type: 'grant', x: 82, y: highPlat1Y - 1 });
+  const highPlat2Y = groundY - 7;
+  for (let dx = 0; dx < 3; dx++) tiles[highPlat2Y][86 + dx] = 2;
+  entities.push({ type: 'coffee', x: 87, y: highPlat2Y - 1 });
+  entities.push({ type: 'sign', x: 77, y: groundY - 1, text: '"Double-jump in mid-air!"' });
+
+  // Section 6 (x: 95-115): Collectibles and a predatory journal
+  entities.push({ type: 'predatory_journal', x: 100, y: groundY - 1.5, patrolRange: 0 });
+  entities.push({ type: 'sign', x: 96, y: groundY - 1, text: '"Beware predatory journals!"' });
+  entities.push({ type: 'publication', x: 103, y: groundY - 1 });
+  entities.push({ type: 'flame', x: 106, y: groundY - 1 });
+  entities.push({ type: 'sign', x: 108, y: groundY - 1, text: '"Pick up flames, press . to fire!"' });
+
+  // Flag
+  entities.push({ type: 'flag', x: w - 4, y: groundY - 3 });
+
+  return { tiles, entities, width: w, height: h };
+}
+
+function initTrainingTasks() {
+  trainingTasks = [
+    { text: 'Walk right using the arrow keys', check: () => player && player.x > 5 * TILE, done: false },
+    { text: 'Jump! Press Up or Space', check: () => player && player.hasDoubleJumped !== undefined && !player.onGround, done: false },
+    { text: 'Collect something on a platform', check: () => { const s = twoPlayerMode ? p1Stats : stats; return s.citations > 0 || s.publications > 0; }, done: false },
+    { text: 'Jump over the pit (don\'t fall!)', check: () => player && player.x > 48 * TILE, done: false },
+    { text: 'Stomp on an enemy! Jump on their head', check: () => enemies.some(e => !e.alive && e.type === 'reviewer2'), done: false },
+    { text: 'Try a double-jump to reach higher platforms', check: () => { const s = twoPlayerMode ? p1Stats : stats; return s.grants > 0; }, done: false },
+    { text: 'Reach the flag to complete training!', check: () => flagObj && flagObj.reached, done: false },
+  ];
+  trainingTaskIndex = 0;
+  trainingCompleted = false;
+}
+
+function initTrainingLevel() {
+  trainingMode = true;
+  currentLevel = 0;
+  const data = generateTrainingLevel();
+  level = data;
+
+  enemies = [];
+  collectibles = [];
+  signs = [];
+  particles = [];
+  floatingTexts = [];
+  fireballs = [];
+  gradStudents = [];
+
+  for (const ent of data.entities) {
+    const wx = ent.x * TILE;
+    const wy = ent.y * TILE;
+    switch (ent.type) {
+      case 'player':
+        player = {
+          x: wx, y: wy, vx: 0, vy: 0,
+          w: 26, h: 32,
+          onGround: false, facingRight: true,
+          frame: 0, frameTimer: 0,
+          powered: false, powerTimer: 0,
+          invincible: false, invTimer: 0,
+          dead: false, isPlayer: true,
+          hasDoubleJumped: false,
+          jumpBuffer: 0, coyoteTime: 0, wasOnGround: false,
+          hasFlame: false, flameTimer: 0, fireCooldown: 0,
+          mentoring: null, mentoringTimer: 0, headbutting: false
+        };
+        break;
+      case 'flag':
+        flagObj = { x: wx, y: wy, w: 32, h: 48, reached: false };
+        break;
+      case 'publication':
+      case 'grant':
+      case 'citation':
+      case 'coffee':
+      case 'heart':
+      case 'flame':
+      case 'potion':
+        collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
+        break;
+      case 'reviewer2':
+        enemies.push({
+          type: ent.type, x: wx, y: wy, w: 28, h: 30,
+          vx: 0.6, startX: wx, patrolRange: (ent.patrolRange || 3) * TILE,
+          alive: true, frame: 0, frameTimer: 0,
+          appearance: randomAppearance()
+        });
+        break;
+      case 'predatory_journal':
+        enemies.push({
+          type: 'predatory_journal', x: wx, y: wy, w: 32, h: 40,
+          vx: 0, vy: 0, startX: wx, patrolRange: 0,
+          alive: true, frame: 0, frameTimer: 0,
+          pipeTimer: 0, pipeState: 'hidden', // hidden, rising, exposed, sinking
+          pipeY: wy, basePipeY: wy + 40,
+          shootTimer: 0, variant: 'eater', // 'eater' or 'shooter'
+          appearance: {}
+        });
+        break;
+      case 'sign':
+        signs.push({ x: wx, y: wy, text: ent.text });
+        break;
+    }
+  }
+
+  player2 = null;
+  camera.x = 0;
+  camera.y = 0;
+  levelTimer = 0;
+  p1Stats = newStats();
+  p1Stats.lives = 99; // can't really die in training
+  stats = p1Stats;
+  initTrainingTasks();
+  gameState = 'playing';
+}
+
+// ============================================================
 // GAME STATE
 // ============================================================
 let gameState = 'menu';
 let currentLevel = 0;
+let trainingMode = false;
+let trainingTasks = [];
+let trainingTaskIndex = 0;
+let trainingTaskTimer = 0;
+let trainingCompleted = false;
 let level = null;
 let player = null;
 let camera = { x: 0, y: 0 };
@@ -4586,6 +4982,19 @@ function initLevel(idx) {
           shootTimer: 0, shootCooldown: 0,
           rivalTitle: sub.title, rivalColor: sub.color,
           appearance: randomAppearance()
+        });
+        break;
+      }
+      case 'predatory_journal': {
+        const pjVariant = Math.random() < 0.5 ? 'eater' : 'shooter';
+        enemies.push({
+          type: 'predatory_journal', x: wx, y: wy, w: 32, h: 40,
+          vx: 0, vy: 0, startX: wx, patrolRange: 0,
+          alive: true, frame: 0, frameTimer: 0,
+          pipeTimer: 0, pipeState: 'hidden',
+          pipeY: wy, basePipeY: wy + 40,
+          shootTimer: 0, variant: pjVariant,
+          appearance: {}
         });
         break;
       }
@@ -4781,6 +5190,7 @@ function update() {
     }
     if (justPressed['KeyX']) {
       gameState = 'menu';
+      trainingMode = false;
     }
     if (justPressed['KeyM']) {
       musicVolume = musicVolume > 0 ? 0 : 0.15;
@@ -4953,6 +5363,12 @@ function update() {
         if (twoPlayerMode) player2Appearance = randomAppearance();
         SFX.menuToggle();
       }
+      if (justPressed['KeyT']) {
+        SFX.menuStart();
+        initTrainingLevel();
+        for (const key in justPressed) delete justPressed[key];
+        return;
+      }
       if (justPressed['KeyD']) {
         const idx = DIFFICULTY_ORDER.indexOf(difficulty);
         difficulty = DIFFICULTY_ORDER[(idx + 1) % DIFFICULTY_ORDER.length];
@@ -4975,6 +5391,23 @@ function update() {
   }
 
   levelTimer++;
+
+  // Training task progress
+  if (trainingMode && !trainingCompleted && trainingTasks.length > 0) {
+    if (trainingTaskIndex < trainingTasks.length) {
+      const task = trainingTasks[trainingTaskIndex];
+      if (!task.done && task.check()) {
+        task.done = true;
+        spawnFloatingText(player.x, player.y - 20, 'Task Complete!', '#66bb6a');
+        SFX.collectPub();
+        trainingTaskIndex++;
+        if (trainingTaskIndex >= trainingTasks.length) {
+          trainingCompleted = true;
+          showMessage('Training complete! You\'re ready for academia!');
+        }
+      }
+    }
+  }
 
   // --- Helper: update one player ---
   function updatePlayer(pl, prefix) {
@@ -5424,6 +5857,61 @@ function update() {
       }
     }
 
+    // Predatory Journal — Piranha Plant behavior
+    if (e.type === 'predatory_journal' && e.alive) {
+      e.pipeTimer++;
+      const cycleDuration = 240; // full cycle
+      const riseTime = 40;
+      const exposeTime = 120;
+      const sinkTime = 40;
+      const phase = e.pipeTimer % cycleDuration;
+
+      if (phase < riseTime) {
+        // Rising out of pipe
+        e.pipeState = 'rising';
+        const progress = phase / riseTime;
+        e.y = e.basePipeY - e.h * progress;
+      } else if (phase < riseTime + exposeTime) {
+        // Fully exposed - dangerous
+        e.pipeState = 'exposed';
+        e.y = e.basePipeY - e.h;
+
+        // Shooter variant fires spam emails
+        if (e.variant === 'shooter') {
+          e.shootTimer++;
+          if (e.shootTimer > 80) {
+            e.shootTimer = 0;
+            const closestP = [player, player2].filter(p => p && !p.dead).sort((a,b) => Math.abs(a.x - e.x) - Math.abs(b.x - e.x))[0];
+            if (closestP && Math.abs(closestP.x - e.x) < TILE * 10) {
+              const dir = closestP.x < e.x ? -1 : 1;
+              const dx = closestP.x - e.x;
+              const dy = closestP.y - e.y;
+              const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+              enemies.push({
+                type: 'spam_email', x: e.x + e.w / 2, y: e.y + 5,
+                w: 14, h: 10, vx: (dx / dist) * 3, vy: (dy / dist) * 3 - 1,
+                startX: e.x, patrolRange: 300, alive: true,
+                frame: 0, frameTimer: 0, isProjectile: true
+              });
+              spawnFloatingText(e.x, e.y - 10, 'SPAM!', '#ff6f00');
+            }
+          }
+        }
+      } else if (phase < riseTime + exposeTime + sinkTime) {
+        // Sinking back down
+        e.pipeState = 'sinking';
+        const progress = (phase - riseTime - exposeTime) / sinkTime;
+        e.y = e.basePipeY - e.h * (1 - progress);
+      } else {
+        // Hidden
+        e.pipeState = 'hidden';
+        e.y = e.basePipeY;
+      }
+
+      // Don't patrol - stay in place
+      e.vx = 0;
+    }
+
     if (e.isProjectile) {
       e.vy = (e.vy || 0) + 0.15;
       e.y += e.vy;
@@ -5433,6 +5921,8 @@ function update() {
     // Check collision with both players
     for (const pl of [player, player2]) {
       if (!pl || pl.dead || pl.invincible) continue;
+      // Predatory journal only collides when exposed
+      if (e.type === 'predatory_journal' && e.pipeState !== 'exposed' && e.pipeState !== 'rising') continue;
       if (!rectCollide(pl, e)) continue;
       const plSt2 = twoPlayerMode ? statsFor(pl) : stats;
       if (pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
@@ -5478,6 +5968,7 @@ function update() {
             'imposter': 'Imposter syndrome banished!',
             'teaching': 'Teaching load lightened!',
             'committee': 'Committee meeting cancelled!',
+            'predatory_journal': 'Predatory journal squashed! Impact factor: 0!',
           };
           spawnFloatingText(e.x, e.y, '+200', '#ffd54f');
           if (defeatMsgs[e.type]) showMessage(defeatMsgs[e.type]);
@@ -5661,7 +6152,10 @@ function update() {
         (twoPlayerMode ? statsFor(pl) : stats).score += 1000;
         spawnParticles(flagObj.x + 16, flagObj.y + 16, '#ffd54f', 30);
         SFX.levelComplete();
-        if (currentLevel === 2) {
+        if (trainingMode) {
+          trainingCompleted = true;
+          showMessage('Training complete! Press ESC to return to menu.');
+        } else if (currentLevel === 2) {
           gameState = 'jobMarketCheck';
           checkJobMarket();
         } else {
@@ -5711,6 +6205,23 @@ function update() {
 }
 
 function playerDie(msg) {
+  if (trainingMode) {
+    // In training mode, just respawn immediately
+    showMessage('Oops! Try again! (No penalty in training)');
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 10);
+    SFX.die();
+    player.x = 2 * TILE;
+    player.y = (level.height - 4) * TILE;
+    player.vx = 0;
+    player.vy = 0;
+    player.onGround = false;
+    player.invincible = true;
+    player.invTimer = 60;
+    player.powered = false;
+    player.mentoring = null;
+    player.headbutting = false;
+    return;
+  }
   player.dead = true;
   const st = twoPlayerMode ? p1Stats : stats;
   st.lives--;
@@ -5765,7 +6276,9 @@ function getDeathMessage(enemyType) {
     'committee': 'Endless meetings consumed your soul!',
     'dean': 'The Dean denied your tenure case!',
     'rejection': 'Hit by a rejection letter!',
-    'rival': 'Scooped by a rival researcher!'
+    'rival': 'Scooped by a rival researcher!',
+    'predatory_journal': 'Eaten by a predatory journal! Your h-index plummets!',
+    'spam_email': 'Hit by a spam call for papers!'
   };
   return msgs[enemyType] || 'Academic career interrupted!';
 }
@@ -6050,6 +6563,11 @@ function draw() {
   // HUD
   drawHUD();
 
+  // Training tasks overlay
+  if (trainingMode && trainingTasks.length > 0) {
+    drawTrainingTasks();
+  }
+
   // Overlays
   if (gameState === 'paused') drawPauseScreen();
   if (gameState === 'levelIntro') drawLevelIntro();
@@ -6222,7 +6740,7 @@ function drawMenu() {
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 11px monospace';
     if (!isTouchDevice) {
-      ctx.fillText('C: Customize | K: Key Config | 2: Two Players | D: Difficulty | M: Music', GAME_W / 2, 346);
+      ctx.fillText('C: Customize | K: Keys | 2: Two Players | D: Difficulty | T: Training', GAME_W / 2, 346);
     }
 
     // Two-player status and difficulty
@@ -6327,7 +6845,7 @@ function drawMenu() {
   ctx.fillStyle = '#78909c';
   ctx.fillText('Collect: Pubs | Grants | Citations | Coffee', legendX, 430);
   ctx.fillStyle = '#ef5350';
-  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Imposter Syndrome', legendX, 446);
+  ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Predatory Journals', legendX, 446);
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#37474f';
