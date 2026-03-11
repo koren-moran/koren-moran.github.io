@@ -5041,7 +5041,7 @@ const JOB_MARKET_THRESHOLDS = {
 };
 
 // Leaderboard API
-const LEADERBOARD_URL = 'https://tenure-track-leaderboard.onrender.com/api/leaderboard';
+const LEADERBOARD_URL = 'https://tenure-track-leaderboard-production.up.railway.app/api/leaderboard';
 let leaderboardData = [];
 let leaderboardRank = null;
 let playerName = '';
@@ -6755,6 +6755,35 @@ function update() {
       if (e.type === 'predatory_journal' && e.pipeState !== 'exposed' && e.pipeState !== 'rising') continue;
       if (!rectCollide(pl, e)) continue;
       const plSt2 = twoPlayerMode ? statsFor(pl) : stats;
+      // Predatory journals can't be stomped — only fire kills them
+      if (e.type === 'predatory_journal' && pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2) {
+        // Treat it like taking a hit (can't stop on them)
+        pl.vy = -6;
+        if (pl.mentoring && !pl.headbutting) {
+          const gs = pl.mentoring;
+          pl.mentoring = null; gs.mentee = null;
+          pl.headbutting = false;
+          pl.invincible = true; pl.invTimer = 60;
+          gs.spent = true; gs.panicked = true; gs.panicTimer = 180;
+          gs.vx = (gs.x < e.x ? -4 : 4); gs.vy = -5;
+          spawnParticles(gs.x + gs.w / 2, gs.y + gs.h / 2, '#ffeb3b', 10);
+          spawnFloatingText(gs.x, gs.y - 10, 'AAAH!', '#ef5350');
+          showMessage('Grad student escaped in panic!');
+        } else if (pl.mentoring && pl.headbutting) {
+          continue;
+        } else if (pl.powered) {
+          pl.powered = false;
+          pl.invincible = true; pl.invTimer = 90;
+          showMessage('Lost your coffee buzz! Predatory journals can only be burned!');
+          SFX.lostCoffee();
+        } else if (sacrificePet(pl)) {
+          // pet absorbed the hit
+        } else {
+          if (pl === player) playerDie('Eaten by a predatory journal! Only fire can destroy them!');
+          else { p2Die('P2: Eaten by a predatory journal! Only fire can destroy them!'); }
+        }
+        continue;
+      }
       if (pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
         pl.vy = -8;
         SFX.stomp();
