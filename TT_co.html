@@ -7578,7 +7578,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V5.4', GAME_W / 2, 188);
+  ctx.fillText('V5.6', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
@@ -7743,7 +7743,7 @@ function drawMenu() {
   ctx.fillText('Avoid: Reviewer 2 | Bureaucrats | Predatory Journals', 20, bottomY + 14);
 
   if (leaderboardData.length > 0) {
-    drawMiniLeaderboard(420, bottomY - 10, 3);
+    drawMiniLeaderboard(340, bottomY - 10, 3);
   } else {
     ctx.fillStyle = '#42a5f5';
     ctx.font = '10px monospace';
@@ -8194,7 +8194,7 @@ function drawDeathScreen() {
     }
 
     // Leaderboard
-    drawMiniLeaderboard(GAME_W / 2 - 180, 150, 10);
+    drawMiniLeaderboard(GAME_W / 2 - 220, 150, 10);
 
     const blink = Math.sin(Date.now() * 0.005) > 0;
     if (blink) {
@@ -8369,13 +8369,13 @@ function drawWinScreen() {
 
   // Right column: leaderboard
   if (leaderboardData.length > 0) {
-    drawMiniLeaderboard(GAME_W / 2 + 20, 155, 8);
+    drawMiniLeaderboard(GAME_W / 2 - 60, 155, 8);
   }
   if (leaderboardRank) {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffd54f';
     ctx.font = 'bold 14px monospace';
-    ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W * 3 / 4, 340);
+    ctx.fillText(`Your Rank: #${leaderboardRank}`, GAME_W / 2 + 150, 340);
   }
 
   // Bottom prompt
@@ -8422,6 +8422,12 @@ async function fetchRank(score) {
   }
 }
 
+function getAcademicRank() {
+  const SHORT_RANKS = ['Mr/Ms./Mrs', 'Dr.', 'Dr.', 'Ast.Prof', 'Asc.Prof', 'Asc.Prof'];
+  if (gameState === 'gameWin') return 'Full Prof.!';
+  return SHORT_RANKS[currentLevel] || 'Mr/Mrs';
+}
+
 async function submitScore() {
   try {
     const st = twoPlayerMode ? combinedStats() : stats;
@@ -8435,6 +8441,8 @@ async function submitScore() {
         grants: st.grants,
         citations: st.citations,
         hIndex: st.hIndex,
+        mentored: st.mentored,
+        level: getAcademicRank(),
       }),
     });
     const data = await res.json();
@@ -8645,21 +8653,23 @@ function drawLeaderboardOverlay() {
   } else {
     // Header
     ctx.fillStyle = '#b0bec5';
-    ctx.font = 'bold 9px monospace';
+    ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('#', 100, 70);
-    ctx.fillText('NAME', 130, 70);
-    ctx.fillText('SCORE', 320, 70);
-    ctx.fillText('PUBS', 410, 70);
-    ctx.fillText('GRANTS', 470, 70);
-    ctx.fillText('h-idx', 540, 70);
-    ctx.fillText('CITES', 600, 70);
+    ctx.fillText('#', 30, 70);
+    ctx.fillText('NAME', 52, 70);
+    ctx.fillText('RANK REACHED', 175, 70);
+    ctx.fillText('SCORE', 340, 70);
+    ctx.fillText('PUBS', 400, 70);
+    ctx.fillText('GRANTS', 450, 70);
+    ctx.fillText('h', 510, 70);
+    ctx.fillText('CITES', 535, 70);
+    ctx.fillText('STUD', 590, 70);
 
     ctx.strokeStyle = 'rgba(255,255,255,0.1)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(90, 75);
-    ctx.lineTo(670, 75);
+    ctx.moveTo(25, 75);
+    ctx.lineTo(630, 75);
     ctx.stroke();
 
     const maxShow = Math.min(leaderboardData.length, 15);
@@ -8670,24 +8680,29 @@ function drawLeaderboardOverlay() {
 
       if (isMe) {
         ctx.fillStyle = 'rgba(255,213,79,0.15)';
-        ctx.fillRect(85, y - 12, 590, 20);
+        ctx.fillRect(25, y - 12, 610, 20);
       }
 
       ctx.fillStyle = i < 3 ? '#ffd54f' : '#b0bec5';
-      ctx.font = i < 3 ? 'bold 10px monospace' : '10px monospace';
-      ctx.fillText(`${e.rank || i + 1}`, 100, y);
+      ctx.font = i < 3 ? 'bold 9px monospace' : '9px monospace';
+      ctx.fillText(`${e.rank || i + 1}`, 30, y);
       ctx.fillStyle = isMe ? '#ffd54f' : '#fff';
-      ctx.fillText(e.name, 130, y);
+      ctx.fillText(e.name, 52, y);
+      ctx.fillStyle = '#ce93d8';
+      const lvl = e.level || '-';
+      ctx.fillText(lvl, 175, y);
       ctx.fillStyle = '#ffa726';
-      ctx.fillText(`${e.score}`, 320, y);
+      ctx.fillText(`${e.score}`, 340, y);
       ctx.fillStyle = '#fff';
-      ctx.fillText(`${e.publications}`, 410, y);
+      ctx.fillText(`${e.publications}`, 400, y);
       ctx.fillStyle = '#66bb6a';
-      ctx.fillText(`${e.grants}`, 470, y);
+      ctx.fillText(`${e.grants}`, 450, y);
       ctx.fillStyle = '#ffd54f';
-      ctx.fillText(`${e.hIndex}`, 540, y);
+      ctx.fillText(`${e.hIndex}`, 510, y);
       ctx.fillStyle = '#4fc3f7';
-      ctx.fillText(`${e.citations}`, 600, y);
+      ctx.fillText(`${e.citations}`, 535, y);
+      ctx.fillStyle = '#ef9a9a';
+      ctx.fillText(`${e.mentored || 0}`, 590, y);
     }
   }
 
@@ -8703,7 +8718,7 @@ function drawLeaderboardOverlay() {
 
 // Draw a compact leaderboard table at a given position
 function drawMiniLeaderboard(startX, startY, maxRows) {
-  const lbW = 360;
+  const lbW = 420;
   // Panel background
   ctx.fillStyle = 'rgba(10,10,30,0.7)';
   drawRoundRect(startX - 10, startY - 18, lbW + 20, maxRows * 16 + 34, 6);
@@ -8734,10 +8749,12 @@ function drawMiniLeaderboard(startX, startY, maxRows) {
   ctx.font = '8px monospace';
   ctx.fillText('#', startX, startY + 12);
   ctx.fillText('NAME', startX + 20, startY + 12);
-  ctx.fillText('SCORE', startX + 150, startY + 12);
-  ctx.fillText('PUBS', startX + 210, startY + 12);
-  ctx.fillText('h', startX + 255, startY + 12);
-  ctx.fillText('GRANTS', startX + 280, startY + 12);
+  ctx.fillText('SCORE', startX + 120, startY + 12);
+  ctx.fillText('RANK', startX + 175, startY + 12);
+  ctx.fillText('PUBS', startX + 285, startY + 12);
+  ctx.fillText('h', startX + 325, startY + 12);
+  ctx.fillText('G', startX + 345, startY + 12);
+  ctx.fillText('S', startX + 370, startY + 12);
 
   const rows = Math.min(leaderboardData.length, maxRows);
   for (let i = 0; i < rows; i++) {
@@ -8754,15 +8771,20 @@ function drawMiniLeaderboard(startX, startY, maxRows) {
     ctx.fillStyle = i < 3 ? '#ffd54f' : '#b0bec5';
     ctx.fillText(`${e.rank || i + 1}`, startX, rowY);
     ctx.fillStyle = isMe ? '#ffd54f' : '#fff';
-    ctx.fillText(e.name.slice(0, 12), startX + 20, rowY);
+    ctx.fillText(e.name.slice(0, 10), startX + 20, rowY);
     ctx.fillStyle = '#ffa726';
-    ctx.fillText(`${e.score}`, startX + 150, rowY);
+    ctx.fillText(`${e.score}`, startX + 120, rowY);
+    ctx.fillStyle = '#ce93d8';
+    const lvl = e.level || '-';
+    ctx.fillText(lvl.slice(0, 14), startX + 175, rowY);
     ctx.fillStyle = '#fff';
-    ctx.fillText(`${e.publications}`, startX + 210, rowY);
+    ctx.fillText(`${e.publications}`, startX + 285, rowY);
     ctx.fillStyle = '#ffd54f';
-    ctx.fillText(`${e.hIndex}`, startX + 255, rowY);
+    ctx.fillText(`${e.hIndex}`, startX + 325, rowY);
     ctx.fillStyle = '#66bb6a';
-    ctx.fillText(`${e.grants}`, startX + 280, rowY);
+    ctx.fillText(`${e.grants}`, startX + 345, rowY);
+    ctx.fillStyle = '#ef9a9a';
+    ctx.fillText(`${e.mentored || 0}`, startX + 370, rowY);
   }
 }
 
