@@ -5886,6 +5886,10 @@ function update() {
       gameState = 'playing';
     }
     if (justPressed['KeyX']) {
+      if (!trainingMode) {
+        submitScore();
+        fetchLeaderboard();
+      }
       gameState = 'menu';
       trainingMode = false;
     }
@@ -6540,10 +6544,12 @@ function update() {
           }
         }
       }
-      // Check collection by player
+      // Check collection by player (also check grad student collision when riding)
       for (const pl of [player, player2]) {
         if (!pl || pl.dead) continue;
-        if (rectCollide(pl, pet)) {
+        const plCollides = rectCollide(pl, pet);
+        const gsCollides = pl.mentoring && rectCollide(pl.mentoring, pet);
+        if (plCollides || gsCollides) {
           pet.collected = true;
           pet.owner = pl;
           // Fill trail with current player position
@@ -6969,6 +6975,8 @@ function update() {
     const fbSt = twoPlayerMode && fb.owner ? statsFor(fb.owner) : stats;
     for (const e of enemies) {
       if (!e.alive) continue;
+      // Predatory journals can't be hit when hidden in their box
+      if (e.type === 'predatory_journal' && e.pipeState !== 'exposed' && e.pipeState !== 'rising') continue;
       if (rectCollide(fb, e)) {
         fb.life = 0;
         spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#ff5722', 12);
@@ -7570,7 +7578,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V5.2', GAME_W / 2, 188);
+  ctx.fillText('V5.4', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
