@@ -291,7 +291,7 @@ function updateMusic() {
     targetKey = totalLives > 0 ? 'level' + currentLevel : 'dead';
   } else if (gameState === 'gameWin') {
     targetKey = 'win';
-  } else if (gameState === 'playing' || gameState === 'levelIntro' || gameState === 'paused' || gameState === 'levelComplete' || gameState === 'jobMarketCheck') {
+  } else if (gameState === 'playing' || gameState === 'levelIntro' || gameState === 'paused' || gameState === 'levelComplete' || gameState === 'phdComplete' || gameState === 'jobMarketCheck') {
     // Check for boss fight (dean alive on level 5)
     let bossAlive = false;
     if (currentLevel === 5 && enemies) {
@@ -440,6 +440,13 @@ function getTouchLayout() {
   if (gameState === 'dead') {
     return [
       { id: 'Space', label: 'CONTINUE', x: GAME_W / 2 - 55, y: GAME_H - btnH - pad, w: 110, h: btnH, color: '#ffd54f' },
+    ];
+  }
+
+  if (gameState === 'phdComplete') {
+    return [
+      { id: 'Digit1', label: '1: POSTDOC', x: GAME_W / 2 - 130, y: GAME_H - btnH - pad, w: 120, h: btnH, color: '#66bb6a' },
+      { id: 'Digit2', label: '2: STAY', x: GAME_W / 2 + 10, y: GAME_H - btnH - pad, w: 120, h: btnH, color: '#42a5f5' },
     ];
   }
 
@@ -5032,68 +5039,88 @@ function drawHUD() {
   ctx.fillText(`Time: ${Math.floor(levelTimer / 60)}s`, GAME_W - 14, 34);
   ctx.textAlign = 'left';
 
-  // Funding countdown timer (Postdoc & Job Market) — upper right below HUD bar
-  if ((currentLevel === 1 || currentLevel === 2) && postdocTimeLimit > 0) {
-    const remaining = Math.max(0, postdocTimeLimit - levelTimer);
-    const secs = Math.ceil(remaining / 60);
-    const mins = Math.floor(secs / 60);
-    const secPart = secs % 60;
-    const timeStr = mins > 0 ? `${mins}:${String(secPart).padStart(2, '0')}` : `${secs}s`;
-    const pct = remaining / postdocTimeLimit;
-    const timerColor = pct < 0.25 ? '#ef5350' : pct < 0.5 ? '#ffa726' : '#66bb6a';
-
+  // Funding display (Postdoc & Job Market) — upper right below HUD bar
+  if (currentLevel === 1 || currentLevel === 2) {
     const timerY = hudH + 14;
     const timerRightX = GAME_W - 10;
 
-    // Background pill
-    ctx.fillStyle = 'rgba(15,12,30,0.75)';
-    drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
-    ctx.fill();
-    ctx.strokeStyle = `${timerColor}44`;
-    ctx.lineWidth = 1;
-    drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
-    ctx.stroke();
-
-    // Clock icon
-    const clockX = timerRightX - 94;
-    const clockY = timerY;
-    const clockR = 7;
-    ctx.strokeStyle = timerColor;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(clockX, clockY, clockR, 0, Math.PI * 2);
-    ctx.stroke();
-    // Hour hand
-    ctx.beginPath();
-    ctx.moveTo(clockX, clockY);
-    ctx.lineTo(clockX, clockY - clockR * 0.6);
-    ctx.stroke();
-    // Minute hand (animated)
-    const handAngle = -Math.PI / 2 + (1 - pct) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(clockX, clockY);
-    ctx.lineTo(clockX + Math.cos(handAngle) * clockR * 0.5, clockY + Math.sin(handAngle) * clockR * 0.5);
-    ctx.stroke();
-
-    // Pulse effect when low
-    if (pct < 0.25) {
-      ctx.globalAlpha = 0.3 + Math.sin(levelTimer * 0.15) * 0.3;
-      ctx.fillStyle = '#ef5350';
-      ctx.beginPath();
-      ctx.arc(clockX, clockY, clockR + 2, 0, Math.PI * 2);
+    if (isPhDStar) {
+      // Star player: show "★ FUNDED" in gold
+      ctx.fillStyle = 'rgba(15,12,30,0.75)';
+      drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
       ctx.fill();
-      ctx.globalAlpha = 1;
-    }
+      ctx.strokeStyle = 'rgba(255,213,79,0.3)';
+      ctx.lineWidth = 1;
+      drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
+      ctx.stroke();
 
-    // Label + time
-    ctx.font = 'bold 9px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#b0bec5';
-    ctx.fillText('FUNDING', clockX + 12, timerY - 2);
-    ctx.font = 'bold 12px monospace';
-    ctx.fillStyle = timerColor;
-    ctx.fillText(timeStr, clockX + 12, timerY + 10);
-    ctx.textAlign = 'left';
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd54f';
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 6;
+      ctx.fillText('\u2605 FUNDED', timerRightX - 53, timerY + 4);
+      ctx.shadowBlur = 0;
+      ctx.textAlign = 'left';
+    } else if (postdocTimeLimit > 0) {
+      const remaining = Math.max(0, postdocTimeLimit - levelTimer);
+      const secs = Math.ceil(remaining / 60);
+      const mins = Math.floor(secs / 60);
+      const secPart = secs % 60;
+      const timeStr = mins > 0 ? `${mins}:${String(secPart).padStart(2, '0')}` : `${secs}s`;
+      const pct = remaining / postdocTimeLimit;
+      const timerColor = pct < 0.25 ? '#ef5350' : pct < 0.5 ? '#ffa726' : '#66bb6a';
+
+      // Background pill
+      ctx.fillStyle = 'rgba(15,12,30,0.75)';
+      drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
+      ctx.fill();
+      ctx.strokeStyle = `${timerColor}44`;
+      ctx.lineWidth = 1;
+      drawRoundRect(timerRightX - 110, timerY - 12, 114, 22, 8);
+      ctx.stroke();
+
+      // Clock icon
+      const clockX = timerRightX - 94;
+      const clockY = timerY;
+      const clockR = 7;
+      ctx.strokeStyle = timerColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(clockX, clockY, clockR, 0, Math.PI * 2);
+      ctx.stroke();
+      // Hour hand
+      ctx.beginPath();
+      ctx.moveTo(clockX, clockY);
+      ctx.lineTo(clockX, clockY - clockR * 0.6);
+      ctx.stroke();
+      // Minute hand (animated)
+      const handAngle = -Math.PI / 2 + (1 - pct) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(clockX, clockY);
+      ctx.lineTo(clockX + Math.cos(handAngle) * clockR * 0.5, clockY + Math.sin(handAngle) * clockR * 0.5);
+      ctx.stroke();
+
+      // Pulse effect when low
+      if (pct < 0.25) {
+        ctx.globalAlpha = 0.3 + Math.sin(levelTimer * 0.15) * 0.3;
+        ctx.fillStyle = '#ef5350';
+        ctx.beginPath();
+        ctx.arc(clockX, clockY, clockR + 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Label + time
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#b0bec5';
+      ctx.fillText('FUNDING', clockX + 12, timerY - 2);
+      ctx.font = 'bold 12px monospace';
+      ctx.fillStyle = timerColor;
+      ctx.fillText(timeStr, clockX + 12, timerY + 10);
+      ctx.textAlign = 'left';
+    }
   }
 }
 
@@ -6070,8 +6097,48 @@ function update() {
           } else {
             stats.grants -= 3;
             initLevel(1); // back to Postdoc
+            if (isPhDStar) {
+              showMessage('\u2605 PhD Star! Your postdoc is fully funded!');
+            } else {
+              const fundingSecs = Math.ceil(postdocTimeLimit / 60);
+              showMessage(`Funding: ${fundingSecs}s on the clock. Collect grants for more time!`);
+            }
           }
         }
+      }
+    }
+    for (const key in justPressed) delete justPressed[key];
+    return;
+  }
+
+  if (gameState === 'phdComplete') {
+    if (winTimer > 0) winTimer--;
+    if (winTimer <= 0) {
+      // 1 = move on to postdoc, 2 = stay for another year
+      if (justPressed['Digit1'] || justPressed['Numpad1']) {
+        // Move on to postdoc
+        const st = twoPlayerMode ? combinedStats() : stats;
+        if (st.grants < 3) {
+          gameState = 'dead';
+          deathTimer = 0;
+          stats.lives = 0;
+          showMessage('Not enough funding for postdoc! (Need 3 grants)');
+          submitScore();
+          fetchLeaderboard();
+        } else {
+          stats.grants -= 3;
+          initLevel(1);
+          if (isPhDStar) {
+            showMessage('\u2605 PhD Star! Your funding is secured \u2014 no time limit!');
+          } else {
+            const fundingSecs = Math.ceil(postdocTimeLimit / 60);
+            showMessage(`Funding: ${fundingSecs}s on the clock. Collect grants for more time!`);
+          }
+        }
+      } else if (justPressed['Digit2'] || justPressed['Numpad2']) {
+        // Stay for another year — replay PhD
+        showMessage('Staying for another year! Keep publishing!');
+        initLevel(0);
       }
     }
     for (const key in justPressed) delete justPressed[key];
@@ -6099,6 +6166,15 @@ function update() {
           stats.grants -= 3;
         }
         initLevel(nextLevel);
+        // Inform player about funding status on postdoc/JM entry
+        if (nextLevel === 1 || nextLevel === 2) {
+          if (isPhDStar) {
+            showMessage('\u2605 PhD Star! Your funding is secured — no time limit!');
+          } else {
+            const fundingSecs = Math.ceil(postdocTimeLimit / 60);
+            showMessage(`Funding: ${fundingSecs}s on the clock. Collect grants for more time!`);
+          }
+        }
       } else {
         gameState = 'gameWin';
         winTimer = 600;
@@ -6616,8 +6692,8 @@ function update() {
         SFX.collectGrant();
         // Extend funding timer during Postdoc/JM
         if ((currentLevel === 1 || currentLevel === 2) && postdocTimeLimit > 0) {
-          postdocTimeLimit += 30 * 60; // +30 seconds per grant
-          spawnFloatingText(c.x, cy - 16, '+30s funding!', '#66bb6a');
+          postdocTimeLimit += 20 * 60; // +20 seconds per grant
+          spawnFloatingText(c.x, cy - 16, '+20s funding!', '#66bb6a');
         }
         break;
       case 'citation':
@@ -7206,18 +7282,19 @@ function update() {
         } else if (currentLevel === 2) {
           gameState = 'jobMarketCheck';
           checkJobMarket();
-        } else {
-          // Check PhD star status when completing PhD
-          if (currentLevel === 0) {
-            const st = twoPlayerMode ? combinedStats() : stats;
-            if (st.publications >= 5 || st.mentored >= 2) {
-              isPhDStar = true;
-              showMessage('★ PhD STAR! Your postdoc is fully funded! ★');
-            }
+        } else if (currentLevel === 0) {
+          // PhD complete — offer choice to stay or move on
+          const st = twoPlayerMode ? combinedStats() : stats;
+          if (st.publications >= 10 && st.mentored >= 2) {
+            isPhDStar = true;
+            showMessage('\u2605 PhD STAR! Your postdoc is fully funded! \u2605');
           }
+          gameState = 'phdComplete';
+          winTimer = 60; // brief delay before accepting input
+        } else {
           gameState = 'levelComplete'; winTimer = 180;
           const completeMsgs = [
-            'PhD complete! Securing postdoc funding...',
+            '',
             'Postdoc complete! Time for the job market!',
             '',
             'Third-year review passed! Keep going!',
@@ -7519,73 +7596,32 @@ function draw() {
     const sx = player.x - camera.x;
     const sy = player.y - camera.y;
 
-    // PhD Star: Broadway spotlight (drawn behind player)
-    if (isPhDStar && (currentLevel === 1 || currentLevel === 2)) {
-      const centerX = sx + player.w / 2;
-      const spotY = sy + player.h;
-      // Cone of light from above
-      ctx.save();
-      ctx.globalAlpha = 0.18 + Math.sin(levelTimer * 0.03) * 0.05;
-      ctx.beginPath();
-      ctx.moveTo(centerX - 8, sy - 40);
-      ctx.lineTo(centerX + 8, sy - 40);
-      ctx.lineTo(centerX + 50, spotY + 10);
-      ctx.lineTo(centerX - 50, spotY + 10);
-      ctx.closePath();
-      const spotGrad = ctx.createLinearGradient(centerX, sy - 40, centerX, spotY + 10);
-      spotGrad.addColorStop(0, 'rgba(255,255,200,0.9)');
-      spotGrad.addColorStop(0.5, 'rgba(255,245,150,0.5)');
-      spotGrad.addColorStop(1, 'rgba(255,235,100,0.0)');
-      ctx.fillStyle = spotGrad;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      // Ground glow ellipse
-      ctx.globalAlpha = 0.15 + Math.sin(levelTimer * 0.05) * 0.05;
-      ctx.beginPath();
-      ctx.ellipse(centerX, spotY + 5, 40, 6, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,245,180,0.6)';
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    }
-
     if (player.invincible && Math.floor(player.invTimer / 3) % 2 === 0) {
       // blink
     } else {
       drawPlayer(sx, sy, player.w, player.h, player.frame, player.facingRight, player.powered, player.dead);
     }
 
-    // PhD Star: Gold star above head
+    // PhD Star: Rainbow arc floating above player's head
     if (isPhDStar && (currentLevel === 1 || currentLevel === 2)) {
-      const starX = sx + player.w / 2;
-      const bobOffset = Math.sin(levelTimer * 0.08) * 3;
-      const starY = sy - 14 + bobOffset;
-      const starSize = 7;
+      const centerX = sx + player.w / 2;
+      const bobOffset = Math.sin(levelTimer * 0.06) * 2;
+      const arcY = sy - 12 + bobOffset;
+      const arcW = 20;
+      const arcH = 12;
+      const rainbowColors = ['#ef5350','#ff9800','#ffeb3b','#66bb6a','#42a5f5','#7e57c2'];
       ctx.save();
-      // Glow
-      ctx.shadowColor = '#ffd54f';
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = '#ffd54f';
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) {
-        const angle = -Math.PI / 2 + (i * 2 * Math.PI / 5);
-        const innerAngle = angle + Math.PI / 5;
-        const ox = starX + Math.cos(angle) * starSize;
-        const oy = starY + Math.sin(angle) * starSize;
-        const ix = starX + Math.cos(innerAngle) * (starSize * 0.4);
-        const iy = starY + Math.sin(innerAngle) * (starSize * 0.4);
-        if (i === 0) ctx.moveTo(ox, oy);
-        else ctx.lineTo(ox, oy);
-        ctx.lineTo(ix, iy);
+      ctx.globalAlpha = 0.9;
+      for (let i = 0; i < rainbowColors.length; i++) {
+        const r = arcH - i * 1.5;
+        if (r <= 0) break;
+        ctx.strokeStyle = rainbowColors[i];
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.ellipse(centerX, arcY, arcW - i * 1.5, r, 0, Math.PI, 0);
+        ctx.stroke();
       }
-      ctx.closePath();
-      ctx.fill();
-      // Bright center
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,220,0.7)';
-      ctx.beginPath();
-      ctx.arc(starX, starY, 2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.restore();
     }
 
@@ -7594,7 +7630,7 @@ function draw() {
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('P1', sx + player.w / 2, sy - (isPhDStar && (currentLevel === 1 || currentLevel === 2) ? 24 : 12));
+      ctx.fillText('P1', sx + player.w / 2, sy - (isPhDStar && (currentLevel === 1 || currentLevel === 2) ? 26 : 12));
       ctx.textAlign = 'left';
     }
   }
@@ -7730,6 +7766,7 @@ function draw() {
   if (gameState === 'paused') drawPauseScreen();
   if (gameState === 'levelIntro') drawLevelIntro();
   if (gameState === 'dead') drawDeathScreen();
+  if (gameState === 'phdComplete') drawPhdComplete();
   if (gameState === 'levelComplete') drawLevelComplete();
   if (gameState === 'jobMarketCheck') drawJobMarketResult();
 
@@ -7835,7 +7872,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.0', GAME_W / 2, 188);
+  ctx.fillText('V6.3', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
@@ -8462,6 +8499,79 @@ function drawDeathScreen() {
     }
     ctx.textAlign = 'left';
   }
+}
+
+function drawPhdComplete() {
+  ctx.fillStyle = 'rgba(10,20,30,0.82)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  ctx.textAlign = 'center';
+
+  // Title
+  ctx.fillStyle = '#ffd54f';
+  ctx.font = 'bold 24px monospace';
+  ctx.fillText('PhD COMPLETE!', GAME_W / 2, 100);
+
+  // Stats summary
+  const st = twoPlayerMode ? combinedStats() : stats;
+  ctx.fillStyle = '#b0bec5';
+  ctx.font = '12px monospace';
+  ctx.fillText(`Pubs: ${st.publications}  |  Grants: ${st.grants}  |  Citations: ${st.citations}  |  h=${st.hIndex}  |  Students: ${st.mentored}`, GAME_W / 2, 140);
+
+  // Star status
+  if (isPhDStar) {
+    ctx.fillStyle = '#ffd54f';
+    ctx.font = 'bold 14px monospace';
+    ctx.shadowColor = '#ffd54f';
+    ctx.shadowBlur = 10;
+    ctx.fillText('\u2605 PhD STAR — Postdoc fully funded! \u2605', GAME_W / 2, 175);
+    ctx.shadowBlur = 0;
+  } else {
+    ctx.fillStyle = '#78909c';
+    ctx.font = '11px monospace';
+    ctx.fillText(`(PhD Star requires 10+ pubs AND 2+ students)`, GAME_W / 2, 175);
+  }
+
+  // Grant requirement info
+  ctx.fillStyle = st.grants >= 3 ? '#66bb6a' : '#ef5350';
+  ctx.font = '12px monospace';
+  const grantMsg = st.grants >= 3
+    ? `You have ${st.grants} grants (3 needed for postdoc entry) \u2714`
+    : `You have ${st.grants} grants (need 3 for postdoc — stay and collect more!)`;
+  ctx.fillText(grantMsg, GAME_W / 2, 210);
+
+  // Options
+  if (winTimer <= 0) {
+    const blink = Math.sin(Date.now() * 0.005) > 0;
+
+    ctx.fillStyle = st.grants >= 3 ? '#66bb6a' : '#546e7a';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('[1] Move on to Postdoc', GAME_W / 2, 270);
+    if (st.grants < 3) {
+      ctx.fillStyle = '#ef5350';
+      ctx.font = '10px monospace';
+      ctx.fillText('(not enough grants!)', GAME_W / 2, 288);
+    }
+
+    ctx.fillStyle = '#42a5f5';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('[2] Stay for Another Year', GAME_W / 2, 320);
+    ctx.fillStyle = '#78909c';
+    ctx.font = '10px monospace';
+    ctx.fillText('(replay PhD — keep all your stats)', GAME_W / 2, 338);
+
+    if (blink) {
+      ctx.fillStyle = '#ffd54f';
+      ctx.font = '11px monospace';
+      ctx.fillText('Press 1 or 2', GAME_W / 2, 380);
+    }
+  } else {
+    ctx.fillStyle = '#78909c';
+    ctx.font = '11px monospace';
+    ctx.fillText('...', GAME_W / 2, 280);
+  }
+
+  ctx.textAlign = 'left';
 }
 
 function drawLevelComplete() {
