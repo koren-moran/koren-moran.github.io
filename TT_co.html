@@ -4712,6 +4712,42 @@ function drawTrainingTasks() {
   }
 }
 
+function drawProgressBar() {
+  if (!level || !player) return;
+  const barH = 4;
+  const barY = GAME_H - barH;
+  const totalW = level.width * TILE;
+
+  // Dark background (unseen)
+  ctx.fillStyle = 'rgba(30,20,50,0.8)';
+  ctx.fillRect(0, barY, GAME_W, barH);
+
+  // Light area (seen/visited) — proportion of bar
+  const seenFrac = Math.min(visitedMaxX / totalW, 1);
+  ctx.fillStyle = 'rgba(180,170,220,0.5)';
+  ctx.fillRect(0, barY, GAME_W * seenFrac, barH);
+
+  // Current position dot
+  const posFrac = Math.min((player.x + player.w / 2) / totalW, 1);
+  const dotX = GAME_W * posFrac;
+  ctx.fillStyle = '#ffd54f';
+  ctx.beginPath();
+  ctx.arc(dotX, barY + barH / 2, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Postdoc countdown timer display
+  if (currentLevel === 1 && postdocTimeLimit > 0) {
+    const remaining = Math.max(0, postdocTimeLimit - levelTimer);
+    const secs = Math.ceil(remaining / 60);
+    const pct = remaining / postdocTimeLimit;
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = pct < 0.25 ? '#ef5350' : pct < 0.5 ? '#ffa726' : '#66bb6a';
+    ctx.fillText(`Funding: ${secs}s`, GAME_W - 8, barY - 4);
+    ctx.textAlign = 'left';
+  }
+}
+
 function drawHUD() {
   const hudH = twoPlayerMode ? 62 : 40;
   // HUD background with glass effect
@@ -5049,6 +5085,9 @@ let nameInputActive = false;
 let jobMarketPassed = null; // null = not checked, true/false = result
 let jobMarketFailReason = '';
 let postdocCount = 0; // how many times sent back to postdoc
+let visitedMaxX = 0; // furthest x pixel visited (for progress bar)
+let postdocTimeLimit = 0; // frames allowed to finish postdoc (0 = no limit)
+let goneToIndustry = false; // true if postdoc time ran out
 
 // ============================================================
 // LEVEL GENERATION
@@ -5115,8 +5154,8 @@ function generateLevel(levelIdx) {
     if (Math.random() < 0.7) {
       const collectTypes = ['publication', 'grant', 'citation', 'coffee', 'heart', 'flame', 'potion'];
       //                                  pub   grant  cite  coffee heart flame potion
-      const weights = levelIdx === 0 ? [0.25, 0.12, 0.42, 0.08, 0.02, 0.065, 0.015] :
-                      levelIdx === 1 ? [0.20, 0.19, 0.34, 0.10, 0.03, 0.09, 0.02] :
+      const weights = levelIdx === 0 ? [0.22, 0.22, 0.35, 0.08, 0.02, 0.065, 0.015] :
+                      levelIdx === 1 ? [0.18, 0.28, 0.27, 0.10, 0.03, 0.09, 0.02] :
                       [0.18, 0.27, 0.23, 0.10, 0.03, 0.12, 0.04];
       let r = Math.random(), cumul = 0, cType = 'publication';
       for (let ci = 0; ci < collectTypes.length; ci++) {
@@ -5584,6 +5623,16 @@ function initLevel(idx) {
   flagObj = null;
   messageQueue = [];
   currentMessage = null;
+  visitedMaxX = 0;
+  goneToIndustry = false;
+
+  // Postdoc time limit: based on grants at entry (each grant = 10 seconds of funding)
+  if (idx === 1) {
+    const st = twoPlayerMode ? combinedStats() : stats;
+    postdocTimeLimit = Math.max(st.grants * 10 * 60, 30 * 60); // min 30 sec
+  } else {
+    postdocTimeLimit = 0;
+  }
 
   initBackgroundDecor();
 
@@ -5945,7 +5994,19 @@ function update() {
           initLevel(3); // advance to Assistant Prof
         } else {
           jobMarketPassed = null;
-          initLevel(1); // back to Postdoc
+          // Postdoc re-entry gate: need 3 grants
+          const st = twoPlayerMode ? combinedStats() : stats;
+          if (st.grants < 3) {
+            gameState = 'dead';
+            deathTimer = 0;
+            stats.lives = 0;
+            showMessage('No funding for another postdoc! (Need 3 grants)');
+            submitScore();
+            fetchLeaderboard();
+          } else {
+            stats.grants -= 3;
+            initLevel(1); // back to Postdoc
+          }
         }
       }
     }
@@ -5957,7 +6018,23 @@ function update() {
     winTimer--;
     if (winTimer <= 0) {
       if (currentLevel < LEVELS.length - 1) {
-        initLevel(currentLevel + 1);
+        const nextLevel = currentLevel + 1;
+        // Postdoc entry gate: need 3 grants
+        if (nextLevel === 1) {
+          const st = twoPlayerMode ? combinedStats() : stats;
+          if (st.grants < 3) {
+            gameState = 'dead';
+            deathTimer = 0;
+            stats.lives = 0;
+            showMessage('Not enough funding for postdoc! (Need 3 grants)');
+            submitScore();
+            fetchLeaderboard();
+            for (const key in justPressed) delete justPressed[key];
+            return;
+          }
+          stats.grants -= 3;
+        }
+        initLevel(nextLevel);
       } else {
         gameState = 'gameWin';
         winTimer = 600;
@@ -6092,6 +6169,33 @@ function update() {
   }
 
   levelTimer++;
+
+  // Update progress bar tracking
+  if (player && !player.dead) {
+    visitedMaxX = Math.max(visitedMaxX, player.x + player.w);
+  }
+
+  // Postdoc time limit check
+  if (currentLevel === 1 && postdocTimeLimit > 0 && levelTimer >= postdocTimeLimit && !goneToIndustry) {
+    goneToIndustry = true;
+    const industryMsgs = [
+      'Your funding ran out! Time to pivot to data science.',
+      'Grant expired! LinkedIn profile updated to "Open to Work".',
+      'No more funding! At least industry has free snacks.',
+      'Postdoc funding depleted! Your recruiter is calling...',
+      'Out of funding! "So, have you considered consulting?"',
+      'Funding gone! Time to explain your PhD to recruiters.',
+    ];
+    player.dead = true;
+    stats.lives = 0;
+    gameState = 'dead';
+    deathTimer = 120;
+    showMessage(industryMsgs[Math.floor(Math.random() * industryMsgs.length)]);
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ef5350', 20);
+    SFX.die();
+    submitScore();
+    fetchLeaderboard();
+  }
 
   // Training task progress
   if (trainingMode && !trainingCompleted && trainingTasks.length > 0) {
@@ -7030,7 +7134,7 @@ function update() {
         } else {
           gameState = 'levelComplete'; winTimer = 180;
           const completeMsgs = [
-            'Qualifying exam passed! On to the postdoc!',
+            'PhD complete! Securing postdoc funding...',
             'Postdoc complete! Time for the job market!',
             '',
             'Third-year review passed! Keep going!',
@@ -7464,6 +7568,9 @@ function draw() {
   // HUD
   drawHUD();
 
+  // Progress bar at bottom of screen
+  if (gameState === 'playing') drawProgressBar();
+
   // Training tasks overlay
   if (trainingMode && trainingTasks.length > 0) {
     drawTrainingTasks();
@@ -7578,7 +7685,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V5.6', GAME_W / 2, 188);
+  ctx.fillText('V5.7', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
@@ -8794,6 +8901,9 @@ function startGame() {
   stats = p1Stats;
   postdocCount = 0;
   jobMarketPassed = null;
+  visitedMaxX = 0;
+  postdocTimeLimit = 0;
+  goneToIndustry = false;
   swappedControls = false;
   // playerAppearance is already set by customization or random default
 
