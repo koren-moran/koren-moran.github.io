@@ -2674,6 +2674,222 @@ function drawEnemy(e, x, y) {
       ctx.restore();
       break;
     }
+
+    case 'student_loans': {
+      // Manga-style bear trap — drawn at bottom of hitbox (ground level)
+      const tw = e.w;         // 36
+      const cx = x + tw / 2;  // center x
+      const gnd = y + e.h;    // ground line (bottom of hitbox)
+      const isOpen = e.trapState === 'open' || e.trapState === 'freezing';
+      const isSnapping = e.trapState === 'snapping';
+
+      ctx.save();
+      ctx.translate(0, -bob); // cancel bob — trap is stationary
+
+      // ── Manga speed-lines when snapping ──
+      if (isSnapping) {
+        ctx.strokeStyle = 'rgba(255,50,50,0.6)';
+        ctx.lineWidth = 1.2;
+        for (let sl = 0; sl < 8; sl++) {
+          const ang = -Math.PI / 2 + (sl - 3.5) * 0.22;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(ang) * 10, gnd - 10 + Math.sin(ang) * 10);
+          ctx.lineTo(cx + Math.cos(ang) * 26, gnd - 10 + Math.sin(ang) * 26);
+          ctx.stroke();
+        }
+      }
+
+      // ── Base plate — dark steel, flat on ground ──
+      ctx.fillStyle = '#3a3a3a';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x + 1, gnd);
+      ctx.lineTo(x + tw - 1, gnd);
+      ctx.lineTo(x + tw - 3, gnd - 6);
+      ctx.lineTo(x + 3, gnd - 6);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Steel highlight strip
+      ctx.fillStyle = '#5a5a5a';
+      ctx.fillRect(x + 5, gnd - 5, tw - 10, 1.5);
+      // Rivets
+      ctx.fillStyle = '#666';
+      drawCircle(x + 6, gnd - 3, 1.5); ctx.fill();
+      drawCircle(x + tw - 6, gnd - 3, 1.5); ctx.fill();
+
+      // ── Central hinge bolt ──
+      ctx.fillStyle = '#222';
+      drawCircle(cx, gnd - 6, 4); ctx.fill();
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = '#555';
+      drawCircle(cx, gnd - 6, 2.2); ctx.fill();
+
+      if (isOpen || isSnapping) {
+        const jawAng = isSnapping ? (Math.PI * 0.42 * Math.max(0, e.snapAnimTimer / 8)) : Math.PI * 0.42;
+
+        // Draw one jaw with teeth
+        const drawJaw = (side) => {
+          ctx.save();
+          ctx.translate(cx, gnd - 6);
+          ctx.rotate(side * jawAng);
+
+          const jawLen = tw / 2 - 1;
+
+          // Jaw arm — bold manga outline
+          ctx.fillStyle = '#7a7a7a';
+          ctx.strokeStyle = '#111';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(0, -2);
+          ctx.lineTo(side * jawLen, -4);
+          ctx.lineTo(side * jawLen, 2);
+          ctx.lineTo(0, 3);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+
+          // Steel sheen on arm
+          ctx.fillStyle = 'rgba(180,180,180,0.35)';
+          ctx.beginPath();
+          ctx.moveTo(side > 0 ? 2 : -jawLen + 1, -2);
+          ctx.lineTo(side > 0 ? jawLen - 1 : -1, -3);
+          ctx.lineTo(side > 0 ? jawLen - 1 : -1, -1);
+          ctx.lineTo(side > 0 ? 2 : -jawLen + 1, 0);
+          ctx.closePath();
+          ctx.fill();
+
+          // Teeth — manga fang style, curved, big
+          const teethCount = 5;
+          for (let t = 0; t < teethCount; t++) {
+            const tBase = side * (3 + t * (jawLen - 5) / (teethCount - 1));
+            const tH = 12 + t * 0.8;
+            const tW = 3.2;
+
+            // Tooth with bold outline
+            ctx.fillStyle = '#e8e8e8';
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(tBase - tW / 2, 0);
+            ctx.quadraticCurveTo(tBase - tW / 3, -tH * 0.5, tBase, -tH);
+            ctx.quadraticCurveTo(tBase + tW / 3, -tH * 0.5, tBase + tW / 2, 0);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Manga shine line on tooth
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(tBase + tW * 0.12, -1);
+            ctx.quadraticCurveTo(tBase + tW * 0.08, -tH * 0.45, tBase, -tH + 1.5);
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        };
+
+        drawJaw(-1);
+        drawJaw(1);
+
+      } else {
+        // ── CLOSED — jaws flat, teeth meshed ──
+        ctx.fillStyle = '#7a7a7a';
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 1.8;
+        // Left jaw bar
+        ctx.beginPath();
+        ctx.moveTo(x + 2, gnd - 10);
+        ctx.lineTo(cx, gnd - 10);
+        ctx.lineTo(cx, gnd - 6);
+        ctx.lineTo(x + 2, gnd - 6);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // Right jaw bar
+        ctx.beginPath();
+        ctx.moveTo(cx, gnd - 10);
+        ctx.lineTo(x + tw - 2, gnd - 10);
+        ctx.lineTo(x + tw - 2, gnd - 6);
+        ctx.lineTo(cx, gnd - 6);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Interlocking teeth
+        for (let t = 0; t < 7; t++) {
+          const tx = x + 4 + t * ((tw - 8) / 6);
+          const up = t % 2 === 0;
+          ctx.fillStyle = '#e0e0e0';
+          ctx.strokeStyle = '#111';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          if (up) {
+            ctx.moveTo(tx - 2, gnd - 10);
+            ctx.lineTo(tx, gnd - 16);
+            ctx.lineTo(tx + 2, gnd - 10);
+          } else {
+            ctx.moveTo(tx - 2, gnd - 6);
+            ctx.lineTo(tx, gnd);
+            ctx.lineTo(tx + 2, gnd - 6);
+          }
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
+
+        // Red flash on recent snap
+        if (e.snapTimer > 0) {
+          ctx.globalAlpha = 0.45 * (e.snapTimer / 40);
+          ctx.fillStyle = '#ff1744';
+          ctx.beginPath();
+          ctx.arc(cx, gnd - 8, tw / 2 + 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // ── Chain links trailing left ──
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 1.5;
+      for (let c = 0; c < 3; c++) {
+        ctx.beginPath();
+        ctx.ellipse(x - 2 - c * 5, gnd - 2, 3, 1.8, 0.15, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // ── "$" on base plate ──
+      ctx.fillStyle = isOpen ? '#4CAF50' : '#f44336';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('$', cx, gnd - 1);
+
+      // ── "STUDENT LOANS" label — always red ──
+      if (isOpen && e.trapState === 'open') {
+        const lb = Math.sin(levelTimer * 0.06) * 2;
+        ctx.fillStyle = '#f44336';
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 0.8;
+        ctx.font = 'bold 7px monospace';
+        ctx.fillText('STUDENT', cx, y + 4 + lb);
+        ctx.strokeText('STUDENT', cx, y + 4 + lb);
+        ctx.fillText('LOANS', cx, y + 12 + lb);
+        ctx.strokeText('LOANS', cx, y + 12 + lb);
+      }
+
+      // ── Manga "!" when freezing ──
+      if (e.trapState === 'freezing') {
+        const ex2 = Math.sin(levelTimer * 0.3) * 2;
+        ctx.fillStyle = '#ff1744';
+        ctx.font = 'bold 16px monospace';
+        ctx.fillText('!', cx, y - 4 + ex2);
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 2;
+        ctx.strokeText('!', cx, y - 4 + ex2);
+      }
+
+      ctx.textAlign = 'left';
+      ctx.restore();
+      break;
+    }
   }
 
   ctx.restore();
@@ -2898,7 +3114,7 @@ function drawPet(pet, x, y) {
       ctx.stroke();
     }
 
-  } else {
+  } else if (pet.kind === 'cat') {
     // === ANIME CAT ===
     const furMain = '#9e9e9e';
     const furLight = '#bdbdbd';
@@ -3105,6 +3321,188 @@ function drawPet(pet, x, y) {
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
+  } else {
+    // === ANIME MOUSE ===
+    const furMain = '#c9b89a';
+    const furLight = '#e0d4c0';
+    const furDark = '#9e8b72';
+    const belly = '#f0e8d8';
+    const nose = '#f48fb1';
+
+    // Body contour
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 3, dy + 8, pet.w - 6, pet.h - 9, 4);
+    ctx.fill();
+
+    // Body with radial gradient
+    const bodyGrad = ctx.createRadialGradient(cx - 1, cy2 + 1, 2, cx, cy2 + 2, 12);
+    bodyGrad.addColorStop(0, furLight);
+    bodyGrad.addColorStop(0.7, furMain);
+    bodyGrad.addColorStop(1, furDark);
+    ctx.fillStyle = bodyGrad;
+    drawRoundRect(x + 4, dy + 9, pet.w - 8, pet.h - 10, 3);
+    ctx.fill();
+
+    // Belly patch
+    ctx.fillStyle = belly;
+    drawEllipse(cx, dy + pet.h - 5, 4, 2.5);
+    ctx.fill();
+
+    // Rim light
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#fff';
+    drawRoundRect(x + 5, dy + 9, 2, pet.h - 13, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Tiny legs (scurrying animation)
+    const legOffset = pet.collected ? Math.sin(pet.frame * Math.PI / 1.5) * 2 : 0;
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 5, dy + pet.h - 4 + legOffset, 2, 4, 1);
+    ctx.fill();
+    drawRoundRect(x + 8, dy + pet.h - 4 - legOffset, 2, 4, 1);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 10, dy + pet.h - 4 - legOffset, 2, 4, 1);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 7, dy + pet.h - 4 + legOffset, 2, 4, 1);
+    ctx.fill();
+
+    // Tiny paws
+    ctx.fillStyle = belly;
+    drawCircle(x + 6, dy + pet.h + legOffset, 1);
+    ctx.fill();
+    drawCircle(x + 9, dy + pet.h - legOffset, 1);
+    ctx.fill();
+    drawCircle(x + pet.w - 9, dy + pet.h - legOffset, 1);
+    ctx.fill();
+    drawCircle(x + pet.w - 6, dy + pet.h + legOffset, 1);
+    ctx.fill();
+
+    // Head contour
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 3, dy + 6, 6.5);
+    ctx.fill();
+
+    // Head fill
+    const headGrad = ctx.createRadialGradient(cx + 2, dy + 4, 1, cx + 3, dy + 6, 7);
+    headGrad.addColorStop(0, furLight);
+    headGrad.addColorStop(0.6, furMain);
+    headGrad.addColorStop(1, furDark);
+    ctx.fillStyle = headGrad;
+    drawCircle(cx + 3, dy + 6, 5.5);
+    ctx.fill();
+
+    // Big round ears (signature mouse look)
+    // Left ear
+    ctx.fillStyle = furDark;
+    drawCircle(cx - 1, dy + 1, 4.5);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawCircle(cx - 1, dy + 1, 3.5);
+    ctx.fill();
+    ctx.fillStyle = '#f8bbd0';
+    drawCircle(cx - 1, dy + 1, 2);
+    ctx.fill();
+
+    // Right ear
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 7, dy + 1, 4.5);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawCircle(cx + 7, dy + 1, 3.5);
+    ctx.fill();
+    ctx.fillStyle = '#f8bbd0';
+    drawCircle(cx + 7, dy + 1, 2);
+    ctx.fill();
+
+    // Eyes — anime style (large, dark)
+    const eyeY = dy + 5;
+    for (let ei = 0; ei < 2; ei++) {
+      const ex = cx + (ei === 0 ? 0.5 : 5.5);
+      ctx.fillStyle = '#fff';
+      drawEllipse(ex, eyeY, 2.8, 2.8);
+      ctx.fill();
+      // Iris gradient
+      const irisGrad = ctx.createRadialGradient(ex, eyeY, 0.3, ex, eyeY, 2);
+      irisGrad.addColorStop(0, '#333');
+      irisGrad.addColorStop(0.7, '#1a1a1a');
+      irisGrad.addColorStop(1, '#000');
+      ctx.fillStyle = irisGrad;
+      drawEllipse(ex, eyeY, 2, 2.2);
+      ctx.fill();
+      // Highlights
+      ctx.fillStyle = '#fff';
+      drawCircle(ex - 0.6, eyeY - 0.8, 0.7);
+      ctx.fill();
+      ctx.globalAlpha = 0.5;
+      drawCircle(ex + 0.4, eyeY + 0.7, 0.3);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Nose (tiny pink dot)
+    ctx.fillStyle = nose;
+    drawCircle(cx + 5.5, dy + 7.5, 1);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    drawCircle(cx + 5.3, dy + 7.2, 0.3);
+    ctx.fill();
+
+    // Whiskers (thin, delicate)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.4;
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath(); ctx.moveTo(cx - 1, dy + 7.5); ctx.lineTo(cx - 6, dy + 6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 1, dy + 8); ctx.lineTo(cx - 6, dy + 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 1, dy + 8.5); ctx.lineTo(cx - 5, dy + 9.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 7, dy + 7.5); ctx.lineTo(cx + 12, dy + 6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 7, dy + 8); ctx.lineTo(cx + 12, dy + 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 7, dy + 8.5); ctx.lineTo(cx + 11, dy + 9.5); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Mouth (tiny smile)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.arc(cx + 4, dy + 8.5, 1.5, 0.1, Math.PI - 0.1);
+    ctx.stroke();
+
+    // Blush marks
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#f48fb1';
+    drawEllipse(cx - 1, dy + 7.5, 1.5, 0.8);
+    ctx.fill();
+    drawEllipse(cx + 7, dy + 7.5, 1.5, 0.8);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Tail (thin, curly, long)
+    const tailWave = Math.sin(pet.tailWag * (pet.collected ? 2.5 : 0.8)) * 0.4;
+    ctx.save();
+    ctx.translate(x + 1, dy + 12);
+    ctx.strokeStyle = '#d4a88a';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-4, -2 + tailWave * 3, -6, -6 + tailWave * 4, -3, -9 + tailWave * 2);
+    ctx.bezierCurveTo(0, -11 + tailWave, 2, -8 + tailWave * 3, 0, -5 + tailWave * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Cheese crumb when collected (occasionally)
+    if (pet.collected && Math.sin(levelTimer * 0.08) > 0.8) {
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath();
+      ctx.moveTo(cx + 7, dy + 9);
+      ctx.lineTo(cx + 10, dy + 8);
+      ctx.lineTo(cx + 10, dy + 11);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = 'rgba(200,150,0,0.4)';
+      drawCircle(cx + 8.5, dy + 9.5, 0.5);
+      ctx.fill();
+    }
   }
 
   // Heart icon floating above uncollected pets
@@ -5267,10 +5665,10 @@ function generateLevel(levelIdx) {
 
   // Enemies
   const enemyTypes = [
-    ['reviewer2', 'imposter'],
-    ['reviewer2', 'imposter', 'bureaucrat', 'predatory_journal'],
-    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival', 'predatory_journal'],  // Job Market
-    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival', 'predatory_journal'],
+    ['reviewer2', 'imposter', 'student_loans'],
+    ['reviewer2', 'imposter', 'bureaucrat', 'predatory_journal', 'student_loans'],
+    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival', 'predatory_journal', 'student_loans'],  // Job Market
+    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival', 'predatory_journal', 'student_loans'],
     ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival', 'predatory_journal'],
     ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival', 'predatory_journal']
   ];
@@ -5357,7 +5755,8 @@ function generateLevel(levelIdx) {
   // Emotional support pets (random placement, 0-3 per level, on ground or platforms)
   const petCount = Math.floor(Math.random() * 3) + 1; // 1-3 pets per level
   for (let i = 0; i < petCount; i++) {
-    const petKind = Math.random() < 0.5 ? 'dog' : 'cat';
+    const petRand = Math.random();
+    const petKind = petRand < 0.4 ? 'dog' : petRand < 0.8 ? 'cat' : 'mouse';
     let placed = false;
     // 40% chance to place on a platform if available
     if (Math.random() < 0.4 && platforms.length > 0) {
@@ -5491,7 +5890,8 @@ function generateTrainingLevel() {
   entities.push({ type: 'sign', x: 77, y: groundY - 1, text: '"Double-jump in mid-air!"' });
 
   // Emotional support pet to collect
-  entities.push({ type: 'pet', x: 70, y: groundY - 1, petKind: Math.random() < 0.5 ? 'dog' : 'cat' });
+  const trainingPetRand = Math.random();
+  entities.push({ type: 'pet', x: 70, y: groundY - 1, petKind: trainingPetRand < 0.4 ? 'dog' : trainingPetRand < 0.8 ? 'cat' : 'mouse' });
   entities.push({ type: 'sign', x: 68, y: groundY - 1, text: '"Collect a pet for emotional support!"' });
 
   // Section 6 (x: 95-115): Collectibles and a predatory journal
@@ -5582,6 +5982,16 @@ function initTrainingLevel() {
           pipeTimer: 0, pipeState: 'hidden', // hidden, rising, exposed, sinking
           pipeY: wy, basePipeY: wy + 40,
           shootTimer: 0, variant: 'eater', // 'eater' or 'shooter'
+          appearance: {}
+        });
+        break;
+      case 'student_loans':
+        enemies.push({
+          type: 'student_loans', x: wx, y: wy, w: 36, h: 30,
+          vx: 0, startX: wx, patrolRange: 0,
+          alive: true, frame: 0, frameTimer: 0,
+          trapState: 'open', snapTimer: 0, snapAnimTimer: 0,
+          trappedPlayer: null, freezeTimer: 0,
           appearance: {}
         });
         break;
@@ -5821,6 +6231,16 @@ function initLevel(idx) {
         });
         break;
       }
+      case 'student_loans':
+        enemies.push({
+          type: 'student_loans', x: wx, y: wy, w: 36, h: 30,
+          vx: 0, startX: wx, patrolRange: 0,
+          alive: true, frame: 0, frameTimer: 0,
+          trapState: 'open', snapTimer: 0, snapAnimTimer: 0,
+          trappedPlayer: null, freezeTimer: 0,
+          appearance: {}
+        });
+        break;
       case 'dean':
         enemies.push({
           type: 'dean', x: wx, y: wy - TILE, w: 48, h: 56,
@@ -5849,7 +6269,7 @@ function initLevel(idx) {
           x: wx, y: wy, w: 20, h: 18, vx: 0, vy: 0,
           onGround: false, facingRight: true,
           frame: 0, frameTimer: 0,
-          kind: ent.petKind || (Math.random() < 0.5 ? 'dog' : 'cat'),
+          kind: ent.petKind || (['dog', 'cat', 'mouse'][Math.floor(Math.random() * 3)]),
           collected: false, owner: null,
           bobOffset: Math.random() * Math.PI * 2,
           trail: [],
@@ -6363,6 +6783,10 @@ function update() {
   // --- Helper: update one player ---
   function updatePlayer(pl, prefix) {
     if (!pl || pl.dead) return;
+    // Frozen by bear trap — can't move
+    if (enemies.some(e => e.type === 'student_loans' && e.trappedPlayer === pl && (e.trapState === 'freezing' || e.trapState === 'snapping'))) {
+      pl.vx = 0; pl.vy = 0; return;
+    }
     const mentoringGS = pl.mentoring;
     const speedMul = mentoringGS ? 1.5 : 1;
     const speed = (pl.powered ? 5 : 3.5) * speedMul;
@@ -6811,8 +7235,9 @@ function update() {
           for (let i = 0; i < PET_TRAIL_LENGTH; i++) {
             pet.trail.push({ x: pl.x, y: pl.y });
           }
-          const petName = pet.kind === 'dog' ? 'Emotional Support Dog' : 'Emotional Support Cat';
-          spawnParticles(pet.x + 10, pet.y + 9, pet.kind === 'dog' ? '#c8a26a' : '#9e9e9e', 12);
+          const petName = pet.kind === 'dog' ? 'Emotional Support Dog' : pet.kind === 'cat' ? 'Emotional Support Cat' : 'Emotional Support Mouse';
+          const petColor = pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : '#c9b89a';
+          spawnParticles(pet.x + 10, pet.y + 9, petColor, 12);
           spawnFloatingText(pet.x, pet.y - 10, petName + '!', '#ff80ab');
           SFX.collectCitation();
           showMessage(petName + ' is now following you!');
@@ -7003,6 +7428,79 @@ function update() {
       e.vx = 0;
     }
 
+    // Student Loans bear trap — stationary, freeze/snap animation
+    if (e.type === 'student_loans' && e.alive) {
+      e.vx = 0;
+      if (e.snapTimer > 0) e.snapTimer--;
+
+      // Snapping animation phase
+      if (e.trapState === 'snapping') {
+        e.snapAnimTimer--;
+        if (e.snapAnimTimer <= 0) {
+          // Snap complete — trap is closed, damage the player
+          e.trapState = 'closed';
+          e.snapTimer = 60;
+          SFX.hit();
+          spawnParticles(e.x + e.w / 2, e.y, '#b0b0b0', 12);
+          // Spawn multiple -$ floating texts
+          for (let d = 0; d < 5; d++) {
+            const ox = (Math.random() - 0.5) * 30;
+            const delay = d * 5;
+            setTimeout(() => {
+              spawnFloatingText(e.x + e.w / 2 + ox, e.y - 10 - d * 8, '-$', '#f44336');
+            }, delay * 16);
+          }
+          spawnFloatingText(e.x + e.w / 2, e.y - 30, 'DEFAULTED!', '#ff1744');
+          // Damage the trapped player — same hit order as other enemies
+          const tp = e.trappedPlayer;
+          if (tp && !tp.dead) {
+            if (tp.mentoring && !tp.headbutting) {
+              const gs = tp.mentoring;
+              tp.mentoring = null; gs.mentee = null;
+              tp.headbutting = false;
+              tp.invincible = true; tp.invTimer = 60;
+              gs.spent = true; gs.panicked = true; gs.panicTimer = 180;
+              gs.vx = (gs.x < e.x ? -4 : 4); gs.vy = -5;
+              spawnParticles(gs.x + gs.w / 2, gs.y + gs.h / 2, '#ffeb3b', 10);
+              spawnFloatingText(gs.x, gs.y - 10, 'AAAH!', '#ef5350');
+              showMessage('Student loans! Grad student escaped in panic!');
+            } else if (tp.mentoring && tp.headbutting) {
+              // headbutt protects
+            } else if (tp.powered) {
+              tp.powered = false;
+              tp.invincible = true; tp.invTimer = 90;
+              showMessage('Student loans took your coffee buzz!');
+              SFX.lostCoffee();
+            } else if (sacrificePet(tp)) {
+              showMessage('Your pet absorbed the student loans!');
+            } else {
+              showMessage('Defaulted on student loans! Career derailed!');
+              if (tp === player) playerDie(getDeathMessage('student_loans'));
+              else p2Die('P2: ' + getDeathMessage('student_loans'));
+            }
+          }
+          e.trappedPlayer = null;
+        }
+      }
+
+      // Freeze phase — player is stuck
+      if (e.freezeTimer > 0) {
+        e.freezeTimer--;
+        const tp = e.trappedPlayer;
+        if (tp && !tp.dead) {
+          tp.vx = 0;
+          tp.vy = 0;
+          tp.x = e.x + e.w / 2 - tp.w / 2;
+        }
+        if (e.freezeTimer <= 0) {
+          // Freeze done — start snap animation
+          e.trapState = 'snapping';
+          e.snapAnimTimer = 8; // quick snap (8 frames)
+          SFX.stomp();
+        }
+      }
+    }
+
     if (e.isProjectile) {
       e.vy = (e.vy || 0) + 0.15;
       e.y += e.vy;
@@ -7043,6 +7541,21 @@ function update() {
           if (pl === player) playerDie('Eaten by a predatory journal! Only fire can destroy them!');
           else { p2Die('P2: Eaten by a predatory journal! Only fire can destroy them!'); }
         }
+        continue;
+      }
+      // Student Loans bear trap — freeze player then snap
+      if (e.type === 'student_loans') {
+        if (e.trapState === 'open') {
+          // Player stepped in! Freeze them.
+          e.trappedPlayer = pl;
+          e.freezeTimer = 30; // ~0.5s freeze before snap
+          pl.vx = 0;
+          pl.vy = 0;
+          pl.x = e.x + e.w / 2 - pl.w / 2; // center on trap
+          spawnFloatingText(e.x + e.w / 2, e.y - 15, 'TRAPPED!', '#ff9800');
+          e.trapState = 'freezing';
+        }
+        // During freeze/snap/closed — skip normal collision
         continue;
       }
       if (pl.vy > 0 && pl.y + pl.h - 8 < e.y + e.h / 2 && !e.isProjectile) {
@@ -7352,8 +7865,8 @@ function sacrificePet(pl) {
   pet.vx = (Math.random() < 0.5 ? -4 : 4);
   pet.vy = -5;
   pet.onGround = false;
-  const petName = pet.kind === 'dog' ? 'Dog' : 'Cat';
-  spawnParticles(pet.x + pet.w / 2, pet.y + pet.h / 2, pet.kind === 'dog' ? '#c8a26a' : '#9e9e9e', 12);
+  const petName = pet.kind === 'dog' ? 'Dog' : pet.kind === 'cat' ? 'Cat' : 'Mouse';
+  spawnParticles(pet.x + pet.w / 2, pet.y + pet.h / 2, pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : '#c9b89a', 12);
   spawnFloatingText(pet.x, pet.y - 10, petName + ' scared off!', '#ff80ab');
   showMessage('Your emotional support ' + petName.toLowerCase() + ' ran away in fright!');
   SFX.hit();
@@ -7439,7 +7952,8 @@ function getDeathMessage(enemyType) {
     'rejection': 'Hit by a rejection letter!',
     'rival': 'Scooped by a rival researcher!',
     'predatory_journal': 'Eaten by a predatory journal! Your h-index plummets!',
-    'spam_email': 'Hit by a spam call for papers!'
+    'spam_email': 'Hit by a spam call for papers!',
+    'student_loans': 'Defaulted on student loans! Career derailed!'
   };
   return msgs[enemyType] || 'Academic career interrupted!';
 }
@@ -7872,7 +8386,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.3', GAME_W / 2, 188);
+  ctx.fillText('V6.4', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
