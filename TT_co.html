@@ -7655,7 +7655,7 @@ function update() {
   for (const e of enemies) {
     if (!e.alive) continue;
     e.x += e.vx;
-    if (Math.abs(e.x - e.startX) > e.patrolRange) e.vx *= -1;
+    if (!e.isProjectile && Math.abs(e.x - e.startX) > e.patrolRange) e.vx *= -1;
 
     e.frameTimer++;
     if (e.frameTimer > 12) { e.frame = (e.frame + 1) % 2; e.frameTimer = 0; }
@@ -8775,7 +8775,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.6', GAME_W / 2, 188);
+  ctx.fillText('V6.8', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
