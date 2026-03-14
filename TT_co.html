@@ -2680,8 +2680,8 @@ function drawEnemy(e, x, y) {
       const tw = e.w;         // 36
       const cx = x + tw / 2;  // center x
       const gnd = y + e.h;    // ground line (bottom of hitbox)
-      const isOpen = e.trapState === 'open' || e.trapState === 'freezing';
       const isSnapping = e.trapState === 'snapping';
+      const isClosed = e.trapState === 'closed';
 
       ctx.save();
       ctx.translate(0, -bob); // cancel bob — trap is stationary
@@ -2727,8 +2727,9 @@ function drawEnemy(e, x, y) {
       ctx.fillStyle = '#555';
       drawCircle(cx, gnd - 6, 2.2); ctx.fill();
 
-      if (isOpen || isSnapping) {
-        const jawAng = isSnapping ? (Math.PI * 0.42 * Math.max(0, e.snapAnimTimer / 8)) : Math.PI * 0.42;
+      if (isClosed || isSnapping) {
+        // ── CLOSED / SNAPPING — jaws spread with teeth (snapped shut look) ──
+        const jawAng = isSnapping ? (Math.PI * 0.42 * (1 - Math.max(0, e.snapAnimTimer / 8))) : Math.PI * 0.42;
 
         // Draw one jaw with teeth
         const drawJaw = (side) => {
@@ -2793,8 +2794,18 @@ function drawEnemy(e, x, y) {
         drawJaw(-1);
         drawJaw(1);
 
+        // Red flash on recent snap
+        if (e.snapTimer > 0) {
+          ctx.globalAlpha = 0.45 * (e.snapTimer / 40);
+          ctx.fillStyle = '#ff1744';
+          ctx.beginPath();
+          ctx.arc(cx, gnd - 8, tw / 2 + 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
       } else {
-        // ── CLOSED — jaws flat, teeth meshed ──
+        // ── OPEN / FREEZING — flat base with teeth sticking up (waiting to snap) ──
         ctx.fillStyle = '#7a7a7a';
         ctx.strokeStyle = '#111';
         ctx.lineWidth = 1.8;
@@ -2815,7 +2826,7 @@ function drawEnemy(e, x, y) {
         ctx.closePath();
         ctx.fill(); ctx.stroke();
 
-        // Interlocking teeth
+        // Interlocking teeth pointing up (visible danger)
         for (let t = 0; t < 7; t++) {
           const tx = x + 4 + t * ((tw - 8) / 6);
           const up = t % 2 === 0;
@@ -2835,16 +2846,6 @@ function drawEnemy(e, x, y) {
           ctx.closePath();
           ctx.fill(); ctx.stroke();
         }
-
-        // Red flash on recent snap
-        if (e.snapTimer > 0) {
-          ctx.globalAlpha = 0.45 * (e.snapTimer / 40);
-          ctx.fillStyle = '#ff1744';
-          ctx.beginPath();
-          ctx.arc(cx, gnd - 8, tw / 2 + 2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.globalAlpha = 1;
-        }
       }
 
       // ── Chain links trailing left ──
@@ -2857,13 +2858,13 @@ function drawEnemy(e, x, y) {
       }
 
       // ── "$" on base plate ──
-      ctx.fillStyle = isOpen ? '#4CAF50' : '#f44336';
+      ctx.fillStyle = !isClosed ? '#4CAF50' : '#f44336';
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
       ctx.fillText('$', cx, gnd - 1);
 
       // ── "STUDENT LOANS" label — always red ──
-      if (isOpen && e.trapState === 'open') {
+      if (e.trapState === 'open') {
         const lb = Math.sin(levelTimer * 0.06) * 2;
         ctx.fillStyle = '#f44336';
         ctx.strokeStyle = '#111';
@@ -2887,6 +2888,267 @@ function drawEnemy(e, x, y) {
       }
 
       ctx.textAlign = 'left';
+      ctx.restore();
+      break;
+    }
+
+    case 'language_editor': {
+      // Manga-style anthropomorphized anteater — "Language Editor"
+      const aW = e.w;    // 28
+      const aH = e.h;    // 36
+      const acx = x + aW / 2;
+      const ady = dy;
+      const facing = 1; // always faces right
+
+      ctx.save();
+
+      // ── Body — brown fur, oval torso ──
+      ctx.fillStyle = '#6d4c41';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(acx, ady + aH - 12, 10, 14, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // Belly patch — lighter
+      ctx.fillStyle = '#a1887f';
+      ctx.beginPath();
+      ctx.ellipse(acx, ady + aH - 10, 6, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Legs — short stubby ──
+      ctx.fillStyle = '#5d4037';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.2;
+      // Left leg
+      ctx.beginPath();
+      ctx.ellipse(acx - 5, ady + aH - 1, 3.5, 4, 0.1, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // Right leg
+      ctx.beginPath();
+      ctx.ellipse(acx + 5, ady + aH - 1, 3.5, 4, -0.1, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // Feet claws
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 0.8;
+      for (const lx of [acx - 5, acx + 5]) {
+        for (let c = -1; c <= 1; c++) {
+          ctx.beginPath();
+          ctx.moveTo(lx + c * 2, ady + aH + 2);
+          ctx.lineTo(lx + c * 2.5, ady + aH + 5);
+          ctx.stroke();
+        }
+      }
+
+      // ── Arms — small, holding red pen ──
+      ctx.fillStyle = '#6d4c41';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.2;
+      // Left arm
+      ctx.beginPath();
+      ctx.ellipse(acx - 10, ady + aH - 16, 3, 7, 0.3, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // Right arm — holding pen
+      ctx.beginPath();
+      ctx.ellipse(acx + 10, ady + aH - 16, 3, 7, -0.3, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // Red pen in right hand
+      ctx.fillStyle = '#d32f2f';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 0.8;
+      ctx.save();
+      ctx.translate(acx + 13, ady + aH - 20);
+      ctx.rotate(-0.4);
+      ctx.fillRect(-1, -8, 2.5, 12);
+      ctx.strokeRect(-1, -8, 2.5, 12);
+      // Pen tip
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.moveTo(-0.5, 4); ctx.lineTo(0.75, 7); ctx.lineTo(2, 4);
+      ctx.fill();
+      ctx.restore();
+
+      // ── Head — round with long snout ──
+      ctx.fillStyle = '#795548';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.5;
+      // Head circle
+      ctx.beginPath();
+      ctx.arc(acx, ady + 8, 9, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // ── Long anteater snout — manga style, elongated ──
+      ctx.fillStyle = '#8d6e63';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(acx + 6, ady + 6);
+      ctx.quadraticCurveTo(acx + 20, ady + 5, acx + 22, ady + 9);
+      ctx.quadraticCurveTo(acx + 20, ady + 13, acx + 6, ady + 11);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Snout nostril
+      ctx.fillStyle = '#3e2723';
+      drawCircle(acx + 20, ady + 9, 1.2); ctx.fill();
+
+      // Snout highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(acx + 14, ady + 7, 5, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Small round ears ──
+      ctx.fillStyle = '#6d4c41';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1;
+      // Left ear
+      ctx.beginPath();
+      ctx.arc(acx - 7, ady + 1, 4, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d7ccc8';
+      ctx.beginPath();
+      ctx.arc(acx - 7, ady + 1, 2, 0, Math.PI * 2);
+      ctx.fill();
+      // Right ear
+      ctx.fillStyle = '#6d4c41';
+      ctx.beginPath();
+      ctx.arc(acx + 7, ady + 1, 4, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d7ccc8';
+      ctx.beginPath();
+      ctx.arc(acx + 7, ady + 1, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Eyes — small beady, behind thick glasses ──
+      // Thick glasses frames
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2;
+      // Left lens
+      ctx.beginPath();
+      ctx.arc(acx - 3.5, ady + 7, 4.5, 0, Math.PI * 2);
+      ctx.stroke();
+      // Right lens
+      ctx.beginPath();
+      ctx.arc(acx + 3.5, ady + 7, 4.5, 0, Math.PI * 2);
+      ctx.stroke();
+      // Bridge
+      ctx.beginPath();
+      ctx.moveTo(acx - 0.5, ady + 7);
+      ctx.lineTo(acx + 0.5, ady + 7);
+      ctx.stroke();
+      // Temple arms
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(acx - 8, ady + 7);
+      ctx.lineTo(acx - 11, ady + 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(acx + 8, ady + 7);
+      ctx.lineTo(acx + 11, ady + 5);
+      ctx.stroke();
+
+      // Lens glare
+      ctx.fillStyle = 'rgba(200,230,255,0.35)';
+      ctx.beginPath();
+      ctx.arc(acx - 3.5, ady + 7, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(acx + 3.5, ady + 7, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes behind lenses
+      ctx.fillStyle = '#111';
+      drawCircle(acx - 3.5, ady + 7, 1.8); ctx.fill();
+      drawCircle(acx + 3.5, ady + 7, 1.8); ctx.fill();
+      // Eye shine
+      ctx.fillStyle = '#fff';
+      drawCircle(acx - 2.8, ady + 6.2, 0.7); ctx.fill();
+      drawCircle(acx + 4.2, ady + 6.2, 0.7); ctx.fill();
+
+      // ── Tail — long bushy anteater tail ──
+      ctx.fillStyle = '#5d4037';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(acx - 8, ady + aH - 18);
+      ctx.quadraticCurveTo(acx - 18, ady + aH - 28, acx - 14, ady + aH - 35);
+      ctx.quadraticCurveTo(acx - 10, ady + aH - 30, acx - 6, ady + aH - 18);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Tail fur stripes
+      ctx.strokeStyle = '#4e342e';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(acx - 13, ady + aH - 28);
+      ctx.lineTo(acx - 10, ady + aH - 24);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(acx - 15, ady + aH - 32);
+      ctx.lineTo(acx - 12, ady + aH - 28);
+      ctx.stroke();
+
+      // ── Shooting indicator glow ──
+      if (e.shootTimer > 60) {
+        const shGrad = ctx.createRadialGradient(acx + 20, ady + 9, 0, acx + 20, ady + 9, 10);
+        shGrad.addColorStop(0, `rgba(255,60,60,${0.3 + Math.sin(levelTimer * 0.3) * 0.15})`);
+        shGrad.addColorStop(1, 'rgba(255,60,60,0)');
+        ctx.fillStyle = shGrad;
+        drawCircle(acx + 20, ady + 9, 10); ctx.fill();
+      }
+
+      // ── Label ──
+      ctx.fillStyle = '#d32f2f';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 0.6;
+      ctx.font = 'bold 6px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('LANGUAGE', acx, ady - 6);
+      ctx.strokeText('LANGUAGE', acx, ady - 6);
+      ctx.fillText('EDITOR', acx, ady);
+      ctx.strokeText('EDITOR', acx, ady);
+      ctx.textAlign = 'left';
+
+      ctx.restore();
+      break;
+    }
+
+    case 'typo': {
+      // Typo projectile — a jumbled red letter flying through the air
+      const typoChars = ['ö', 'ë', 'ü', 'ñ', '¿', '§', '†', '‡', 'ø', 'æ'];
+      const tChar = typoChars[Math.floor((e.x * 7 + e.y * 3) % typoChars.length)];
+      const trot = levelTimer * 0.15 + e.x;
+
+      // Trail particles
+      for (let ti = 0; ti < 3; ti++) {
+        ctx.globalAlpha = 0.3 - ti * 0.08;
+        ctx.fillStyle = '#ef9a9a';
+        drawCircle(x + e.w / 2, dy + e.h / 2 + ti * 4, 2 - ti * 0.5);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      ctx.save();
+      ctx.translate(x + e.w / 2, dy + e.h / 2);
+      ctx.rotate(trot);
+
+      // Red glow
+      ctx.fillStyle = 'rgba(244,67,54,0.3)';
+      drawCircle(0, 0, 8); ctx.fill();
+
+      // Letter
+      ctx.fillStyle = '#d32f2f';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 1;
+      ctx.font = 'bold 11px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tChar, 0, 0);
+      ctx.strokeText(tChar, 0, 0);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
       ctx.restore();
       break;
     }
@@ -5665,12 +5927,12 @@ function generateLevel(levelIdx) {
 
   // Enemies
   const enemyTypes = [
-    ['reviewer2', 'imposter', 'student_loans'],
-    ['reviewer2', 'imposter', 'bureaucrat', 'predatory_journal', 'student_loans'],
-    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival', 'predatory_journal', 'student_loans'],  // Job Market
-    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival', 'predatory_journal', 'student_loans'],
-    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival', 'predatory_journal'],
-    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival', 'predatory_journal']
+    ['reviewer2', 'imposter', 'student_loans', 'language_editor'],
+    ['reviewer2', 'imposter', 'bureaucrat', 'predatory_journal', 'student_loans', 'language_editor'],
+    ['reviewer2', 'committee', 'bureaucrat', 'bureaucrat', 'reviewer2', 'committee', 'imposter', 'rival', 'predatory_journal', 'student_loans', 'language_editor'],  // Job Market
+    ['reviewer2', 'bureaucrat', 'teaching', 'teaching', 'reviewer2', 'bureaucrat', 'imposter', 'rival', 'predatory_journal', 'student_loans', 'language_editor'],
+    ['bureaucrat', 'teaching', 'committee', 'committee', 'bureaucrat', 'teaching', 'reviewer2', 'rival', 'predatory_journal', 'language_editor'],
+    ['reviewer2', 'bureaucrat', 'committee', 'bureaucrat', 'reviewer2', 'committee', 'teaching', 'rival', 'predatory_journal', 'language_editor']
   ];
 
   // Collect platform info for enemy spawning
@@ -5987,7 +6249,7 @@ function initTrainingLevel() {
         break;
       case 'student_loans':
         enemies.push({
-          type: 'student_loans', x: wx, y: wy, w: 36, h: 30,
+          type: 'student_loans', x: wx, y: wy + 18, w: 36, h: 30,
           vx: 0, startX: wx, patrolRange: 0,
           alive: true, frame: 0, frameTimer: 0,
           trapState: 'open', snapTimer: 0, snapAnimTimer: 0,
@@ -6233,11 +6495,20 @@ function initLevel(idx) {
       }
       case 'student_loans':
         enemies.push({
-          type: 'student_loans', x: wx, y: wy, w: 36, h: 30,
+          type: 'student_loans', x: wx, y: wy + 18, w: 36, h: 30,
           vx: 0, startX: wx, patrolRange: 0,
           alive: true, frame: 0, frameTimer: 0,
           trapState: 'open', snapTimer: 0, snapAnimTimer: 0,
           trappedPlayer: null, freezeTimer: 0,
+          appearance: {}
+        });
+        break;
+      case 'language_editor':
+        enemies.push({
+          type: 'language_editor', x: wx, y: wy, w: 28, h: 36,
+          vx: 0, startX: wx, patrolRange: 0,
+          alive: true, frame: 0, frameTimer: 0,
+          shootTimer: 0, shootCooldown: 0,
           appearance: {}
         });
         break;
@@ -7501,6 +7772,25 @@ function update() {
       }
     }
 
+    // Language Editor anteater — stationary, shoots typos vertically
+    if (e.type === 'language_editor' && e.alive) {
+      e.vx = 0;
+      e.shootTimer = (e.shootTimer || 0) + 1;
+      const closestP = [player, player2].filter(p => p && !p.dead).sort((a,b) => Math.abs(a.x - e.x) - Math.abs(b.x - e.x))[0];
+      if (closestP && Math.abs(closestP.x - e.x) < TILE * 8 && e.shootTimer > 90) {
+        e.shootTimer = 0;
+        const dx = closestP.x - e.x;
+        const horz = dx > 0 ? 1.5 : -1.5;
+        enemies.push({
+          type: 'typo', x: e.x + e.w / 2, y: e.y + 4,
+          w: 10, h: 10, vx: horz, vy: -4.5,
+          startX: e.x, patrolRange: 300, alive: true,
+          frame: 0, frameTimer: 0, isProjectile: true
+        });
+        spawnFloatingText(e.x + e.w / 2, e.y - 8, 'TYPO!', '#d32f2f');
+      }
+    }
+
     if (e.isProjectile) {
       e.vy = (e.vy || 0) + 0.15;
       e.y += e.vy;
@@ -7953,7 +8243,9 @@ function getDeathMessage(enemyType) {
     'rival': 'Scooped by a rival researcher!',
     'predatory_journal': 'Eaten by a predatory journal! Your h-index plummets!',
     'spam_email': 'Hit by a spam call for papers!',
-    'student_loans': 'Defaulted on student loans! Career derailed!'
+    'student_loans': 'Defaulted on student loans! Career derailed!',
+    'language_editor': 'The Language Editor shredded your manuscript!',
+    'typo': 'Hit by a typo! Your paper was rejected for poor grammar!'
   };
   return msgs[enemyType] || 'Academic career interrupted!';
 }
@@ -8386,7 +8678,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.4', GAME_W / 2, 188);
+  ctx.fillText('V6.5', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
