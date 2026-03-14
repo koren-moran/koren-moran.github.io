@@ -34,9 +34,14 @@ canvas {
   image-rendering: auto;
 }
 #rotate-msg { display: none; }
+#phone-block { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f0a1a; color: #e94560; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Courier New', monospace; padding: 2rem; }
+#phone-block .icon { font-size: 4rem; margin-bottom: 1rem; }
+#phone-block h2 { font-size: 1.3rem; margin-bottom: 0.8rem; color: #ffd54f; }
+#phone-block p { font-size: 0.95rem; color: #a0a0c0; line-height: 1.5; max-width: 280px; }
 </style>
 </head>
 <body>
+<div id="phone-block"><div class="icon">&#x1F4BB;</div><h2>Screen Too Small</h2><p>Tenure Track requires a tablet or larger screen. Please switch to an iPad, tablet, or desktop to play.</p></div>
 <div id="rotate-msg"><span>&#x1F4F1;</span><p>Please rotate your device to landscape</p></div>
 <canvas id="game"></canvas>
 <input id="mobileNameInput" type="text" maxlength="15" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="position:fixed;top:-100px;left:0;opacity:0;width:1px;height:1px;font-size:16px;">
@@ -369,6 +374,18 @@ function keyName(code) {
 // Detect true mobile (not just touchscreen laptops) — check screen size + touch support
 const isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) && (window.innerWidth <= 1024 || !window.matchMedia('(pointer: fine)').matches);
 
+// Block phones (small screens) — only allow tablets (>= 768px shortest dimension) and desktops
+(function checkPhoneBlock() {
+  const minDim = Math.min(window.screen.width, window.screen.height);
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const isPhone = isTouch && minDim < 768 && !window.matchMedia('(pointer: fine)').matches;
+  const el = document.getElementById('phone-block');
+  if (isPhone && el) {
+    el.style.display = 'flex';
+    document.getElementById('game').style.display = 'none';
+  }
+})();
+
 // Track which touch buttons are currently held
 const touchButtons = {};
 // Track active touches per button for multi-touch
@@ -694,6 +711,34 @@ function drawCircle(x, y, r) {
 function drawEllipse(x, y, rx, ry) {
   ctx.beginPath();
   ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+}
+
+// Draw text always LTR even when ctx is horizontally flipped
+function fillTextLTR(text, tx, ty) {
+  const t = ctx.getTransform();
+  if (t.a < 0) {
+    ctx.save();
+    ctx.scale(-1, 1);
+    if (ctx.textAlign === 'left') ctx.textAlign = 'right';
+    else if (ctx.textAlign === 'right') ctx.textAlign = 'left';
+    ctx.fillText(text, -tx, ty);
+    ctx.restore();
+  } else {
+    ctx.fillText(text, tx, ty);
+  }
+}
+function strokeTextLTR(text, tx, ty) {
+  const t = ctx.getTransform();
+  if (t.a < 0) {
+    ctx.save();
+    ctx.scale(-1, 1);
+    if (ctx.textAlign === 'left') ctx.textAlign = 'right';
+    else if (ctx.textAlign === 'right') ctx.textAlign = 'left';
+    ctx.strokeText(text, -tx, ty);
+    ctx.restore();
+  } else {
+    ctx.strokeText(text, tx, ty);
+  }
 }
 
 function lerpColor(a, b, t) {
@@ -1550,7 +1595,7 @@ function drawEnemy(e, x, y) {
       // Label
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 8px monospace';
-      ctx.fillText('R2', x + 8, dy + e.h - 2);
+      fillTextLTR('R2', x + 8, dy + e.h - 2);
       break;
     }
 
@@ -1751,7 +1796,7 @@ function drawEnemy(e, x, y) {
       ctx.fillStyle = '#e1bee7';
       ctx.font = 'italic 7px monospace';
       const textWobble = Math.sin(levelTimer * 0.12) * 3;
-      ctx.fillText('fraud?', x + 2 + textWobble, dy - 4);
+      fillTextLTR('fraud?', x + 2 + textWobble, dy - 4);
       ctx.globalAlpha = 1;
       break;
     }
@@ -1808,7 +1853,7 @@ function drawEnemy(e, x, y) {
 
       ctx.fillStyle = '#fff';
       ctx.font = '6px monospace';
-      ctx.fillText('4/4', x + 8, dy + e.h - 1);
+      fillTextLTR('4/4', x + 8, dy + e.h - 1);
       break;
     }
 
@@ -2105,7 +2150,7 @@ function drawEnemy(e, x, y) {
       ctx.fillRect(2, 9, 7, 1);
       ctx.fillStyle = '#e65100';
       ctx.font = 'bold 5px monospace';
-      ctx.fillText('PUB', 1, 15);
+      fillTextLTR('PUB', 1, 15);
       ctx.restore();
 
       // Shooting indicator (radial glow when about to shoot)
@@ -2141,7 +2186,7 @@ function drawEnemy(e, x, y) {
       ctx.fillStyle = rivalColor;
       ctx.font = 'bold 7px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(rivalTitle, x + e.w / 2, dy - 13);
+      fillTextLTR(rivalTitle, x + e.w / 2, dy - 13);
       ctx.textAlign = 'left';
 
       // Charging speed lines
@@ -2360,7 +2405,7 @@ function drawEnemy(e, x, y) {
       ctx.fillStyle = '#ffd54f';
       ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('THE DEAN', x + e.w / 2, dy - 15);
+      fillTextLTR('THE DEAN', x + e.w / 2, dy - 15);
       ctx.textAlign = 'left';
       break;
     }
@@ -2486,7 +2531,7 @@ function drawEnemy(e, x, y) {
         ctx.strokeStyle = 'rgba(198,40,40,0.7)'; ctx.lineWidth = 1.2;
         drawRoundRect(-9, -3.5, 18, 8, 1.5); ctx.stroke();
         ctx.fillStyle = '#c62828'; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center';
-        ctx.fillText('ACCEPTED', 0, 2); ctx.textAlign = 'left';
+        fillTextLTR('ACCEPTED', 0, 2); ctx.textAlign = 'left';
         ctx.restore();
 
         // Anime eyes — large, with coin-gold gradient iris
@@ -2508,7 +2553,7 @@ function drawEnemy(e, x, y) {
           // $ pupil
           ctx.fillStyle = '#1a0a00';
           ctx.font = 'bold 4px monospace'; ctx.textAlign = 'center';
-          ctx.fillText('$', ex2 + 0.3, dy + 19); ctx.textAlign = 'left';
+          fillTextLTR('$', ex2 + 0.3, dy + 19); ctx.textAlign = 'left';
           // Large highlight top-left
           ctx.fillStyle = 'rgba(255,255,255,0.9)';
           drawCircle(ex2 - 1.5, dy + 15.5, 1.5); ctx.fill();
@@ -2566,7 +2611,7 @@ function drawEnemy(e, x, y) {
         ctx.fillStyle = badgeGrad; drawCircle(0, 0, 5); ctx.fill();
         ctx.strokeStyle = '#a06800'; ctx.lineWidth = 0.6; drawCircle(0, 0, 3.5); ctx.stroke();
         ctx.fillStyle = '#5d4037'; ctx.font = 'bold 4px monospace'; ctx.textAlign = 'center';
-        ctx.fillText('IF', 0, 1.5); ctx.textAlign = 'left';
+        fillTextLTR('IF', 0, 1.5); ctx.textAlign = 'left';
         ctx.fillStyle = 'rgba(255,255,255,0.4)'; drawCircle(-1.5, -1.5, 1.2); ctx.fill();
         ctx.restore();
 
@@ -2581,7 +2626,7 @@ function drawEnemy(e, x, y) {
         // Label
         ctx.fillStyle = isShooter ? '#ff9800' : '#ef5350';
         ctx.font = 'bold 6px monospace'; ctx.textAlign = 'center';
-        ctx.fillText(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 3);
+        fillTextLTR(isShooter ? 'SPAM JOURNAL' : 'PREDATORY', x + e.w / 2, dy - 3);
         ctx.textAlign = 'left';
       }
       break;
@@ -2616,7 +2661,7 @@ function drawEnemy(e, x, y) {
       // $ sign
       ctx.fillStyle = '#bf360c';
       ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
-      ctx.fillText('$', 0, 4); ctx.textAlign = 'left';
+      fillTextLTR('$', 0, 4); ctx.textAlign = 'left';
       ctx.restore();
       break;
     }
@@ -2636,7 +2681,7 @@ function drawEnemy(e, x, y) {
       ctx.fill();
       ctx.fillStyle = '#c62828';
       ctx.font = 'bold 7px monospace';
-      ctx.fillText('REJ', -8, 3);
+      fillTextLTR('REJ', -8, 3);
       // Red stamp
       ctx.strokeStyle = '#c62828';
       ctx.lineWidth = 1.5;
@@ -2861,7 +2906,7 @@ function drawEnemy(e, x, y) {
       ctx.fillStyle = !isClosed ? '#4CAF50' : '#f44336';
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('$', cx, gnd - 1);
+      fillTextLTR('$', cx, gnd - 1);
 
       // ── "STUDENT LOANS" label — always red ──
       if (e.trapState === 'open') {
@@ -2870,10 +2915,10 @@ function drawEnemy(e, x, y) {
         ctx.strokeStyle = '#111';
         ctx.lineWidth = 0.8;
         ctx.font = 'bold 7px monospace';
-        ctx.fillText('STUDENT', cx, y + 4 + lb);
-        ctx.strokeText('STUDENT', cx, y + 4 + lb);
-        ctx.fillText('LOANS', cx, y + 12 + lb);
-        ctx.strokeText('LOANS', cx, y + 12 + lb);
+        fillTextLTR('STUDENT', cx, y + 4 + lb);
+        strokeTextLTR('STUDENT', cx, y + 4 + lb);
+        fillTextLTR('LOANS', cx, y + 12 + lb);
+        strokeTextLTR('LOANS', cx, y + 12 + lb);
       }
 
       // ── Manga "!" when freezing ──
@@ -2881,10 +2926,10 @@ function drawEnemy(e, x, y) {
         const ex2 = Math.sin(levelTimer * 0.3) * 2;
         ctx.fillStyle = '#ff1744';
         ctx.font = 'bold 16px monospace';
-        ctx.fillText('!', cx, y - 4 + ex2);
+        fillTextLTR('!', cx, y - 4 + ex2);
         ctx.strokeStyle = '#111';
         ctx.lineWidth = 2;
-        ctx.strokeText('!', cx, y - 4 + ex2);
+        strokeTextLTR('!', cx, y - 4 + ex2);
       }
 
       ctx.textAlign = 'left';
@@ -2893,211 +2938,258 @@ function drawEnemy(e, x, y) {
     }
 
     case 'language_editor': {
-      // Manga-style anthropomorphized anteater — "Language Editor"
+      // Side-view anteater in academic attire — "Language Editor"
       const aW = e.w;    // 28
       const aH = e.h;    // 36
       const acx = x + aW / 2;
       const ady = dy;
-      const facing = 1; // always faces right
+      // Face toward closest player
+      const closP = [player, player2].filter(p => p && !p.dead);
+      const fDir = closP.length > 0 && closP.sort((a,b) => Math.abs(a.x - e.x) - Math.abs(b.x - e.x))[0].x < e.x ? -1 : 1;
+
+      // Nose blowing animation
+      const blowCycle = Math.sin(levelTimer * 0.12);
+      const nosePuff = (e.shootTimer || 0) > 70 ? Math.abs(Math.sin(levelTimer * 0.4)) * 2.5 : 0;
 
       ctx.save();
+      ctx.translate(acx, ady);
+      if (fDir < 0) { ctx.scale(-1, 1); }
 
-      // ── Body — brown fur, oval torso ──
-      ctx.fillStyle = '#6d4c41';
-      ctx.strokeStyle = '#3e2723';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.ellipse(acx, ady + aH - 12, 10, 14, 0, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-
-      // Belly patch — lighter
-      ctx.fillStyle = '#a1887f';
-      ctx.beginPath();
-      ctx.ellipse(acx, ady + aH - 10, 6, 9, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // ── Legs — short stubby ──
+      // ── Tail — bushy, behind body ──
       ctx.fillStyle = '#5d4037';
       ctx.strokeStyle = '#3e2723';
       ctx.lineWidth = 1.2;
-      // Left leg
       ctx.beginPath();
-      ctx.ellipse(acx - 5, ady + aH - 1, 3.5, 4, 0.1, 0, Math.PI * 2);
+      ctx.moveTo(-8, aH - 16);
+      ctx.quadraticCurveTo(-20, aH - 30, -16, aH - 36);
+      ctx.quadraticCurveTo(-12, aH - 28, -6, aH - 16);
+      ctx.closePath();
       ctx.fill(); ctx.stroke();
-      // Right leg
-      ctx.beginPath();
-      ctx.ellipse(acx + 5, ady + aH - 1, 3.5, 4, -0.1, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
+      // Tail fur streaks
+      ctx.strokeStyle = '#4e342e';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(-15, aH - 30); ctx.lineTo(-12, aH - 26); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-17, aH - 34); ctx.lineTo(-14, aH - 30); ctx.stroke();
 
-      // Feet claws
-      ctx.strokeStyle = '#111';
-      ctx.lineWidth = 0.8;
-      for (const lx of [acx - 5, acx + 5]) {
-        for (let c = -1; c <= 1; c++) {
-          ctx.beginPath();
-          ctx.moveTo(lx + c * 2, ady + aH + 2);
-          ctx.lineTo(lx + c * 2.5, ady + aH + 5);
-          ctx.stroke();
-        }
+      // ── Hind leg (back) ──
+      ctx.fillStyle = '#5d4037';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(-3, aH - 2, 3.5, 5, 0.15, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // Claws
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 0.7;
+      for (let c = -1; c <= 1; c++) {
+        ctx.beginPath(); ctx.moveTo(-3 + c * 2, aH + 2); ctx.lineTo(-3 + c * 2.5, aH + 5); ctx.stroke();
       }
 
-      // ── Arms — small, holding red pen ──
+      // ── Body — side view oval ──
       ctx.fillStyle = '#6d4c41';
       ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, aH - 14, 12, 13, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+
+      // ── Academic jacket — side view ──
+      // Jacket body
+      ctx.fillStyle = '#1a237e'; // dark navy academic jacket
+      ctx.strokeStyle = '#0d1642';
       ctx.lineWidth = 1.2;
-      // Left arm
       ctx.beginPath();
-      ctx.ellipse(acx - 10, ady + aH - 16, 3, 7, 0.3, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-      // Right arm — holding pen
-      ctx.beginPath();
-      ctx.ellipse(acx + 10, ady + aH - 16, 3, 7, -0.3, 0, Math.PI * 2);
+      ctx.moveTo(-10, aH - 22);
+      ctx.lineTo(-11, aH - 6);
+      ctx.quadraticCurveTo(-10, aH - 2, -6, aH - 3);
+      ctx.lineTo(6, aH - 3);
+      ctx.quadraticCurveTo(10, aH - 2, 11, aH - 6);
+      ctx.lineTo(10, aH - 22);
+      ctx.quadraticCurveTo(5, aH - 26, 0, aH - 26);
+      ctx.quadraticCurveTo(-5, aH - 26, -10, aH - 22);
+      ctx.closePath();
       ctx.fill(); ctx.stroke();
 
-      // Red pen in right hand
-      ctx.fillStyle = '#d32f2f';
-      ctx.strokeStyle = '#111';
-      ctx.lineWidth = 0.8;
-      ctx.save();
-      ctx.translate(acx + 13, ady + aH - 20);
-      ctx.rotate(-0.4);
-      ctx.fillRect(-1, -8, 2.5, 12);
-      ctx.strokeRect(-1, -8, 2.5, 12);
-      // Pen tip
-      ctx.fillStyle = '#111';
+      // Jacket lapels
+      ctx.fillStyle = '#283593';
       ctx.beginPath();
-      ctx.moveTo(-0.5, 4); ctx.lineTo(0.75, 7); ctx.lineTo(2, 4);
+      ctx.moveTo(2, aH - 25);
+      ctx.lineTo(4, aH - 18);
+      ctx.lineTo(1, aH - 16);
+      ctx.lineTo(-1, aH - 18);
+      ctx.lineTo(0, aH - 25);
+      ctx.closePath();
       ctx.fill();
-      ctx.restore();
+      // Lapel lines
+      ctx.strokeStyle = '#1a237e';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(1, aH - 25); ctx.lineTo(2, aH - 18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(1, aH - 25); ctx.lineTo(0, aH - 18); ctx.stroke();
 
-      // ── Head — round with long snout ──
+      // Shirt/tie visible in lapel opening
+      ctx.fillStyle = '#eceff1'; // white shirt
+      ctx.beginPath();
+      ctx.moveTo(0, aH - 25);
+      ctx.lineTo(2, aH - 18);
+      ctx.lineTo(0, aH - 16);
+      ctx.lineTo(-2, aH - 18);
+      ctx.closePath();
+      ctx.fill();
+      // Tie
+      ctx.fillStyle = '#c62828'; // dark red tie
+      ctx.beginPath();
+      ctx.moveTo(1, aH - 24);
+      ctx.lineTo(2.5, aH - 18);
+      ctx.lineTo(1, aH - 14);
+      ctx.lineTo(-0.5, aH - 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#8e0000';
+      ctx.lineWidth = 0.4;
+      ctx.stroke();
+
+      // Jacket pocket with pen
+      ctx.strokeStyle = '#0d1642';
+      ctx.lineWidth = 0.6;
+      ctx.strokeRect(5, aH - 12, 4, 3);
+      // Red pen sticking out of pocket
+      ctx.fillStyle = '#d32f2f';
+      ctx.fillRect(6, aH - 15, 1.5, 5);
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.moveTo(6, aH - 15); ctx.lineTo(6.75, aH - 17); ctx.lineTo(7.5, aH - 15); ctx.fill();
+
+      // Jacket buttons
+      ctx.fillStyle = '#ffd54f';
+      drawCircle(1, aH - 12, 1); ctx.fill();
+      drawCircle(1, aH - 8, 1); ctx.fill();
+
+      // ── Front leg ──
+      ctx.fillStyle = '#5d4037';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(5, aH - 2, 3.5, 5, -0.15, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // Claws
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 0.7;
+      for (let c = -1; c <= 1; c++) {
+        ctx.beginPath(); ctx.moveTo(5 + c * 2, aH + 2); ctx.lineTo(5 + c * 2.5, aH + 5); ctx.stroke();
+      }
+
+      // ── Front arm (over jacket) ──
+      ctx.fillStyle = '#1a237e';
+      ctx.strokeStyle = '#0d1642';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(8, aH - 16, 3, 7, -0.2, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      // Paw at end of arm
+      ctx.fillStyle = '#5d4037';
+      ctx.beginPath();
+      ctx.arc(9, aH - 10, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Head — side view, elongated ──
       ctx.fillStyle = '#795548';
       ctx.strokeStyle = '#3e2723';
       ctx.lineWidth = 1.5;
-      // Head circle
       ctx.beginPath();
-      ctx.arc(acx, ady + 8, 9, 0, Math.PI * 2);
+      ctx.ellipse(2, 9, 8, 9, 0, 0, Math.PI * 2);
       ctx.fill(); ctx.stroke();
 
-      // ── Long anteater snout — manga style, elongated ──
+      // ── Ear — single visible from side ──
+      ctx.fillStyle = '#6d4c41';
+      ctx.strokeStyle = '#3e2723';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(-3, 1, 4, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d7ccc8';
+      ctx.beginPath();
+      ctx.arc(-3, 1, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ── Long anteater snout — side view, pointing right ──
+      const noseBaseY = 10;
+      const noseTipX = 26 + nosePuff;
+      const noseTipY = noseBaseY + blowCycle * 0.5;
       ctx.fillStyle = '#8d6e63';
       ctx.strokeStyle = '#3e2723';
       ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(acx + 6, ady + 6);
-      ctx.quadraticCurveTo(acx + 20, ady + 5, acx + 22, ady + 9);
-      ctx.quadraticCurveTo(acx + 20, ady + 13, acx + 6, ady + 11);
+      ctx.moveTo(8, noseBaseY - 3);
+      ctx.quadraticCurveTo(18, noseBaseY - 4, noseTipX, noseTipY - 1.5);
+      ctx.quadraticCurveTo(noseTipX + 1, noseTipY, noseTipX, noseTipY + 1.5);
+      ctx.quadraticCurveTo(18, noseBaseY + 5, 8, noseBaseY + 4);
       ctx.closePath();
       ctx.fill(); ctx.stroke();
-
-      // Snout nostril
-      ctx.fillStyle = '#3e2723';
-      drawCircle(acx + 20, ady + 9, 1.2); ctx.fill();
 
       // Snout highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
       ctx.beginPath();
-      ctx.ellipse(acx + 14, ady + 7, 5, 1.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(16, noseBaseY - 1.5, 6, 1.2, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // ── Small round ears ──
-      ctx.fillStyle = '#6d4c41';
-      ctx.strokeStyle = '#3e2723';
-      ctx.lineWidth = 1;
-      // Left ear
-      ctx.beginPath();
-      ctx.arc(acx - 7, ady + 1, 4, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#d7ccc8';
-      ctx.beginPath();
-      ctx.arc(acx - 7, ady + 1, 2, 0, Math.PI * 2);
-      ctx.fill();
-      // Right ear
-      ctx.fillStyle = '#6d4c41';
-      ctx.beginPath();
-      ctx.arc(acx + 7, ady + 1, 4, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#d7ccc8';
-      ctx.beginPath();
-      ctx.arc(acx + 7, ady + 1, 2, 0, Math.PI * 2);
-      ctx.fill();
+      // ── Nostril — animated puffing ──
+      const nostrilR = 1.5 + nosePuff * 0.4;
+      ctx.fillStyle = '#3e2723';
+      drawCircle(noseTipX - 1, noseTipY, nostrilR); ctx.fill();
 
-      // ── Eyes — small beady, behind thick glasses ──
-      // Thick glasses frames
-      ctx.strokeStyle = '#1a1a1a';
-      ctx.lineWidth = 2;
-      // Left lens
-      ctx.beginPath();
-      ctx.arc(acx - 3.5, ady + 7, 4.5, 0, Math.PI * 2);
-      ctx.stroke();
-      // Right lens
-      ctx.beginPath();
-      ctx.arc(acx + 3.5, ady + 7, 4.5, 0, Math.PI * 2);
-      ctx.stroke();
-      // Bridge
-      ctx.beginPath();
-      ctx.moveTo(acx - 0.5, ady + 7);
-      ctx.lineTo(acx + 0.5, ady + 7);
-      ctx.stroke();
-      // Temple arms
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(acx - 8, ady + 7);
-      ctx.lineTo(acx - 11, ady + 5);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(acx + 8, ady + 7);
-      ctx.lineTo(acx + 11, ady + 5);
-      ctx.stroke();
+      // Blow puff particles when about to shoot
+      if ((e.shootTimer || 0) > 70) {
+        ctx.globalAlpha = 0.3 + Math.sin(levelTimer * 0.5) * 0.15;
+        for (let pi = 0; pi < 3; pi++) {
+          const px = noseTipX + 3 + pi * 4 + Math.sin(levelTimer * 0.3 + pi) * 2;
+          const py = noseTipY + Math.cos(levelTimer * 0.4 + pi * 1.5) * 2;
+          ctx.fillStyle = 'rgba(200,200,200,0.4)';
+          drawCircle(px, py, 1.5 - pi * 0.3); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
 
-      // Lens glare
-      ctx.fillStyle = 'rgba(200,230,255,0.35)';
-      ctx.beginPath();
-      ctx.arc(acx - 3.5, ady + 7, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(acx + 3.5, ady + 7, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Eyes behind lenses
-      ctx.fillStyle = '#111';
-      drawCircle(acx - 3.5, ady + 7, 1.8); ctx.fill();
-      drawCircle(acx + 3.5, ady + 7, 1.8); ctx.fill();
-      // Eye shine
-      ctx.fillStyle = '#fff';
-      drawCircle(acx - 2.8, ady + 6.2, 0.7); ctx.fill();
-      drawCircle(acx + 4.2, ady + 6.2, 0.7); ctx.fill();
-
-      // ── Tail — long bushy anteater tail ──
-      ctx.fillStyle = '#5d4037';
-      ctx.strokeStyle = '#3e2723';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(acx - 8, ady + aH - 18);
-      ctx.quadraticCurveTo(acx - 18, ady + aH - 28, acx - 14, ady + aH - 35);
-      ctx.quadraticCurveTo(acx - 10, ady + aH - 30, acx - 6, ady + aH - 18);
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
-      // Tail fur stripes
-      ctx.strokeStyle = '#4e342e';
-      ctx.lineWidth = 0.6;
-      ctx.beginPath();
-      ctx.moveTo(acx - 13, ady + aH - 28);
-      ctx.lineTo(acx - 10, ady + aH - 24);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(acx - 15, ady + aH - 32);
-      ctx.lineTo(acx - 12, ady + aH - 28);
-      ctx.stroke();
-
-      // ── Shooting indicator glow ──
-      if (e.shootTimer > 60) {
-        const shGrad = ctx.createRadialGradient(acx + 20, ady + 9, 0, acx + 20, ady + 9, 10);
+        // Nostril glow
+        const shGrad = ctx.createRadialGradient(noseTipX - 1, noseTipY, 0, noseTipX - 1, noseTipY, 8);
         shGrad.addColorStop(0, `rgba(255,60,60,${0.3 + Math.sin(levelTimer * 0.3) * 0.15})`);
         shGrad.addColorStop(1, 'rgba(255,60,60,0)');
         ctx.fillStyle = shGrad;
-        drawCircle(acx + 20, ady + 9, 10); ctx.fill();
+        drawCircle(noseTipX - 1, noseTipY, 8); ctx.fill();
       }
+
+      // ── Eye — single visible from side, behind thick glasses ──
+      // Glasses frame
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(3, 7, 5, 0, Math.PI * 2);
+      ctx.stroke();
+      // Temple arm going back
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-2, 7);
+      ctx.lineTo(-7, 5);
+      ctx.stroke();
+
+      // Lens glare
+      ctx.fillStyle = 'rgba(200,230,255,0.3)';
+      ctx.beginPath();
+      ctx.arc(3, 7, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye
+      ctx.fillStyle = '#111';
+      drawCircle(3, 7, 2); ctx.fill();
+      // Eye shine
+      ctx.fillStyle = '#fff';
+      drawCircle(4, 6, 0.8); ctx.fill();
+
+      // ── Elbow patch on jacket (academic detail) ──
+      ctx.fillStyle = '#5d4037';
+      ctx.beginPath();
+      ctx.ellipse(-8, aH - 16, 2, 3, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Store nose tip position for typo spawning (in world coords)
+      e._noseTipLocalX = noseTipX;
+      e._noseTipLocalY = noseTipY;
+      e._faceDir = fDir;
 
       // ── Label ──
       ctx.fillStyle = '#d32f2f';
@@ -3105,10 +3197,10 @@ function drawEnemy(e, x, y) {
       ctx.lineWidth = 0.6;
       ctx.font = 'bold 6px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('LANGUAGE', acx, ady - 6);
-      ctx.strokeText('LANGUAGE', acx, ady - 6);
-      ctx.fillText('EDITOR', acx, ady);
-      ctx.strokeText('EDITOR', acx, ady);
+      fillTextLTR('LANGUAGE', 0, -10);
+      strokeTextLTR('LANGUAGE', 0, -10);
+      fillTextLTR('EDITOR', 0, -4);
+      strokeTextLTR('EDITOR', 0, -4);
       ctx.textAlign = 'left';
 
       ctx.restore();
@@ -3145,8 +3237,8 @@ function drawEnemy(e, x, y) {
       ctx.font = 'bold 11px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(tChar, 0, 0);
-      ctx.strokeText(tChar, 0, 0);
+      fillTextLTR(tChar, 0, 0);
+      strokeTextLTR(tChar, 0, 0);
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
       ctx.restore();
@@ -4008,7 +4100,7 @@ function drawGradStudent(gs, x, y) {
       ctx.font = 'bold 7px monospace';
       ctx.textAlign = 'center';
       const arrowBob = Math.sin(levelTimer * 0.15) * 3;
-      ctx.fillText('\u25BC MENTOR' + (gs.gsLabel ? ' (' + gs.gsLabel + ')' : ''), x + gs.w / 2, dy - 8 + arrowBob);
+      fillTextLTR('\u25BC MENTOR' + (gs.gsLabel ? ' (' + gs.gsLabel + ')' : ''), x + gs.w / 2, dy - 8 + arrowBob);
       ctx.textAlign = 'left';
     }
   } else {
@@ -7780,21 +7872,26 @@ function update() {
       if (closestP && Math.abs(closestP.x - e.x) < TILE * 8 && e.shootTimer > 90) {
         e.shootTimer = 0;
         const dx = closestP.x - e.x;
-        const horz = dx > 0 ? 1.5 : -1.5;
+        const horz = dx > 0 ? 6 : -6;
+        // Spawn typo from the nose tip — gunshot trajectory
+        const fD = e._faceDir || (dx > 0 ? 1 : -1);
+        const spawnX = e.x + e.w / 2 + (e._noseTipLocalX || 22) * fD;
+        const spawnY = e.y + (e._noseTipLocalY || 10);
         enemies.push({
-          type: 'typo', x: e.x + e.w / 2, y: e.y + 4,
-          w: 10, h: 10, vx: horz, vy: -4.5,
+          type: 'typo', x: spawnX, y: spawnY,
+          w: 10, h: 10, vx: horz, vy: 0,
           startX: e.x, patrolRange: 300, alive: true,
-          frame: 0, frameTimer: 0, isProjectile: true
+          frame: 0, frameTimer: 0, isProjectile: true, noGravity: true
         });
-        spawnFloatingText(e.x + e.w / 2, e.y - 8, 'TYPO!', '#d32f2f');
+        spawnFloatingText(spawnX, spawnY - 8, 'TYPO!', '#d32f2f');
       }
     }
 
     if (e.isProjectile) {
-      e.vy = (e.vy || 0) + 0.15;
+      if (!e.noGravity) { e.vy = (e.vy || 0) + 0.15; }
       e.y += e.vy;
       if (e.y > level.height * TILE) e.alive = false;
+      if (e.noGravity && (e.x < -50 || e.x > level.width * TILE + 50)) e.alive = false;
     }
 
     // Check collision with both players
@@ -8678,7 +8775,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.5', GAME_W / 2, 188);
+  ctx.fillText('V6.6', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
