@@ -3675,6 +3675,448 @@ function drawPet(pet, x, y) {
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
+  } else if (pet.kind === 'teddybear') {
+    // === ANIME TEDDY BEAR (standing upright) ===
+    const furMain = '#8B5E3C';
+    const furLight = '#B0845A';
+    const furDark = '#5C3A1E';
+    const belly = '#D4A574';
+    const nose = '#3e2723';
+    const padColor = '#C4956A';
+
+    // Standing upright: big head on top, small round body below, stubby legs, arms at sides
+    const headR = 7;
+    const headCX = cx + 3;
+    const headCY = dy + 5;
+    const bodyTop = headCY + headR - 2;
+    const bodyH = pet.h - headR - 2;
+    const legOffset = pet.collected ? Math.sin(pet.frame * Math.PI / 2) * 1.5 : 0;
+
+    // Body contour (round, upright torso)
+    ctx.fillStyle = furDark;
+    drawEllipse(headCX, bodyTop + bodyH / 2, 8, bodyH / 2 + 1);
+    ctx.fill();
+
+    // Body fill
+    const bodyGrad = ctx.createRadialGradient(headCX - 1, bodyTop + bodyH / 2 - 1, 2, headCX, bodyTop + bodyH / 2, 9);
+    bodyGrad.addColorStop(0, furLight);
+    bodyGrad.addColorStop(0.7, furMain);
+    bodyGrad.addColorStop(1, furDark);
+    ctx.fillStyle = bodyGrad;
+    drawEllipse(headCX, bodyTop + bodyH / 2, 7, bodyH / 2);
+    ctx.fill();
+
+    // Belly patch (round tummy on front)
+    ctx.fillStyle = belly;
+    drawEllipse(headCX, bodyTop + bodyH / 2 + 1, 5, 4);
+    ctx.fill();
+
+    // Stubby legs (drawn AFTER body so they're visible below it)
+    ctx.fillStyle = furDark;
+    drawRoundRect(headCX - 5, dy + pet.h - 4 + legOffset, 4, 5, 2);
+    ctx.fill();
+    drawRoundRect(headCX + 1, dy + pet.h - 4 - legOffset, 4, 5, 2);
+    ctx.fill();
+    // Leg fill
+    ctx.fillStyle = furMain;
+    drawRoundRect(headCX - 4.5, dy + pet.h - 3.5 + legOffset, 3, 4, 1.5);
+    ctx.fill();
+    drawRoundRect(headCX + 1.5, dy + pet.h - 3.5 - legOffset, 3, 4, 1.5);
+    ctx.fill();
+    // Paw pads on feet
+    ctx.fillStyle = padColor;
+    drawCircle(headCX - 3, dy + pet.h + 0.5 + legOffset, 2);
+    ctx.fill();
+    drawCircle(headCX + 3, dy + pet.h + 0.5 - legOffset, 2);
+    ctx.fill();
+
+    // Stitching line on belly
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.4;
+    ctx.setLineDash([1, 1.5]);
+    ctx.beginPath();
+    ctx.moveTo(headCX, bodyTop + bodyH / 2 - 3);
+    ctx.lineTo(headCX, bodyTop + bodyH / 2 + 4);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+
+    // Arms (sticking out to the sides, slightly raised)
+    const armWave = pet.collected ? Math.sin(pet.tailWag * 2) * 0.3 : 0;
+    // Left arm
+    ctx.save();
+    ctx.translate(headCX - 7, bodyTop + 2);
+    ctx.rotate(-0.6 + armWave);
+    ctx.fillStyle = furDark;
+    drawRoundRect(-2, -1, 4, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawRoundRect(-1, 0, 3, 7, 2);
+    ctx.fill();
+    ctx.fillStyle = padColor;
+    drawCircle(0.5, 7, 2);
+    ctx.fill();
+    ctx.restore();
+    // Right arm
+    ctx.save();
+    ctx.translate(headCX + 7, bodyTop + 2);
+    ctx.rotate(0.6 - armWave);
+    ctx.fillStyle = furDark;
+    drawRoundRect(-2, -1, 4, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawRoundRect(-1, 0, 3, 7, 2);
+    ctx.fill();
+    ctx.fillStyle = padColor;
+    drawCircle(0.5, 7, 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Bow tie (always visible, at neck area)
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.moveTo(headCX, bodyTop + 1);
+    ctx.lineTo(headCX - 4, bodyTop - 1);
+    ctx.lineTo(headCX - 4, bodyTop + 3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(headCX, bodyTop + 1);
+    ctx.lineTo(headCX + 4, bodyTop - 1);
+    ctx.lineTo(headCX + 4, bodyTop + 3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#c62828';
+    drawCircle(headCX, bodyTop + 1, 1.2);
+    ctx.fill();
+
+    // Head contour
+    ctx.fillStyle = furDark;
+    drawCircle(headCX, headCY, headR + 1);
+    ctx.fill();
+
+    // Head fill
+    const headGrad = ctx.createRadialGradient(headCX - 1, headCY - 2, 1, headCX, headCY, headR);
+    headGrad.addColorStop(0, furLight);
+    headGrad.addColorStop(0.6, furMain);
+    headGrad.addColorStop(1, furDark);
+    ctx.fillStyle = headGrad;
+    drawCircle(headCX, headCY, headR);
+    ctx.fill();
+
+    // Round ears (classic teddy bear)
+    // Left ear
+    ctx.fillStyle = furDark;
+    drawCircle(headCX - 5, headCY - 5, 4);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawCircle(headCX - 5, headCY - 5, 3);
+    ctx.fill();
+    ctx.fillStyle = padColor;
+    drawCircle(headCX - 5, headCY - 5, 1.8);
+    ctx.fill();
+    // Right ear
+    ctx.fillStyle = furDark;
+    drawCircle(headCX + 5, headCY - 5, 4);
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    drawCircle(headCX + 5, headCY - 5, 3);
+    ctx.fill();
+    ctx.fillStyle = padColor;
+    drawCircle(headCX + 5, headCY - 5, 1.8);
+    ctx.fill();
+
+    // Eyes — button eyes (classic teddy look)
+    const eyeY = headCY - 1;
+    for (let ei = 0; ei < 2; ei++) {
+      const ex = headCX + (ei === 0 ? -3 : 3);
+      // Button outline
+      ctx.fillStyle = '#1a1a1a';
+      drawCircle(ex, eyeY, 2.2);
+      ctx.fill();
+      // Button body
+      ctx.fillStyle = '#333';
+      drawCircle(ex, eyeY, 1.8);
+      ctx.fill();
+      // Button holes (cross stitch)
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 0.4;
+      ctx.beginPath(); ctx.moveTo(ex - 0.8, eyeY - 0.8); ctx.lineTo(ex + 0.8, eyeY + 0.8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ex + 0.8, eyeY - 0.8); ctx.lineTo(ex - 0.8, eyeY + 0.8); ctx.stroke();
+      // Highlight
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 0.5;
+      drawCircle(ex - 0.5, eyeY - 0.5, 0.6);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Snout mound
+    ctx.fillStyle = belly;
+    drawEllipse(headCX, headCY + 2, 3, 2.2);
+    ctx.fill();
+
+    // Nose (oval teddy nose)
+    ctx.fillStyle = nose;
+    drawEllipse(headCX, headCY + 1, 1.5, 1);
+    ctx.fill();
+    // Nose shine
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    drawCircle(headCX - 0.5, headCY + 0.5, 0.5);
+    ctx.fill();
+
+    // Mouth (Y shape)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(headCX, headCY + 2);
+    ctx.lineTo(headCX, headCY + 3.2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(headCX - 1.5, headCY + 3.8, 1.5, -0.5, 0.1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(headCX + 1.5, headCY + 3.8, 1.5, Math.PI - 0.1, Math.PI + 0.5);
+    ctx.stroke();
+
+    // Blush marks
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#f48fb1';
+    drawEllipse(headCX - 5, headCY + 2, 1.8, 1);
+    ctx.fill();
+    drawEllipse(headCX + 5, headCY + 2, 1.8, 1);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Small stubby tail (behind, peeking out)
+    const tailAngle = Math.sin(pet.tailWag * (pet.collected ? 2 : 0.5)) * 0.3;
+    ctx.save();
+    ctx.translate(headCX - 8, bodyTop + bodyH / 2);
+    ctx.rotate(-0.5 + tailAngle);
+    ctx.fillStyle = furMain;
+    drawCircle(0, 0, 2.5);
+    ctx.fill();
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+    ctx.restore();
+
+  } else if (pet.kind === 'pig') {
+    // === ANIME PIG ===
+    const furMain = '#f8a0b0';
+    const furLight = '#fcc5d0';
+    const furDark = '#d4727e';
+    const belly = '#fde0e6';
+    const nose = '#d4727e';
+
+    // Body contour
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 2, dy + 7, pet.w - 4, pet.h - 8, 6);
+    ctx.fill();
+
+    // Body with radial gradient (chubby)
+    const bodyGrad = ctx.createRadialGradient(cx - 2, cy2 + 1, 2, cx, cy2 + 2, 14);
+    bodyGrad.addColorStop(0, furLight);
+    bodyGrad.addColorStop(0.7, furMain);
+    bodyGrad.addColorStop(1, furDark);
+    ctx.fillStyle = bodyGrad;
+    drawRoundRect(x + 3, dy + 8, pet.w - 6, pet.h - 9, 5);
+    ctx.fill();
+
+    // Belly patch
+    ctx.fillStyle = belly;
+    drawEllipse(cx, dy + pet.h - 5, 6, 3.5);
+    ctx.fill();
+
+    // Rim light
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = '#fff';
+    drawRoundRect(x + 4, dy + 8, 3, pet.h - 12, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Legs (trotters)
+    const legOffset = pet.collected ? Math.sin(pet.frame * Math.PI / 2) * 2 : 0;
+    ctx.fillStyle = furDark;
+    drawRoundRect(x + 4, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + 8, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 11, dy + pet.h - 5 - legOffset, 3, 5, 1.5);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 7, dy + pet.h - 5 + legOffset, 3, 5, 1.5);
+    ctx.fill();
+
+    // Hooves
+    ctx.fillStyle = '#a0525a';
+    drawRoundRect(x + 4, dy + pet.h - 1 + legOffset, 3, 2, 1);
+    ctx.fill();
+    drawRoundRect(x + 8, dy + pet.h - 1 - legOffset, 3, 2, 1);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 11, dy + pet.h - 1 - legOffset, 3, 2, 1);
+    ctx.fill();
+    drawRoundRect(x + pet.w - 7, dy + pet.h - 1 + legOffset, 3, 2, 1);
+    ctx.fill();
+
+    // Head contour
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 3, dy + 6, 7.5);
+    ctx.fill();
+
+    // Head fill
+    const headGrad = ctx.createRadialGradient(cx + 2, dy + 4, 1, cx + 3, dy + 6, 8);
+    headGrad.addColorStop(0, furLight);
+    headGrad.addColorStop(0.6, furMain);
+    headGrad.addColorStop(1, furDark);
+    ctx.fillStyle = headGrad;
+    drawCircle(cx + 3, dy + 6, 6.5);
+    ctx.fill();
+
+    // Ears (floppy pig ears — start at top of head, droop DOWN and outward)
+    // Left ear — attaches at top-left of head, flops down-left
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.moveTo(cx - 1, dy + 2);    // base on head (right side of ear)
+    ctx.lineTo(cx - 3, dy + 0);    // top of ear attachment
+    ctx.quadraticCurveTo(cx - 7, dy + 0, cx - 7, dy + 5);  // curves out and down
+    ctx.quadraticCurveTo(cx - 6, dy + 7, cx - 3, dy + 5);  // rounded bottom tip
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.moveTo(cx - 1, dy + 2.5);
+    ctx.lineTo(cx - 2.5, dy + 0.5);
+    ctx.quadraticCurveTo(cx - 6, dy + 0.5, cx - 6, dy + 5);
+    ctx.quadraticCurveTo(cx - 5.5, dy + 6.5, cx - 3, dy + 4.5);
+    ctx.closePath();
+    ctx.fill();
+    // Inner ear pink
+    ctx.fillStyle = furLight;
+    ctx.beginPath();
+    ctx.moveTo(cx - 1.5, dy + 2.5);
+    ctx.quadraticCurveTo(cx - 5, dy + 1.5, cx - 5, dy + 4.5);
+    ctx.quadraticCurveTo(cx - 4.5, dy + 5.5, cx - 3, dy + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right ear — attaches at top-right of head, flops down-right
+    ctx.fillStyle = furDark;
+    ctx.beginPath();
+    ctx.moveTo(cx + 7, dy + 2);
+    ctx.lineTo(cx + 9, dy + 0);
+    ctx.quadraticCurveTo(cx + 13, dy + 0, cx + 13, dy + 5);
+    ctx.quadraticCurveTo(cx + 12, dy + 7, cx + 9, dy + 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = furMain;
+    ctx.beginPath();
+    ctx.moveTo(cx + 7, dy + 2.5);
+    ctx.lineTo(cx + 8.5, dy + 0.5);
+    ctx.quadraticCurveTo(cx + 12, dy + 0.5, cx + 12, dy + 5);
+    ctx.quadraticCurveTo(cx + 11.5, dy + 6.5, cx + 9, dy + 4.5);
+    ctx.closePath();
+    ctx.fill();
+    // Inner ear pink
+    ctx.fillStyle = furLight;
+    ctx.beginPath();
+    ctx.moveTo(cx + 7.5, dy + 2.5);
+    ctx.quadraticCurveTo(cx + 11, dy + 1.5, cx + 11, dy + 4.5);
+    ctx.quadraticCurveTo(cx + 10.5, dy + 5.5, cx + 9, dy + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Eyes — anime style (big, cute)
+    const eyeY = dy + 5;
+    for (let ei = 0; ei < 2; ei++) {
+      const ex = cx + (ei === 0 ? 0 : 6);
+      ctx.fillStyle = '#fff';
+      drawEllipse(ex, eyeY, 3, 2.8);
+      ctx.fill();
+      // Iris gradient (warm brown)
+      const irisGrad = ctx.createRadialGradient(ex, eyeY, 0.5, ex, eyeY, 2.5);
+      irisGrad.addColorStop(0, '#6d4c41');
+      irisGrad.addColorStop(0.7, '#4e342e');
+      irisGrad.addColorStop(1, '#3e2723');
+      ctx.fillStyle = irisGrad;
+      drawEllipse(ex, eyeY, 2.2, 2.2);
+      ctx.fill();
+      // Pupil
+      ctx.fillStyle = '#000';
+      drawCircle(ex, eyeY + 0.3, 1);
+      ctx.fill();
+      // Highlights
+      ctx.fillStyle = '#fff';
+      drawCircle(ex - 0.8, eyeY - 0.8, 0.8);
+      ctx.fill();
+      ctx.globalAlpha = 0.6;
+      drawCircle(ex + 0.5, eyeY + 0.8, 0.4);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Snout (big oval — signature pig feature)
+    ctx.fillStyle = nose;
+    drawEllipse(cx + 3, dy + 8, 3, 2);
+    ctx.fill();
+    ctx.fillStyle = furLight;
+    drawEllipse(cx + 3, dy + 8, 2.5, 1.5);
+    ctx.fill();
+    // Nostrils
+    ctx.fillStyle = furDark;
+    drawCircle(cx + 1.8, dy + 8, 0.7);
+    ctx.fill();
+    drawCircle(cx + 4.2, dy + 8, 0.7);
+    ctx.fill();
+    // Snout shine
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    drawCircle(cx + 2.5, dy + 7.3, 0.5);
+    ctx.fill();
+
+    // Mouth (tiny smile below snout)
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.arc(cx + 3, dy + 10.5, 1.5, 0.1, Math.PI - 0.1);
+    ctx.stroke();
+
+    // Blush marks
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#e57388';
+    drawEllipse(cx - 1.5, dy + 7.5, 1.8, 1);
+    ctx.fill();
+    drawEllipse(cx + 7.5, dy + 7.5, 1.8, 1);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Curly tail
+    const tailWave = Math.sin(pet.tailWag * (pet.collected ? 3 : 1)) * 0.4;
+    ctx.save();
+    ctx.translate(x + 1, dy + 11);
+    ctx.strokeStyle = furMain;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-2, -2 + tailWave, -4, -4 + tailWave * 2, -2, -5 + tailWave);
+    ctx.bezierCurveTo(0, -6 + tailWave, 1, -4 + tailWave * 2, -1, -3 + tailWave);
+    ctx.stroke();
+    ctx.strokeStyle = furDark;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+
+    // Mud splat when collected (occasionally)
+    if (pet.collected && Math.sin(levelTimer * 0.08) > 0.8) {
+      ctx.fillStyle = '#8d6e63';
+      ctx.globalAlpha = 0.6;
+      drawCircle(cx + 8, dy + pet.h - 2, 1.5);
+      ctx.fill();
+      drawCircle(cx - 2, dy + pet.h - 3, 1);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
   } else {
     // === ANIME MOUSE ===
     const furMain = '#c9b89a';
@@ -4132,7 +4574,7 @@ function drawGradStudent(gs, x, y) {
 // ============================================================
 // CUTE COLLECTIBLE DRAWING
 // ============================================================
-function drawCollectible(type, x, y, w, h) {
+function drawCollectible(type, x, y, w, h, foodKind) {
   const glow = 0.3 + Math.sin(levelTimer * 0.1) * 0.15;
 
   // Anime sparkle ring around all collectibles
@@ -4366,53 +4808,772 @@ function drawCollectible(type, x, y, w, h) {
     }
 
     case 'heart': {
-      // Extra life heart
-      ctx.shadowColor = '#ef5350';
-      ctx.shadowBlur = 12 * glow * 2;
+      // Free seminar food — extra life!
+      ctx.shadowColor = '#ff8f00';
+      ctx.shadowBlur = 10 * glow * 2;
 
-      const pulse = 1 + Math.sin(levelTimer * 0.15) * 0.1;
+      const pulse = 1 + Math.sin(levelTimer * 0.15) * 0.08;
       const cx = x + w / 2;
-      const cy = y + h / 2 + 2;
+      const cy = y + h / 2;
+      const fk = foodKind || 'pizza';
 
       ctx.save();
       ctx.translate(cx, cy);
       ctx.scale(pulse, pulse);
 
-      // Heart contour
-      ctx.fillStyle = '#7f0000';
-      ctx.beginPath();
-      ctx.moveTo(0, 6);
-      ctx.bezierCurveTo(-2, 3, -9, -2, -9, -5.5);
-      ctx.bezierCurveTo(-9, -10, -5, -11.5, 0, -8);
-      ctx.bezierCurveTo(5, -11.5, 9, -10, 9, -5.5);
-      ctx.bezierCurveTo(9, -2, 2, 3, 0, 6);
-      ctx.fill();
-      // Heart shape
-      const heartGrad = ctx.createRadialGradient(0, -2, 2, 0, 0, 12);
-      heartGrad.addColorStop(0, '#ff6b81');
-      heartGrad.addColorStop(1, '#c0392b');
-      ctx.fillStyle = heartGrad;
-      ctx.beginPath();
-      ctx.moveTo(0, 4);
-      ctx.bezierCurveTo(-2, 2, -8, -2, -8, -5);
-      ctx.bezierCurveTo(-8, -9, -4, -10, 0, -7);
-      ctx.bezierCurveTo(4, -10, 8, -9, 8, -5);
-      ctx.bezierCurveTo(8, -2, 2, 2, 0, 4);
-      ctx.fill();
-
-      // Shine
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      drawCircle(-3, -6, 2);
-      ctx.fill();
+      if (fk === 'pizza') {
+        // === PIZZA SLICE — manga style ===
+        // Dark contour behind everything
+        ctx.fillStyle = '#5d4037';
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.lineTo(-9, 8);
+        ctx.quadraticCurveTo(-8, 10, -6, 9);
+        ctx.lineTo(6, 9);
+        ctx.quadraticCurveTo(8, 10, 9, 8);
+        ctx.closePath();
+        ctx.fill();
+        // Crust (thick golden-brown arc at wide end)
+        const crustGrad = ctx.createLinearGradient(-8, 6, 8, 10);
+        crustGrad.addColorStop(0, '#d7a86e');
+        crustGrad.addColorStop(0.5, '#c49a5e');
+        crustGrad.addColorStop(1, '#a1887f');
+        ctx.fillStyle = crustGrad;
+        ctx.beginPath();
+        ctx.moveTo(-8, 6);
+        ctx.lineTo(8, 6);
+        ctx.quadraticCurveTo(9, 9, 6, 8);
+        ctx.lineTo(-6, 8);
+        ctx.quadraticCurveTo(-9, 9, -8, 6);
+        ctx.closePath();
+        ctx.fill();
+        // Crust highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.moveTo(-6, 6.5);
+        ctx.lineTo(6, 6.5);
+        ctx.lineTo(5, 7.5);
+        ctx.lineTo(-5, 7.5);
+        ctx.closePath();
+        ctx.fill();
+        // Crust dots (bread bubbles)
+        ctx.fillStyle = 'rgba(160,120,80,0.3)';
+        drawCircle(-4, 7.5, 0.8); ctx.fill();
+        drawCircle(2, 7.2, 0.6); ctx.fill();
+        drawCircle(5, 7.5, 0.7); ctx.fill();
+        // Cheese body with rich gradient
+        const pizzaGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 10);
+        pizzaGrad.addColorStop(0, '#fff9c4');
+        pizzaGrad.addColorStop(0.3, '#ffee58');
+        pizzaGrad.addColorStop(0.7, '#ffc107');
+        pizzaGrad.addColorStop(1, '#ffab00');
+        ctx.fillStyle = pizzaGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(-7.5, 6);
+        ctx.lineTo(7.5, 6);
+        ctx.closePath();
+        ctx.fill();
+        // Sauce peeking through cheese (splotches)
+        ctx.fillStyle = 'rgba(211,47,47,0.25)';
+        drawEllipse(-2, 2, 3, 2); ctx.fill();
+        drawEllipse(3, 0, 2.5, 1.5); ctx.fill();
+        // Melted cheese texture (wavy lines)
+        ctx.strokeStyle = 'rgba(255,245,157,0.5)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(-4, 3);
+        ctx.quadraticCurveTo(-2, 2, 0, 3);
+        ctx.quadraticCurveTo(2, 4, 4, 3);
+        ctx.stroke();
+        // Pepperoni with gradient and contour
+        for (const pp of [[-2.5, 0.5, 2.2], [2, 3.5, 2], [0.5, -3, 1.7]]) {
+          ctx.fillStyle = '#8B1A1A';
+          drawCircle(pp[0], pp[1], pp[2] + 0.5); ctx.fill();
+          const pepGrad = ctx.createRadialGradient(pp[0] - 0.3, pp[1] - 0.3, 0.3, pp[0], pp[1], pp[2]);
+          pepGrad.addColorStop(0, '#ef5350');
+          pepGrad.addColorStop(0.6, '#c62828');
+          pepGrad.addColorStop(1, '#8B1A1A');
+          ctx.fillStyle = pepGrad;
+          drawCircle(pp[0], pp[1], pp[2]); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          drawCircle(pp[0] - 0.6, pp[1] - 0.6, 0.7); ctx.fill();
+        }
+        // Basil leaf
+        ctx.fillStyle = '#2e7d32';
+        ctx.beginPath();
+        ctx.ellipse(3.5, -1, 1.5, 0.8, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#1b5e20';
+        ctx.lineWidth = 0.3;
+        ctx.stroke();
+        // Cheese drips from edges
+        ctx.fillStyle = '#ffee58';
+        ctx.beginPath();
+        ctx.moveTo(7, 5.5);
+        ctx.quadraticCurveTo(8, 8, 6.5, 9.5);
+        ctx.quadraticCurveTo(5.5, 8, 6.5, 5.5);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-5, 5);
+        ctx.quadraticCurveTo(-6, 7, -5, 8);
+        ctx.quadraticCurveTo(-4, 7, -4.5, 5);
+        ctx.fill();
+        // Shine on cheese
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        drawEllipse(-1, -4, 2, 1.2); ctx.fill();
+      } else if (fk === 'cupcake') {
+        // === CUPCAKE — manga style ===
+        // Paper wrapper contour
+        ctx.fillStyle = '#3e2723';
+        ctx.beginPath();
+        ctx.moveTo(-7, 2);
+        ctx.lineTo(-6, 9);
+        ctx.lineTo(6, 9);
+        ctx.lineTo(7, 2);
+        ctx.closePath();
+        ctx.fill();
+        // Paper wrapper
+        const wrapGrad = ctx.createLinearGradient(-6, 3, 6, 3);
+        wrapGrad.addColorStop(0, '#6d4c41');
+        wrapGrad.addColorStop(0.5, '#8d6e63');
+        wrapGrad.addColorStop(1, '#5d4037');
+        ctx.fillStyle = wrapGrad;
+        ctx.beginPath();
+        ctx.moveTo(-6, 2.5);
+        ctx.lineTo(-5, 8.5);
+        ctx.lineTo(5, 8.5);
+        ctx.lineTo(6, 2.5);
+        ctx.closePath();
+        ctx.fill();
+        // Wrapper ridges
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 0.6;
+        for (let i = -4; i <= 4; i += 1.5) {
+          ctx.beginPath();
+          ctx.moveTo(i, 2.5);
+          ctx.lineTo(i * 0.88, 8.5);
+          ctx.stroke();
+        }
+        // Wrapper top rim
+        ctx.fillStyle = '#a1887f';
+        drawRoundRect(-6.5, 1.5, 13, 2, 1);
+        ctx.fill();
+        // Cake body visible
+        const cakeGrad = ctx.createLinearGradient(0, 0, 0, 3);
+        cakeGrad.addColorStop(0, '#e8c88a');
+        cakeGrad.addColorStop(1, '#d4a35a');
+        ctx.fillStyle = cakeGrad;
+        drawRoundRect(-5.5, 0, 11, 3, 1.5);
+        ctx.fill();
+        // Frosting — swirled dome with layers
+        // Frosting contour
+        ctx.fillStyle = '#ad1457';
+        ctx.beginPath();
+        ctx.moveTo(-6.5, 1);
+        ctx.quadraticCurveTo(-8, -3, -4, -5);
+        ctx.quadraticCurveTo(-1, -9, 0, -7);
+        ctx.quadraticCurveTo(1, -9, 4, -5);
+        ctx.quadraticCurveTo(8, -3, 6.5, 1);
+        ctx.closePath();
+        ctx.fill();
+        // Frosting fill with gradient
+        const frostGrad = ctx.createRadialGradient(0, -3, 1, 0, -1, 8);
+        frostGrad.addColorStop(0, '#fce4ec');
+        frostGrad.addColorStop(0.4, '#f48fb1');
+        frostGrad.addColorStop(1, '#e91e63');
+        ctx.fillStyle = frostGrad;
+        ctx.beginPath();
+        ctx.moveTo(-6, 0.5);
+        ctx.quadraticCurveTo(-7, -3, -3.5, -4.5);
+        ctx.quadraticCurveTo(-1, -8, 0, -6.5);
+        ctx.quadraticCurveTo(1, -8, 3.5, -4.5);
+        ctx.quadraticCurveTo(7, -3, 6, 0.5);
+        ctx.closePath();
+        ctx.fill();
+        // Frosting swirl lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(-4, -1);
+        ctx.quadraticCurveTo(-2, -4, 0, -3);
+        ctx.quadraticCurveTo(2, -4, 4, -1);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-2, -4);
+        ctx.quadraticCurveTo(0, -6.5, 2, -4);
+        ctx.stroke();
+        // Frosting highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        drawEllipse(-3, -3, 2, 1.5); ctx.fill();
+        // Sprinkles (more, varied angles)
+        const sprColors = ['#ffeb3b','#42a5f5','#66bb6a','#ff7043','#ab47bc','#fff','#26c6da'];
+        const sprPos = [[-3,-4,0.4],[-1,-6,0.8],[1,-3,1.2],[3,-5,-0.3],[-4,-2,-0.6],[2,-1,0.5],[4,-4,0.9]];
+        for (let si = 0; si < sprPos.length; si++) {
+          ctx.fillStyle = sprColors[si % sprColors.length];
+          ctx.save();
+          ctx.translate(sprPos[si][0], sprPos[si][1]);
+          ctx.rotate(sprPos[si][2]);
+          drawRoundRect(-1.2, -0.4, 2.4, 0.8, 0.4);
+          ctx.fill();
+          ctx.restore();
+        }
+        // Cherry on top with stem
+        ctx.fillStyle = '#7f0000';
+        drawCircle(0, -7.5, 3); ctx.fill();
+        const cherryGrad = ctx.createRadialGradient(-0.5, -8, 0.5, 0, -7.5, 3);
+        cherryGrad.addColorStop(0, '#ef5350');
+        cherryGrad.addColorStop(1, '#b71c1c');
+        ctx.fillStyle = cherryGrad;
+        drawCircle(0, -7.5, 2.5); ctx.fill();
+        // Cherry shine
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCircle(-0.8, -8.3, 0.9); ctx.fill();
+        // Stem
+        ctx.strokeStyle = '#33691e';
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, -9.5);
+        ctx.quadraticCurveTo(2, -12, 3.5, -11);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+      } else if (fk === 'cake') {
+        // === CAKE SLICE — manga style ===
+        // Shadow/contour behind
+        ctx.fillStyle = '#4e342e';
+        drawRoundRect(-8, -5, 16, 15, 2);
+        ctx.fill();
+        // Bottom sponge layer
+        const spGrad1 = ctx.createLinearGradient(0, 3, 0, 9);
+        spGrad1.addColorStop(0, '#ffe0b2');
+        spGrad1.addColorStop(1, '#ffcc80');
+        ctx.fillStyle = spGrad1;
+        drawRoundRect(-7, 3, 14, 6, 1.5);
+        ctx.fill();
+        // Bottom sponge texture dots
+        ctx.fillStyle = 'rgba(210,170,110,0.3)';
+        drawCircle(-3, 5.5, 0.5); ctx.fill();
+        drawCircle(1, 6, 0.6); ctx.fill();
+        drawCircle(4, 5, 0.4); ctx.fill();
+        // Cream layer between sponges
+        ctx.fillStyle = '#fff';
+        drawRoundRect(-7, 1, 14, 3, 0.5);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,253,231,0.6)';
+        drawRoundRect(-6, 1.5, 12, 1.5, 0.5);
+        ctx.fill();
+        // Top sponge layer
+        const spGrad2 = ctx.createLinearGradient(0, -4, 0, 1);
+        spGrad2.addColorStop(0, '#ffcc80');
+        spGrad2.addColorStop(1, '#ffe0b2');
+        ctx.fillStyle = spGrad2;
+        drawRoundRect(-7, -4, 14, 6, 1.5);
+        ctx.fill();
+        // Top sponge texture
+        ctx.fillStyle = 'rgba(210,170,110,0.25)';
+        drawCircle(-4, -2, 0.5); ctx.fill();
+        drawCircle(2, -1, 0.6); ctx.fill();
+        drawCircle(5, -2.5, 0.4); ctx.fill();
+        // White frosting on top
+        ctx.fillStyle = '#fff';
+        drawRoundRect(-7.5, -6, 15, 3, 1.5);
+        ctx.fill();
+        // Frosting highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        drawRoundRect(-6, -5.8, 12, 1, 1);
+        ctx.fill();
+        // Chocolate drizzle (wavy, dripping over sides)
+        ctx.fillStyle = '#4e342e';
+        ctx.beginPath();
+        ctx.moveTo(-7, -4.5);
+        ctx.quadraticCurveTo(-5, -3, -3, -4.5);
+        ctx.quadraticCurveTo(-1, -3, 1, -4.5);
+        ctx.quadraticCurveTo(3, -3, 5, -4.5);
+        ctx.quadraticCurveTo(7, -3, 7, -4.5);
+        ctx.lineTo(7, -4);
+        ctx.lineTo(-7, -4);
+        ctx.closePath();
+        ctx.fill();
+        // Drip down side
+        ctx.beginPath();
+        ctx.moveTo(6.5, -4);
+        ctx.quadraticCurveTo(7.5, -2, 7, 0);
+        ctx.quadraticCurveTo(6, -1, 6.5, -4);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-5.5, -4.5);
+        ctx.quadraticCurveTo(-6.5, -2, -6, 1);
+        ctx.quadraticCurveTo(-5, 0, -5.5, -4.5);
+        ctx.fill();
+        // Chocolate shine
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        drawRoundRect(-5, -4.5, 10, 0.8, 0.5);
+        ctx.fill();
+        // Strawberry on top
+        ctx.fillStyle = '#c62828';
+        ctx.beginPath();
+        ctx.moveTo(0, -10.5);
+        ctx.quadraticCurveTo(-3.5, -8, -2.5, -6);
+        ctx.lineTo(2.5, -6);
+        ctx.quadraticCurveTo(3.5, -8, 0, -10.5);
+        ctx.fill();
+        const strawGrad = ctx.createRadialGradient(-0.5, -8, 0.5, 0, -8, 3);
+        strawGrad.addColorStop(0, '#ff5252');
+        strawGrad.addColorStop(1, '#c62828');
+        ctx.fillStyle = strawGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.quadraticCurveTo(-3, -8, -2, -6.2);
+        ctx.lineTo(2, -6.2);
+        ctx.quadraticCurveTo(3, -8, 0, -10);
+        ctx.fill();
+        // Strawberry seeds
+        ctx.fillStyle = 'rgba(255,255,200,0.4)';
+        drawCircle(-1, -8, 0.4); ctx.fill();
+        drawCircle(0.5, -7.5, 0.4); ctx.fill();
+        drawCircle(-0.5, -9, 0.3); ctx.fill();
+        // Strawberry shine
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        drawCircle(-1, -9, 0.8); ctx.fill();
+        // Strawberry leaves
+        ctx.fillStyle = '#2e7d32';
+        ctx.beginPath();
+        ctx.moveTo(0, -10.2);
+        ctx.lineTo(-2, -11.5);
+        ctx.lineTo(-0.5, -10.5);
+        ctx.lineTo(0.5, -10.5);
+        ctx.lineTo(2, -11.5);
+        ctx.closePath();
+        ctx.fill();
+        // Side layer lines (visible cross-section)
+        ctx.strokeStyle = 'rgba(139,119,101,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(-7, 1); ctx.lineTo(7, 1);
+        ctx.moveTo(-7, 3); ctx.lineTo(7, 3);
+        ctx.stroke();
+      } else if (fk === 'donut') {
+        // === DONUT — manga style ===
+        // Shadow ring behind
+        ctx.fillStyle = 'rgba(80,50,30,0.3)';
+        ctx.beginPath();
+        ctx.arc(0.5, 1, 8, 0, Math.PI * 2);
+        ctx.arc(0.5, 1, 3, 0, Math.PI * 2, true);
+        ctx.fill();
+        // Donut body contour
+        ctx.fillStyle = '#6d4c41';
+        ctx.beginPath();
+        ctx.arc(0, 0, 8.5, 0, Math.PI * 2);
+        ctx.arc(0, 0, 2.5, 0, Math.PI * 2, true);
+        ctx.fill();
+        // Donut bread with gradient
+        const doughGrad = ctx.createRadialGradient(0, 2, 3, 0, 0, 8);
+        doughGrad.addColorStop(0, '#e8c88a');
+        doughGrad.addColorStop(0.5, '#d7a86e');
+        doughGrad.addColorStop(1, '#c49a5e');
+        ctx.fillStyle = doughGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI * 2);
+        ctx.arc(0, 0, 3, 0, Math.PI * 2, true);
+        ctx.fill();
+        // Bottom half shading (darker)
+        ctx.fillStyle = 'rgba(120,85,50,0.2)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0.1, Math.PI - 0.1);
+        ctx.arc(0, 0, 3, Math.PI - 0.1, 0.1, true);
+        ctx.closePath();
+        ctx.fill();
+        // Pink glaze (top ~60%)
+        const glazeGrad = ctx.createLinearGradient(0, -8, 0, 3);
+        glazeGrad.addColorStop(0, '#f8bbd0');
+        glazeGrad.addColorStop(0.3, '#f48fb1');
+        glazeGrad.addColorStop(0.7, '#ec407a');
+        glazeGrad.addColorStop(1, '#d7a86e');
+        ctx.fillStyle = glazeGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.8, Math.PI + 0.3, -0.3);
+        ctx.arc(0, 0, 3.2, -0.3, Math.PI + 0.3, true);
+        ctx.closePath();
+        ctx.fill();
+        // Glaze drips on sides
+        ctx.fillStyle = '#ec407a';
+        ctx.beginPath();
+        ctx.moveTo(7.5, 0);
+        ctx.quadraticCurveTo(8.5, 2, 7, 3);
+        ctx.quadraticCurveTo(6.5, 2, 7.5, 0);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-7, 1);
+        ctx.quadraticCurveTo(-8, 3, -7, 4);
+        ctx.quadraticCurveTo(-6, 3, -7, 1);
+        ctx.fill();
+        // Glaze highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 7, Math.PI + 0.5, -0.5);
+        ctx.arc(0, 0, 5.5, -0.5, Math.PI + 0.5, true);
+        ctx.closePath();
+        ctx.fill();
+        // Sprinkles (more detailed, varied)
+        const sprinkleColors = ['#ffeb3b','#42a5f5','#66bb6a','#ff7043','#ab47bc','#fff','#26c6da','#ef5350'];
+        for (let si = 0; si < 10; si++) {
+          const sa = -Math.PI + si * (Math.PI / 5.5) + 0.2;
+          const sr = 4.2 + (si % 3) * 1.2;
+          const sx2 = Math.cos(sa) * sr;
+          const sy2 = Math.sin(sa) * sr;
+          if (sy2 > 2) continue; // skip below glaze line
+          ctx.fillStyle = sprinkleColors[si % sprinkleColors.length];
+          ctx.save();
+          ctx.translate(sx2, sy2);
+          ctx.rotate(sa + si * 0.7);
+          drawRoundRect(-1.3, -0.5, 2.6, 1, 0.5);
+          ctx.fill();
+          ctx.restore();
+        }
+        // Big shine
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        drawEllipse(-3.5, -4.5, 2.5, 1.5); ctx.fill();
+      } else if (fk === 'apple') {
+        // === APPLE — manga style ===
+        // Shadow
+        ctx.fillStyle = 'rgba(100,30,30,0.15)';
+        drawEllipse(0.5, 1, 8, 7.5); ctx.fill();
+        // Apple body contour
+        ctx.fillStyle = '#7f0000';
+        drawEllipse(0, 0, 8.5, 8); ctx.fill();
+        // Apple body gradient
+        const appleGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, 9);
+        appleGrad.addColorStop(0, '#ff5252');
+        appleGrad.addColorStop(0.3, '#e53935');
+        appleGrad.addColorStop(0.7, '#c62828');
+        appleGrad.addColorStop(1, '#8e1a1a');
+        ctx.fillStyle = appleGrad;
+        drawEllipse(0, 0, 8, 7.5); ctx.fill();
+        // Apple top indent
+        ctx.fillStyle = '#8e1a1a';
+        ctx.beginPath();
+        ctx.moveTo(-2, -7);
+        ctx.quadraticCurveTo(0, -5.5, 2, -7);
+        ctx.quadraticCurveTo(0, -6.5, -2, -7);
+        ctx.fill();
+        // Green-yellow highlight on side (natural apple coloring)
+        ctx.fillStyle = 'rgba(200,230,80,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(5, 2, 3, 5, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        // Big shine (anime style)
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(-3, -3, 3, 2, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        // Small secondary shine
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        drawCircle(-1, -5, 1.2); ctx.fill();
+        // Stem
+        ctx.strokeStyle = '#5d4037';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, -7);
+        ctx.quadraticCurveTo(1, -10, 2, -10.5);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+        // Leaf
+        ctx.fillStyle = '#43a047';
+        ctx.beginPath();
+        ctx.moveTo(1.5, -10);
+        ctx.quadraticCurveTo(5, -11, 5.5, -9);
+        ctx.quadraticCurveTo(4, -9.5, 1.5, -10);
+        ctx.fill();
+        // Leaf vein
+        ctx.strokeStyle = '#2e7d32';
+        ctx.lineWidth = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(2, -10);
+        ctx.lineTo(4.5, -9.5);
+        ctx.stroke();
+        // Bottom dimple
+        ctx.fillStyle = 'rgba(100,20,20,0.2)';
+        drawCircle(0, 7, 1.5); ctx.fill();
+      } else if (fk === 'carrot') {
+        // === CARROT — manga style ===
+        // Carrot body contour
+        ctx.fillStyle = '#bf360c';
+        ctx.beginPath();
+        ctx.moveTo(-5, -4);
+        ctx.quadraticCurveTo(-6, 0, -4, 4);
+        ctx.quadraticCurveTo(-2, 9, 0, 10);
+        ctx.quadraticCurveTo(2, 9, 4, 4);
+        ctx.quadraticCurveTo(6, 0, 5, -4);
+        ctx.closePath();
+        ctx.fill();
+        // Carrot body gradient (tapers to tip at bottom)
+        const carrotGrad = ctx.createLinearGradient(0, -5, 0, 10);
+        carrotGrad.addColorStop(0, '#ffab40');
+        carrotGrad.addColorStop(0.3, '#ff9100');
+        carrotGrad.addColorStop(0.7, '#ff6d00');
+        carrotGrad.addColorStop(1, '#e65100');
+        ctx.fillStyle = carrotGrad;
+        ctx.beginPath();
+        ctx.moveTo(-4.5, -3.5);
+        ctx.quadraticCurveTo(-5.5, 0, -3.5, 4);
+        ctx.quadraticCurveTo(-1.5, 8.5, 0, 9);
+        ctx.quadraticCurveTo(1.5, 8.5, 3.5, 4);
+        ctx.quadraticCurveTo(5.5, 0, 4.5, -3.5);
+        ctx.closePath();
+        ctx.fill();
+        // Horizontal segment lines (carrot rings)
+        ctx.strokeStyle = 'rgba(180,80,0,0.25)';
+        ctx.lineWidth = 0.6;
+        for (let ci = 0; ci < 5; ci++) {
+          const cy2 = -2 + ci * 2.5;
+          const cw = 4.5 - ci * 0.6;
+          ctx.beginPath();
+          ctx.moveTo(-cw, cy2);
+          ctx.quadraticCurveTo(0, cy2 + 0.5, cw, cy2);
+          ctx.stroke();
+        }
+        // Highlight (left side shine)
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(-2.5, 0, 1.5, 5, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+        // Small shine spot
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        drawCircle(-2, -2, 1); ctx.fill();
+        // Green leafy top (3 stalks fanning out)
+        ctx.strokeStyle = '#2e7d32';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(-1, -8, -3, -10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(0, -9, 0, -11);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(1, -8, 3, -10);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+        // Leaf details (lighter green)
+        ctx.strokeStyle = '#43a047';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-2.5, -9.5);
+        ctx.lineTo(-4, -10.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(2.5, -9.5);
+        ctx.lineTo(4, -10.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -10.5);
+        ctx.lineTo(-1, -11.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, -10.5);
+        ctx.lineTo(1, -11.5);
+        ctx.stroke();
+        ctx.lineCap = 'butt';
+      } else if (fk === 'banana') {
+        // === BANANA — manga style ===
+        // Banana body contour
+        ctx.fillStyle = '#a08020';
+        ctx.beginPath();
+        ctx.moveTo(-1, -9);
+        ctx.quadraticCurveTo(-8, -4, -7, 3);
+        ctx.quadraticCurveTo(-5, 8, -1, 9);
+        ctx.quadraticCurveTo(2, 8, 4, 4);
+        ctx.quadraticCurveTo(7, -1, 5, -6);
+        ctx.quadraticCurveTo(3, -10, -1, -9);
+        ctx.closePath();
+        ctx.fill();
+        // Banana body gradient (curved shape)
+        const bananaGrad = ctx.createRadialGradient(-1, 0, 2, 0, 0, 10);
+        bananaGrad.addColorStop(0, '#fff9c4');
+        bananaGrad.addColorStop(0.3, '#ffee58');
+        bananaGrad.addColorStop(0.6, '#fdd835');
+        bananaGrad.addColorStop(1, '#f9a825');
+        ctx.fillStyle = bananaGrad;
+        ctx.beginPath();
+        ctx.moveTo(-0.5, -8.5);
+        ctx.quadraticCurveTo(-7, -3.5, -6, 3);
+        ctx.quadraticCurveTo(-4.5, 7.5, -0.5, 8.5);
+        ctx.quadraticCurveTo(2, 7.5, 3.5, 3.5);
+        ctx.quadraticCurveTo(6.5, -1, 4.5, -5.5);
+        ctx.quadraticCurveTo(2.5, -9, -0.5, -8.5);
+        ctx.closePath();
+        ctx.fill();
+        // Center ridge line
+        ctx.strokeStyle = 'rgba(200,170,50,0.3)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, -7);
+        ctx.quadraticCurveTo(-4, 0, -1, 7);
+        ctx.stroke();
+        // Left highlight (big anime shine)
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.beginPath();
+        ctx.ellipse(-3, -1, 2, 5, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        // Small shine spot
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        drawCircle(-3, -4, 1.2); ctx.fill();
+        // Stem at top
+        ctx.fillStyle = '#8d6e63';
+        ctx.beginPath();
+        ctx.moveTo(-1, -8.5);
+        ctx.lineTo(-2, -10.5);
+        ctx.lineTo(0, -10);
+        ctx.closePath();
+        ctx.fill();
+        // Brown tip at bottom
+        ctx.fillStyle = '#6d4c41';
+        ctx.beginPath();
+        ctx.moveTo(-1, 8);
+        ctx.quadraticCurveTo(-2, 10, -1, 10.5);
+        ctx.quadraticCurveTo(0, 10, 0, 8);
+        ctx.closePath();
+        ctx.fill();
+        // Brown spots (ripe banana)
+        ctx.fillStyle = 'rgba(120,80,20,0.2)';
+        drawCircle(2, 2, 0.8); ctx.fill();
+        drawCircle(-2, 4, 0.6); ctx.fill();
+        drawCircle(1, -3, 0.5); ctx.fill();
+      } else {
+        // === SANDWICH — manga style ===
+        // Shadow behind
+        ctx.fillStyle = 'rgba(80,60,40,0.2)';
+        ctx.beginPath();
+        ctx.moveTo(0.5, -7);
+        ctx.lineTo(-8, 8);
+        ctx.lineTo(9, 8);
+        ctx.closePath();
+        ctx.fill();
+        // Back bread slice contour
+        ctx.fillStyle = '#8d6e63';
+        ctx.beginPath();
+        ctx.moveTo(0, -9);
+        ctx.lineTo(-9, 8);
+        ctx.lineTo(9, 8);
+        ctx.closePath();
+        ctx.fill();
+        // Back bread with gradient
+        const breadGrad = ctx.createLinearGradient(0, -8, 0, 7);
+        breadGrad.addColorStop(0, '#efebe9');
+        breadGrad.addColorStop(0.8, '#d7ccc8');
+        breadGrad.addColorStop(1, '#bcaaa4');
+        ctx.fillStyle = breadGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.lineTo(-8, 7);
+        ctx.lineTo(8, 7);
+        ctx.closePath();
+        ctx.fill();
+        // Bread speckles (whole grain)
+        ctx.fillStyle = 'rgba(139,119,101,0.15)';
+        drawCircle(-2, 0, 0.5); ctx.fill();
+        drawCircle(3, 2, 0.4); ctx.fill();
+        drawCircle(-4, 4, 0.5); ctx.fill();
+        drawCircle(1, -3, 0.3); ctx.fill();
+        // Lettuce (wavy green, peeking out from edges)
+        ctx.fillStyle = '#43a047';
+        ctx.beginPath();
+        ctx.moveTo(-7, 4);
+        ctx.quadraticCurveTo(-5.5, 2, -4, 4);
+        ctx.quadraticCurveTo(-2.5, 2, -1, 4);
+        ctx.quadraticCurveTo(0.5, 2, 2, 4);
+        ctx.quadraticCurveTo(3.5, 2, 5, 4);
+        ctx.quadraticCurveTo(6.5, 2, 7, 4);
+        ctx.lineTo(7.5, 5.5);
+        ctx.lineTo(-7.5, 5.5);
+        ctx.closePath();
+        ctx.fill();
+        // Lettuce highlight
+        ctx.fillStyle = '#66bb6a';
+        ctx.beginPath();
+        ctx.moveTo(-6, 4.2);
+        ctx.quadraticCurveTo(-4.5, 2.5, -3, 4.2);
+        ctx.quadraticCurveTo(-1.5, 2.5, 0, 4.2);
+        ctx.quadraticCurveTo(1.5, 2.5, 3, 4.2);
+        ctx.quadraticCurveTo(4.5, 2.5, 6, 4.2);
+        ctx.lineTo(6, 5);
+        ctx.lineTo(-6, 5);
+        ctx.closePath();
+        ctx.fill();
+        // Cheese layer (yellow, slightly melty)
+        ctx.fillStyle = '#ffd54f';
+        ctx.beginPath();
+        ctx.moveTo(-6, 2);
+        ctx.lineTo(6, 2);
+        ctx.lineTo(6.5, 3.5);
+        ctx.lineTo(-6.5, 3.5);
+        ctx.closePath();
+        ctx.fill();
+        // Cheese corner drip
+        ctx.beginPath();
+        ctx.moveTo(6.5, 3);
+        ctx.quadraticCurveTo(7, 4.5, 6, 4.5);
+        ctx.quadraticCurveTo(5.5, 4, 6, 3);
+        ctx.fill();
+        // Ham/turkey layer (pink)
+        const hamGrad = ctx.createLinearGradient(0, 0, 0, 2);
+        hamGrad.addColorStop(0, '#f8bbd0');
+        hamGrad.addColorStop(1, '#e91e63');
+        ctx.fillStyle = hamGrad;
+        ctx.beginPath();
+        ctx.moveTo(-5, 0);
+        ctx.lineTo(5, 0);
+        ctx.lineTo(5.5, 1.8);
+        ctx.lineTo(-5.5, 1.8);
+        ctx.closePath();
+        ctx.fill();
+        // Ham fold/ruffle
+        ctx.fillStyle = '#ec407a';
+        ctx.beginPath();
+        ctx.moveTo(-5.5, 1.5);
+        ctx.quadraticCurveTo(-6.5, 2.5, -5, 2.5);
+        ctx.fill();
+        // Tomato slice peeking out
+        ctx.fillStyle = '#c62828';
+        drawCircle(3.5, 1, 2); ctx.fill();
+        ctx.fillStyle = '#e53935';
+        drawCircle(3.5, 1, 1.5); ctx.fill();
+        // Tomato inner lines
+        ctx.strokeStyle = 'rgba(255,200,200,0.4)';
+        ctx.lineWidth = 0.3;
+        ctx.beginPath();
+        ctx.moveTo(2.5, 1); ctx.lineTo(4.5, 1);
+        ctx.moveTo(3.5, 0); ctx.lineTo(3.5, 2);
+        ctx.stroke();
+        // Another tomato
+        ctx.fillStyle = '#c62828';
+        drawCircle(-3, 1.5, 1.5); ctx.fill();
+        ctx.fillStyle = '#e53935';
+        drawCircle(-3, 1.5, 1); ctx.fill();
+        // Top bread edge highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath();
+        ctx.moveTo(0, -7);
+        ctx.lineTo(-3, -2);
+        ctx.lineTo(3, -2);
+        ctx.closePath();
+        ctx.fill();
+      }
 
       ctx.restore();
       ctx.shadowBlur = 0;
 
-      // +1 UP label
+      // "FREE FOOD!" label
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 7px monospace';
+      ctx.font = 'bold 6px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('+1UP', cx, y + h + 2);
+      ctx.fillText('FREE FOOD', cx, y + h + 2);
       ctx.textAlign = 'left';
       break;
     }
@@ -6110,7 +7271,7 @@ function generateLevel(levelIdx) {
   const petCount = Math.floor(Math.random() * 3) + 1; // 1-3 pets per level
   for (let i = 0; i < petCount; i++) {
     const petRand = Math.random();
-    const petKind = petRand < 0.4 ? 'dog' : petRand < 0.8 ? 'cat' : 'mouse';
+    const petKind = petRand < 0.3 ? 'dog' : petRand < 0.55 ? 'cat' : petRand < 0.7 ? 'mouse' : petRand < 0.85 ? 'teddybear' : 'pig';
     let placed = false;
     // 40% chance to place on a platform if available
     if (Math.random() < 0.4 && platforms.length > 0) {
@@ -6245,7 +7406,7 @@ function generateTrainingLevel() {
 
   // Emotional support pet to collect
   const trainingPetRand = Math.random();
-  entities.push({ type: 'pet', x: 70, y: groundY - 1, petKind: trainingPetRand < 0.4 ? 'dog' : trainingPetRand < 0.8 ? 'cat' : 'mouse' });
+  entities.push({ type: 'pet', x: 70, y: groundY - 1, petKind: trainingPetRand < 0.3 ? 'dog' : trainingPetRand < 0.55 ? 'cat' : trainingPetRand < 0.7 ? 'mouse' : trainingPetRand < 0.85 ? 'teddybear' : 'pig' });
   entities.push({ type: 'sign', x: 68, y: groundY - 1, text: '"Collect a pet for emotional support!"' });
 
   // Section 6 (x: 95-115): Collectibles and a predatory journal
@@ -6317,9 +7478,12 @@ function initTrainingLevel() {
       case 'coffee':
       case 'heart':
       case 'flame':
-      case 'potion':
-        collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
+      case 'potion': {
+        const cObj = { type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 };
+        if (ent.type === 'heart') cObj.foodKind = ['pizza','cupcake','cake','donut','sandwich','apple','carrot','banana'][Math.floor(Math.random() * 8)];
+        collectibles.push(cObj);
         break;
+      }
       case 'reviewer2':
         enemies.push({
           type: ent.type, x: wx, y: wy, w: 28, h: 30,
@@ -6524,9 +7688,12 @@ function initLevel(idx) {
       case 'coffee':
       case 'heart':
       case 'flame':
-      case 'potion':
-        collectibles.push({ type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 });
+      case 'potion': {
+        const cObj2 = { type: ent.type, x: wx, y: wy, w: 24, h: 24, collected: false, bobOffset: Math.random() * Math.PI * 2 };
+        if (ent.type === 'heart') cObj2.foodKind = ['pizza','cupcake','cake','donut','sandwich','apple','carrot','banana'][Math.floor(Math.random() * 8)];
+        collectibles.push(cObj2);
         break;
+      }
       case 'reviewer2':
       case 'bureaucrat':
       case 'imposter':
@@ -6632,7 +7799,7 @@ function initLevel(idx) {
           x: wx, y: wy, w: 20, h: 18, vx: 0, vy: 0,
           onGround: false, facingRight: true,
           frame: 0, frameTimer: 0,
-          kind: ent.petKind || (['dog', 'cat', 'mouse'][Math.floor(Math.random() * 3)]),
+          kind: ent.petKind || (['dog', 'cat', 'mouse', 'teddybear', 'pig'][Math.floor(Math.random() * 5)]),
           collected: false, owner: null,
           bobOffset: Math.random() * Math.PI * 2,
           trail: [],
@@ -7496,13 +8663,16 @@ function update() {
         showMessage(plLabel + 'Coffee power! Speed boost!');
         SFX.collectCoffee();
         break;
-      case 'heart':
+      case 'heart': {
         st.lives++; st.score += 300;
-        spawnParticles(c.x + 12, cy + 12, '#ef5350', 15);
-        spawnFloatingText(c.x, cy, plLabel + '+1 UP!', '#ef5350');
-        showMessage(plLabel + 'Extra life!');
+        spawnParticles(c.x + 12, cy + 12, '#ff8f00', 15);
+        const foodNames = { pizza: 'Pizza', cupcake: 'Cupcake', cake: 'Cake', donut: 'Donut', sandwich: 'Sandwich', apple: 'Apple', carrot: 'Carrot', banana: 'Banana' };
+        const fn = foodNames[c.foodKind] || 'Food';
+        spawnFloatingText(c.x, cy, plLabel + 'Free ' + fn + '!', '#ff8f00');
+        showMessage(plLabel + 'Free seminar food! Extra life!');
         SFX.collectHeart();
         break;
+      }
       case 'flame':
         pl.hasFlame = true; pl.flameTimer = 900; st.score += 250;
         spawnParticles(c.x + 12, cy + 12, '#ff5722', 20);
@@ -7598,8 +8768,8 @@ function update() {
           for (let i = 0; i < PET_TRAIL_LENGTH; i++) {
             pet.trail.push({ x: pl.x, y: pl.y });
           }
-          const petName = pet.kind === 'dog' ? 'Emotional Support Dog' : pet.kind === 'cat' ? 'Emotional Support Cat' : 'Emotional Support Mouse';
-          const petColor = pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : '#c9b89a';
+          const petName = pet.kind === 'dog' ? 'Emotional Support Dog' : pet.kind === 'cat' ? 'Emotional Support Cat' : pet.kind === 'teddybear' ? 'Emotional Support Teddy Bear' : pet.kind === 'pig' ? 'Emotional Support Pig' : 'Emotional Support Mouse';
+          const petColor = pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : pet.kind === 'teddybear' ? '#8B5E3C' : pet.kind === 'pig' ? '#f8a0b0' : '#c9b89a';
           spawnParticles(pet.x + 10, pet.y + 9, petColor, 12);
           spawnFloatingText(pet.x, pet.y - 10, petName + '!', '#ff80ab');
           SFX.collectCitation();
@@ -8252,8 +9422,8 @@ function sacrificePet(pl) {
   pet.vx = (Math.random() < 0.5 ? -4 : 4);
   pet.vy = -5;
   pet.onGround = false;
-  const petName = pet.kind === 'dog' ? 'Dog' : pet.kind === 'cat' ? 'Cat' : 'Mouse';
-  spawnParticles(pet.x + pet.w / 2, pet.y + pet.h / 2, pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : '#c9b89a', 12);
+  const petName = pet.kind === 'dog' ? 'Dog' : pet.kind === 'cat' ? 'Cat' : pet.kind === 'teddybear' ? 'Teddy Bear' : pet.kind === 'pig' ? 'Pig' : 'Mouse';
+  spawnParticles(pet.x + pet.w / 2, pet.y + pet.h / 2, pet.kind === 'dog' ? '#c8a26a' : pet.kind === 'cat' ? '#9e9e9e' : pet.kind === 'teddybear' ? '#8B5E3C' : pet.kind === 'pig' ? '#f8a0b0' : '#c9b89a', 12);
   spawnFloatingText(pet.x, pet.y - 10, petName + ' scared off!', '#ff80ab');
   showMessage('Your emotional support ' + petName.toLowerCase() + ' ran away in fright!');
   SFX.hit();
@@ -8396,7 +9566,7 @@ function draw() {
     if (c.collected) continue;
     const sx = c.x - camera.x;
     const sy = c.y - camera.y + Math.sin(c.bobOffset) * 4;
-    drawCollectible(c.type, sx, sy, c.w, c.h);
+    drawCollectible(c.type, sx, sy, c.w, c.h, c.foodKind);
   }
 
   // Grad students
@@ -8775,7 +9945,7 @@ function drawMenu() {
 
   ctx.fillStyle = '#546e7a';
   ctx.font = '9px monospace';
-  ctx.fillText('V6.8', GAME_W / 2, 188);
+  ctx.fillText('V7.4', GAME_W / 2, 188);
 
   // Character preview (animated, larger)
   if (customizing) {
