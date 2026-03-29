@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Moran Koren – Assistant Professor at Ben-Gurion University. Research in game theory, mechanism design, operations management, and AI economics." />
+  <title>Moran Koren – Academic Website</title>
+  <link rel="stylesheet" href="style.css" />
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
   <script>
@@ -9,326 +15,196 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moran Koren – Academic Website</title>
-
-  <!-- External stylesheet (optional; overridden where needed) -->
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    :root{
-      --bg: #ffffff;
-      --text: #111827;
-      --muted: #4b5563;
-      --border: #e5e7eb;
-      --brand: #303f9f;
-      --accent: #f59e0b;
-      --panel: #ffffff;
-      --shadow: 0 2px 12px rgba(0,0,0,.06);
-      --ticker-speed: 30s; /* baseline duration; JS will update */
-    }
-
-    html { font-size: clamp(18px, 1.05vw + 8px, 20px); scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100svh;
-      display: flex; flex-direction: column;
-    }
-
-    header, main, footer {
-      width: 100%;
-      margin: 0;
-      padding: clamp(20px, 3vw, 32px) clamp(24px, 5vw, 80px);
-      box-sizing: border-box;
-    }
-
-    header h1 { margin: 0 0 8px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; }
-    header p { margin: 6px 0; }
-    header a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
-
-    nav {
-      width: 100%; margin: 0;
-      padding: 10px clamp(24px, 5vw, 80px) 0;
-      display: flex; flex-wrap: wrap; gap: 14px;
-      border-top: 1px solid var(--border);
-      box-sizing: border-box;
-    }
-    nav a { color: var(--brand); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
-    nav a:hover { background: #f9fafb; text-decoration: underline; text-underline-offset: 3px; }
-
-    main section { margin: 26px 0; }
-    h2 { margin: 0 0 10px; line-height: 1.25; }
-
-    .jmp-hero {
-      background: #fffbea;
-      border: 1px solid #fcd34d;
-      border-radius: 12px;
-      padding: 18px 16px;
-      box-shadow: var(--shadow);
-      margin: 24px 0;
-      max-width: none;
-    }
-    .jmp-hero h3 { margin: 0 0 8px; }
-    .jmp-hero p { margin: 8px 0; }
-    .jmp-links a {
-      display: inline-block; margin-right: 10px;
-      text-decoration: none; padding: 8px 12px;
-      border-radius: 999px; border: 1px solid var(--border);
-      color: var(--brand);
-    }
-    .jmp-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-    a { color: var(--brand); }
-    p { margin: 12px 0; }
-
-    /* ======== News reel ======== */
-    .news-reel {
-      background: #f9fafb;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      margin: 0;
-    }
-    .news-reel .inner {
-      padding: 10px clamp(24px, 5vw, 80px);
-      display: grid; gap: 8px;
-    }
-    .news-reel .label {
-      font-weight: 700; letter-spacing: .02em;
-      display: inline-flex; align-items: center; gap: 8px;
-    }
-    .badge-new {
-      font-size: .8em; font-weight: 700; background: var(--accent);
-      color: #111; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 999px;
-    }
-
-    .news-ticker {
-      overflow: hidden; position: relative;
-      min-height: 2.2em;
-      white-space: nowrap;
-    }
-    @supports (mask-image: linear-gradient(to right, black, black)) or (-webkit-mask-image: linear-gradient(to right, black, black)) {
-      .news-ticker {
-        mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-        -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      }
-    }
-
-    .news-track {
-      display: inline-flex; gap: 28px; align-items: center;
-      will-change: transform;
-      /* Baseline animation so it moves immediately; JS only tweaks duration */
-      animation: mkTicker var(--ticker-speed) linear infinite;
-    }
-    .news-item { display: inline-flex; align-items: center; gap: 10px; }
-    .news-item time { font-size: .9em; color: var(--muted); }
-    .news-item a { color: var(--brand); text-decoration: none; border-bottom: 1px dashed var(--brand); }
-    .news-item a:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-    /* Unique keyframes: we duplicate items once; -50% loops seamlessly */
-    @keyframes mkTicker {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-
-    .news-ticker:hover .news-track { animation-play-state: paused; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .news-track { animation: none !important; transform: none !important; }
-    }
-
-    /* ======== News Table Section ======== */
-    .news-table-section {
-      background: #f9fafb;
-      border-top: 1px solid var(--border);
-      padding: 32px clamp(24px, 5vw, 80px);
-      margin-top: 32px;
-    }
-
-    .news-table-section h2 {
-      margin: 0 0 20px;
-      font-weight: 700;
-      letter-spacing: -0.015em;
-    }
-
-    .news-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .news-table thead {
-      background: #f3f4f6;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .news-table th {
-      text-align: left;
-      padding: 14px 18px;
-      font-weight: 700;
-      font-size: 0.9em;
-      letter-spacing: 0.02em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .news-table tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s ease;
-    }
-
-    .news-table tbody tr:last-child {
-      border-bottom: none;
-    }
-
-    .news-table tbody tr:hover {
-      background: #f9fafb;
-    }
-
-    .news-table td {
-      padding: 16px 18px;
-      vertical-align: top;
-    }
-
-    .news-table .date-cell {
-      white-space: nowrap;
-      color: var(--muted);
-      font-size: 0.95em;
-      width: 140px;
-    }
-
-    .news-table .content-cell {
-      line-height: 1.6;
-    }
-
-    .news-table .content-cell strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .news-table .content-cell a {
-      color: var(--brand);
-      text-decoration: none;
-      border-bottom: 1px dashed var(--brand);
-    }
-
-    .news-table .content-cell a:hover {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    .back-to-top {
-      margin-top: 24px;
-      text-align: center;
-    }
-
-    .back-to-top a {
-      color: var(--brand);
-      text-decoration: none;
-      padding: 10px 20px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      display: inline-block;
-      font-size: 0.9em;
-      transition: background 0.15s ease;
-    }
-
-    .back-to-top a:hover {
-      background: #f3f4f6;
-      text-decoration: none;
-    }
-
-    .sr-only {
-      position: absolute !important;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px; overflow: hidden;
-      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-    }
-
-    footer {
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      margin-top: 28px;
-      padding-bottom: 32px;
-    }
-
-    @media (max-width: 640px){
-      nav { gap: 10px; padding: 8px clamp(16px, 4vw, 24px) 0; }
-      header, main, footer { padding: clamp(16px, 2vw, 20px) clamp(16px, 4vw, 24px); }
-      .news-reel .inner { padding: 10px clamp(16px, 4vw, 24px); }
-      .news-table-section { padding: 24px clamp(16px, 4vw, 24px); }
-      .news-table th, .news-table td { padding: 12px 14px; }
-      .news-table .date-cell { display: block; margin-bottom: 8px; width: auto; }
-    }
-    @media (min-width: 641px) and (max-width: 1024px) {
-      header, main, footer { padding: clamp(20px, 2.5vw, 28px) clamp(32px, 6vw, 64px); }
-      nav { padding: 10px clamp(32px, 6vw, 64px) 0; }
-      .news-reel .inner { padding: 10px clamp(32px, 6vw, 64px); }
-      .news-table-section { padding: 28px clamp(32px, 6vw, 64px); }
-    }
-    @media (min-width: 1400px) {
-      header, main, footer { padding: 32px 120px; }
-      nav { padding: 10px 120px 0; }
-      .news-reel .inner { padding: 10px 120px; }
-      .news-table-section { padding: 32px 120px; }
-    }
-
-    header, nav, main, footer { padding-inline: 0 !important; width: 100%; margin: 0; box-sizing: border-box; }
-    main { flex: 1 1 auto; }
-    .jmp-hero { border-radius: 0; margin-left: 0; margin-right: 0; }
-    .container, .wrapper, .content, .page, .site, .main {
-      max-width: none !important; margin: 0 !important; padding-inline: 0 !important;
-    }
-  </style>
 </head>
 <body id="top">
-  <header>
-    <h1>Moran Koren</h1>
-    <p>Assistant Professor (Tenure Track), Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev</p>
-    <p>Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a>. ORCID:
-      <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a>
-    </p>
-  </header>
 
-  <nav aria-label="Primary">
-    <a href="index.html">Home</a>
-    <a href="cv.html">CV</a>
-    <a href="publications.html">Publications</a>
-    <a href="#news-table-section">News</a>
-    <a href="students.html">Students</a>
-    <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">My Substack on AI Economics</a>
-  </nav>
+  <!-- ===== Header ===== -->
+  <div class="site-header-wrap">
+    <header class="site-header wrap">
+      <h1>Moran Koren</h1>
+      <p class="tagline">Assistant Professor (Tenure Track), Dept. of Industrial Engineering &amp; Management, Ben-Gurion University of the Negev</p>
+      <p class="contact-info">
+        <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a>
+        &nbsp;&middot;&nbsp;
+        ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a>
+      </p>
+    </header>
+  </div>
 
-  <!-- NEWS REEL (ticker will be populated from table) -->
-  <section class="news-reel" aria-labelledby="news-reel-title">
-    <div class="inner">
-      <h3 id="news-reel-title" class="label">
-        <span class="badge-new">News</span> Lab & Student Updates
-      </h3>
+  <!-- ===== Nav ===== -->
+  <div class="site-nav-wrap">
+    <nav class="site-nav wrap" aria-label="Primary">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="cv.html">CV</a>
+      <a href="publications.html">Publications</a>
+      <a href="#news-table-section">News</a>
+      <a href="students.html">Students</a>
+      <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener" class="nav-external">AI Economics Substack</a>
+    </nav>
+  </div>
 
+  <!-- ===== News ticker ===== -->
+  <div class="news-reel-wrap">
+    <div class="news-reel wrap">
+      <h3 class="label"><span class="badge badge-accent">News</span> Lab &amp; Student Updates</h3>
       <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
-        <div class="news-track">
-          <!-- Will be populated from the news table by JavaScript -->
-        </div>
+        <div class="news-track"></div>
       </div>
-
-      <p class="sr-only">Tip: Hover over the news line to pause scrolling.</p>
+      <p class="sr-only">Hover over the news line to pause scrolling.</p>
     </div>
-  </section>
+  </div>
 
+  <!-- ===== Main ===== -->
+  <div class="site-main-wrap">
+    <main class="site-main wrap">
+
+      <!-- Featured paper -->
+      <section class="section">
+        <div class="card card-featured">
+          <h3>Featured: Representing Paper</h3>
+          <p><strong>Title:</strong> The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes</p>
+          <p><strong>One-line pitch:</strong> Gatekeepers can alter who applies; under common conditions this lowers applicant quality and accuracy — this paper characterizes when, and how to fix it.</p>
+          <div class="card-links">
+            <a href="https://doi.org/10.1287/mnsc.2021.03918" target="_blank" rel="noopener">Journal (DOI)</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Research profile -->
+      <section class="section">
+        <h2 class="section-title">Research Profile</h2>
+        <p>
+          My research program operates at the intersection of <strong>Microeconomic Theory, Operations Management, and Data Science</strong>.
+          I view operational challenges through the lens of rigorous <strong>Game Theory</strong> — characterizing the strategic incentives of agents,
+          whether they are firms, job seekers, or AI algorithms — to design markets that are efficient, transparent, and robust.
+        </p>
+        <p>
+          What distinguishes my work is a <strong>theory-driven empirical approach</strong>.
+          I do not treat theory and data as separate silos; instead, I use economic theory to build the structural framework for analysis,
+          and then employ advanced data science tools — including <strong>causal inference</strong>, <strong>simulations</strong>,
+          and <strong>randomized control trials</strong> — to validate these models against real-world complexities.
+          This allows me to derive managerial insights that are theoretically sound but empirically grounded.
+        </p>
+        <p>
+          The core goal of my lab is to <strong>engineer better systems</strong>. We tackle multifaceted problems in areas like
+          <strong>hiring and screening processes</strong>, <strong>organ allocation</strong>, and <strong>online platforms</strong>.
+          This philosophy extends to my teaching, where I apply the principles of mechanism design to create resilient pedagogical solutions.
+        </p>
+        <p>
+          This interdisciplinary rigor is reflected in my publications, which appear in leading journals across economics
+          (<em>Theoretical Economics</em>, <em>Games and Economic Behavior</em>), operations (<em>Management Science</em>),
+          and top-tier computer science conferences (<strong>NeurIPS</strong>, <strong>ACM EC</strong>, <strong>ICML</strong>).
+        </p>
+        <p>
+          My research is supported by the <strong>Israel Science Foundation (ISF)</strong>, the <strong>Shamir Fellowship</strong>,
+          and the <strong>Fulbright Postdoctoral Fellowship</strong>. Prior to joining Ben-Gurion University, I held postdoctoral fellowships at
+          <strong>Tel Aviv University</strong>, <strong>Harvard University</strong>, and <strong>Stanford University</strong>.
+          I hold a Ph.D. in Economics from the Technion.
+        </p>
+      </section>
+
+      <!-- Contact -->
+      <section class="section">
+        <h2 class="section-title">Contact</h2>
+        <p>
+          Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a><br />
+          Phone: +972-52-6534005<br />
+          Address: Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev, Beer-Sheva, Israel
+        </p>
+      </section>
+
+      <!-- LinkedIn link -->
+      <section class="section">
+        <h2 class="section-title">
+          <a href="https://tinyurl.com/gtg2025" target="_blank" rel="noopener">
+            News &amp; Student Updates — BGU Game Theory &amp; Agentic Design Research Group (LinkedIn)
+          </a>
+        </h2>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== News table ===== -->
+  <div class="news-section-wrap" id="news-table-section">
+    <div class="wrap">
+      <h2 class="news-section-title">Recent News &amp; Updates</h2>
+      <table class="modern-table" id="news-table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="date-cell" data-datetime="2025-12-16">Dec 16, 2025</td>
+            <td class="content-cell">
+              <p>
+                I will be co-chairing <strong>Mid-Chain 2026</strong> at BGU — an inaugural event connecting
+                <strong>academic researchers</strong> with <strong>industry innovators</strong>.
+                We are creating a space to discuss the structural and operational future of the blockchain ecosystem.
+                Stay tuned for updates!
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
+            <td class="content-cell">
+              We're proud to celebrate an exciting achievement in our research group!
+              <a href="https://www.linkedin.com/in/barhoter/">Bar Hoter</a> has been awarded the KKL Fellowship for Sustainability and Climate Change, in memory of Goldman Sonnenfeld.
+              This prestigious fellowship recognizes academic excellence and contributions to research in the fields of sustainability, environment, and climate change.
+              The committee highlighted Bar's outstanding performance and his commitment to advancing impactful research.
+              Congratulations, Bar! We're so proud of you and wish you continued success in your research journey.
+            </td>
+          </tr>
+          <tr>
+            <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
+            <td class="content-cell">
+              Yesterday was the first lesson of my revised course in game theory and agentic design. The course comprises an introduction for game theory and a hands-on workshop in agent design. In the GT part, we studied how to model real world scenarios into a formal game, what is an equilibrium, and started discussing how to find it.
+              In the agent design workshop, we learned what are agents, how they differ from previous programming paradigms and some of the tools available to construct agentic workflows. Next week the students will present their first "job-seeking" agent, designed to help job seekers find and secure a position.
+            </td>
+          </tr>
+          <tr>
+            <td class="date-cell" data-datetime="2025-10-17">Oct 17, 2025</td>
+            <td class="content-cell">
+              We are now after the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, where I presented
+              <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
+                <em>"Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments."</em>
+              </a>
+              It was great to meet friends and colleagues. Old and new. Discuss research, and enjoy a wonderful venue.
+            </td>
+          </tr>
+          <tr>
+            <td class="date-cell" data-datetime="2025-09-30">Sep 30, 2025</td>
+            <td class="content-cell">
+              Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">"Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment."</a></em>,
+              led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
+              <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
+            </td>
+          </tr>
+          <tr>
+            <td class="date-cell" data-datetime="2025-07-15">Jul 15, 2025</td>
+            <td class="content-cell">
+              Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="back-to-top">
+        <a href="#top">&uarr; Back to Top</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="site-footer-wrap">
+    <footer class="site-footer wrap">
+      <span>&copy; 2026 Moran Koren</span>
+      <span>Ben-Gurion University of the Negev</span>
+    </footer>
+  </div>
+
+  <!-- ===== Ticker JS ===== -->
   <script>
     (function () {
       const TICKER_SEL = '.news-ticker';
@@ -338,33 +214,19 @@
       function populateTickerFromTable() {
         const track = document.querySelector(TRACK_SEL);
         const table = document.querySelector(TABLE_SEL);
-        
         if (!track || !table) return;
-        
-        // Clear existing items
         track.innerHTML = '';
-        
-        // Get all rows from tbody
         const rows = table.querySelectorAll('tbody tr');
-        
         rows.forEach(row => {
           const dateCell = row.querySelector('.date-cell');
           const contentCell = row.querySelector('.content-cell');
-          
           if (dateCell && contentCell) {
             const newsItem = document.createElement('span');
             newsItem.className = 'news-item';
-            
-            // Clone the content to preserve links and formatting
             const dateTime = dateCell.getAttribute('data-datetime') || '';
             const dateText = dateCell.textContent.trim();
             const contentHTML = contentCell.innerHTML;
-            
-            newsItem.innerHTML = `
-              <time datetime="${dateTime}">${dateText}</time>
-              ${contentHTML}
-            `;
-            
+            newsItem.innerHTML = '<time datetime="' + dateTime + '">' + dateText + '</time> ' + contentHTML;
             track.appendChild(newsItem);
           }
         });
@@ -380,16 +242,14 @@
       }
 
       function setDuration(track) {
-        // Sum width of the FIRST HALF (originals) only
         const halfCount = Math.floor(track.children.length / 2);
         let w = 0;
         for (let i = 0; i < halfCount; i++) {
           w += track.children[i].getBoundingClientRect().width;
         }
         if (w > 0) {
-          const pxPerSec = 120; // lower = slower
+          const pxPerSec = 120;
           const duration = Math.max(14, Math.round(w / pxPerSec));
-          // Update via CSS variable so the baseline animation keeps running
           track.style.setProperty('--ticker-speed', duration + 's');
         }
       }
@@ -398,179 +258,32 @@
         const ticker = document.querySelector(TICKER_SEL);
         const track  = ticker && ticker.querySelector(TRACK_SEL);
         if (!ticker || !track) return;
-
-        // Populate ticker from table
         populateTickerFromTable();
-
-        // Respect reduced motion
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           track.style.animation = 'none';
           track.style.transform = 'none';
           return;
         }
-
         duplicateOnce(track);
-        // Measure now and again shortly after (to cover late font/layout settles)
         setDuration(track);
         setTimeout(() => setDuration(track), 500);
         setTimeout(() => setDuration(track), 2000);
       }
 
-      // Start ASAP on DOM ready (no waiting on fonts)
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initTicker, { once: true });
       } else {
         initTicker();
       }
 
-      // Recalc on visibility/resize/orientation/content changes
       document.addEventListener('visibilitychange', () => { if (!document.hidden) initTicker(); });
       window.addEventListener('resize', initTicker);
       window.addEventListener('orientationchange', initTicker);
 
-      // Optional: if you dynamically add/remove news items later
       const mo = new MutationObserver(initTicker);
       const target = document.querySelector(TABLE_SEL);
       if (target) mo.observe(target, { childList: true, subtree: true });
     })();
   </script>
-
-  <main>
-    <section class="jmp-hero" aria-labelledby="jmp-title">
-      <h3 id="jmp-title">Featured: Representing Paper</h3>
-      <p><strong>Title:</strong> The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes</p>
-      <p><strong>One-line pitch:</strong> Gatekeepers can alter who applies; under common conditions this lowers applicant quality and accuracy—this paper characterizes when, and how to fix it.</p>
-      <div class="jmp-links">
-        <a href="https://doi.org/10.1287/mnsc.2021.03918" target="_blank" rel="noopener">Journal (DOI)</a>
-      </div>
-    </section>
-
-    <section aria-labelledby="research-profile">
-      <h2 id="research-profile">Research Profile</h2>
-     <p>
-    My research program operates at the intersection of <strong>Microeconomic Theory, Operations Management, and Data Science</strong>. 
-    I view operational challenges through the lens of rigorous <strong>Game Theory</strong>—characterizing the strategic incentives of agents, 
-    whether they are firms, job seekers, or AI algorithms—to design markets that are efficient, transparent, and robust.
-  </p>
-
-  <p>
-    What distinguishes my work is a <strong>theory-driven empirical approach</strong>. 
-    I do not treat theory and data as separate silos; instead, I use economic theory to build the structural framework for analysis, 
-    and then employ advanced data science tools—including <strong>causal inference</strong>, <strong>simulations</strong>, 
-    and <strong>randomized control trials</strong>—to validate these models against real-world complexities. 
-    This allows me to derive managerial insights that are theoretically sound but empirically grounded.
-  </p>
-
-  <p>
-    The core goal of my lab is to <strong>engineer better systems</strong>. We tackle multifaceted problems in areas like 
-    <strong>hiring and screening processes</strong>, <strong>organ allocation</strong>, and <strong>online platforms</strong>. 
-    This philosophy extends to my teaching, where I apply the principles of mechanism design to create resilient pedagogical solutions.
-  </p>
-
-  <p>
-    This interdisciplinary rigor is reflected in my publications, which appear in leading journals across economics 
-    (<em>Theoretical Economics</em>, <em>Games and Economic Behavior</em>), operations (<em>Management Science</em>), 
-    and top-tier computer science conferences (<strong>NeurIPS</strong>, <strong>ACM EC</strong>, <strong>ICML</strong>).
-  </p>
-
-  <p>
-    My research is supported by the <strong>Israel Science Foundation (ISF)</strong>, the <strong>Shamir Fellowship</strong>, 
-    and the <strong>Fulbright Postdoctoral Fellowship</strong>. Prior to joining Ben-Gurion University, I held postdoctoral fellowships at 
-    <strong>Tel Aviv University</strong>, <strong>Harvard University</strong>, and <strong>Stanford University</strong>. 
-    I hold a Ph.D. in Economics from the Technion.
-  </p>
-    </section>
-
-    <section aria-labelledby="contact">
-      <h2 id="contact">Contact</h2>
-      <p>
-        Email: <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a><br>
-        Phone: +972-52-6534005<br>
-        Address: Dept. of Industrial Engineering and Management, Ben-Gurion University of the Negev, Beer-Sheva, Israel
-      </p>
-    </section>
-
-    <section aria-labelledby="news-updates">
-      <h2 id="news-updates">
-        <a href="https://tinyurl.com/gtg2025" target="_blank" rel="noopener">
-          News & Student Updates — BGU Game Theory & Agentic Design Research Group (LinkedIn)
-        </a>
-      </h2>
-    </section>
-  </main>
-
-  <!-- NEWS TABLE SECTION -->
-  <section class="news-table-section" id="news-table-section" aria-labelledby="news-table-title">
-    <h2 id="news-table-title">Recent News & Updates</h2>
-    <table class="news-table" id="news-table">
-      <thead>
-        <tr>
-          <th scope="col">Date</th>
-          <th scope="col">Update</th>
-        </tr>
-      </thead>
-      <tbody>
-                <tr>
-          <td class="date-cell" data-datetime="2025-12-16">Dec 16, 2025</td>
-          <td class="content-cell">
-        <p>
-    I will be co-chairing <strong>Mid-Chain 2026</strong> at BGU—an inaugural event connecting 
-    <strong>academic researchers</strong> with <strong>industry innovators</strong>. 
-    We are creating a space to discuss the structural and operational future of the blockchain ecosystem. 
-    Stay tuned for updates!
-  </p>
-                     </td>
-        </tr>
-        <tr>
-          <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
-          <td class="content-cell">
-            🎉 We’re proud to celebrate an exciting achievement in our research group!
-            <a href="https://www.linkedin.com/in/barhoter/">Bar Hoter</a>, has been awarded the KKL Fellowship for Sustainability and Climate Change, in memory of Goldman Sonnenfeld.
-              This prestigious fellowship recognizes academic excellence and contributions to research in the fields of sustainability, environment, and climate change.
-               The committee highlighted Bar’s outstanding performance and his commitment to advancing impactful research.
-                👏 Congratulations, Bar! We’re so proud of you and wish you continued success in your research journey.
-          </td>
-        </tr>
-          <tr>
-          <td class="date-cell" data-datetime="2025-11-07">Nov 07, 2025</td>
-          <td class="content-cell">
-            Yesterday was the first lesson of my revised course in game theory and agentic design. The course comprises an introduction for game theory and a hands-on workshop in agent design. In the GT part, we studied how to model real world scenarios into a formal game, what is an equilibrium, and started discussing how to find it.
-            In the agent design workshop, we learned what are agents, how they differ from previous programing paradigms and some of the tools available to construct agentic workflows. Next week the students will present their first "job-seeking" agent, designed to help job seekers find and secure a position.
-          </td>
-        </tr>
-        <tr>
-          <td class="date-cell" data-datetime="2025-11-07">Oct 17, 2025</td>
-          <td class="content-cell">
-            We are now after the <strong>INFORMS Annual Meeting (Atlanta, GA)</strong>, where I presented
-            <a href="https://submissions.mirasmart.com/InformsAnnual2025/Itinerary/PresentationDetail.aspx?evdid=480" target="_blank" rel="noopener">
-              <em>"Strategic Behavior and Uncertainty in Allocation Markets: Insights from Online Experiments."</em>
-            </a>
-            It was great to meet friends and collueges. Old and new. Discuss research, and enjoy a wonderful venue. 
-          </td>
-        </tr>
-        <tr>
-          <td class="date-cell" data-datetime="2025-09-30">Nov 7, 2025</td>
-          <td class="content-cell">
-            Our paper <em><a href="https://arxiv.org/abs/2510.14872" target="_blank" rel="noopener">"Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment."</a></em>,
-            led by MSc students <strong>Bar</strong> and <strong>Din</strong>, was accepted to
-            <a href="https://wine2025.cs.rutgers.edu/" target="_blank" rel="noopener"><strong>WINE 2025</strong></a>. See you in December!
-          </td>
-        </tr>
-        <tr>
-          <td class="date-cell" data-datetime="2025-07-15">Jul 15, 2025</td>
-          <td class="content-cell">
-            Congrats to <strong>Lab Cohort 2025</strong> on the beginning of a new academic year!
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="back-to-top">
-      <a href="#top">↑ Back to Top</a>
-    </div>
-  </section>
-
-  <footer>
-    <p>&copy; 2025 Moran Koren</p>
-  </footer>
 </body>
 </html>

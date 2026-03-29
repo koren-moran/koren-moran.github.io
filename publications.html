@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Publications by Moran Koren — journal articles, working papers, and refereed conference proceedings." />
   <title>Publications – Moran Koren</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VTLVLV9QM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -11,332 +15,219 @@
     gtag('js', new Date());
     gtag('config', 'G-2VTLVLV9QM');
   </script>
-  <style>
-    /* ==== Global screen-optimized defaults ==== */
-    :root{
-      --bg: #ffffff;            /* pure white, per request */
-      --text: #111827;          /* near-black for contrast */
-      --muted: #4b5563;         /* secondary text */
-      --border: #e5e7eb;        /* light, unobtrusive borders */
-      --brand: #303f9f;         /* link color */
-      --accent: #f59e0b;        /* JMP / highlight */
-      --panel: #ffffff;
-      --tab-bg: #f9fafb;
-      --shadow: 0 2px 12px rgba(0,0,0,.06);
-    }
-
-    html { /* responsive base size, ~18–20px */
-      font-size: clamp(18px, 1.05vw + 8px, 20px);
-    }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 500 1rem/1.7 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-            Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    header, main, footer {
-      /* Full width with reasonable padding */
-      width: 100%;
-      margin: 0;
-      padding: 20px 24px;
-      box-sizing: border-box;
-    }
-
-    header h1 {
-      margin: 0 0 4px 0;
-      font-weight: 800;
-      letter-spacing: -0.015em;
-      line-height: 1.2;
-    }
-    header p { margin: 0; }
-    header p a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
-
-    /* ==== Tabs (bigger, airy) ==== */
-    .tabs {
-      position: sticky; top: 0; z-index: 5;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.02);
-      width: 100%;
-    }
-    .tablist {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      background: var(--tab-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px;
-      width: 100%;
-      margin: 0 auto;
-      box-sizing: border-box;
-    }
-    [role="tab"]{
-      appearance: none;
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      padding: 10px 14px;        /* bigger hit area */
-      color: #6b7280;
-      font-weight: 700;
-      cursor: pointer;
-      line-height: 1.3;
-    }
-    [role="tab"][aria-selected="true"]{
-      color: var(--text);
-      background: var(--panel);
-      border-color: var(--border);
-      box-shadow: var(--shadow);
-    }
-    .tab-badge{
-      font-size: .75em; font-weight: 800;
-      background: var(--accent); color: #111;
-      padding: 2px 8px; border-radius: 999px; margin-left: 10px;
-    }
-    [role="tabpanel"]{ padding: 20px 6px 6px; }
-    [role="tabpanel"][hidden]{ display: none; }
-
-    /* ==== Lists & entries (roomier) ==== */
-    ul{ 
-      list-style: none; 
-      padding: 0; 
-      margin: 0; 
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    li{
-      margin: 0;                      /* Remove individual margins since we're using grid gap */
-      padding: 18px 16px;             /* air inside items */
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-    }
-    li.jmp{ background: #fffbeb; border-left: 5px solid var(--accent); }
-
-    a{ color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
-    a:hover{ text-decoration-thickness: 2px; }
-
-    .publication-details{
-      font-size: .95rem;              /* slightly larger than before */
-      color: var(--muted);
-      margin-top: 12px;
-      padding-left: 16px;
-      border-left: 3px solid var(--border);
-    }
-    .publication-details p{ margin: 7px 0; }
-    .publication-details strong{ color: var(--brand); }
-
-    /* ==== Footer ==== */
-    footer{
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      margin-top: 28px;
-      padding-bottom: 32px;
-    }
-
-    /* ==== Small screens: adjust for mobile ==== */
-    @media (max-width: 640px){
-      .tablist { gap: 6px; padding: 8px; }
-      [role="tab"]{ padding: 9px 12px; }
-      li{ padding: 16px 14px; }
-      header, main, footer {
-        padding: 20px 16px;
-      }
-    }
-  </style>
 </head>
 <body>
-  <header>
-    <h1>Publications</h1>
-    <p><a href="index.html">← Back to Home</a></p>
-  </header>
 
-  <!-- Tabs -->
-  <nav class="tabs" aria-label="Publication categories">
-    <div class="tablist" role="tablist" aria-label="Publications">
-      <button role="tab" id="tab-journals" aria-selected="true" aria-controls="panel-journals">Journal Articles <span class="tab-badge" data-count="journals"></span></button>
-      <button role="tab" id="tab-working" aria-selected="false" aria-controls="panel-working">Submitted & Working Papers <span class="tab-badge" data-count="working"></span></button>
-      <button role="tab" id="tab-conferences" aria-selected="false" aria-controls="panel-conferences">Refereed Conference Papers <span class="tab-badge" data-count="conferences"></span></button>
+  <!-- ===== Header ===== -->
+  <div class="site-header-wrap">
+    <header class="site-header wrap">
+      <h1>Publications</h1>
+      <p class="tagline">Moran Koren — Ben-Gurion University of the Negev</p>
+    </header>
+  </div>
+
+  <!-- ===== Nav ===== -->
+  <div class="site-nav-wrap">
+    <nav class="site-nav wrap" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="cv.html">CV</a>
+      <a href="publications.html" aria-current="page">Publications</a>
+      <a href="students.html">Students</a>
+      <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener" class="nav-external">AI Economics Substack</a>
+    </nav>
+  </div>
+
+  <!-- ===== Tabs ===== -->
+  <div class="tabs-wrap">
+    <div class="wrap">
+      <div class="tablist" role="tablist" aria-label="Publications">
+        <button role="tab" id="tab-journals" aria-selected="true" aria-controls="panel-journals">Journal Articles <span class="tab-badge" data-count="journals"></span></button>
+        <button role="tab" id="tab-working" aria-selected="false" aria-controls="panel-working">Submitted &amp; Working Papers <span class="tab-badge" data-count="working"></span></button>
+        <button role="tab" id="tab-conferences" aria-selected="false" aria-controls="panel-conferences">Refereed Conference Papers <span class="tab-badge" data-count="conferences"></span></button>
+      </div>
     </div>
-  </nav>
+  </div>
 
-  <main>
-    <!-- Journals -->
-    <section id="panel-journals" role="tabpanel" aria-labelledby="tab-journals" tabindex="0">
-      <ul data-group="journals">
-        <li>
-          Danino, G., Koren, M., & Madmon, O.
-          <a href="https://onlinelibrary.wiley.com/doi/10.1111/jems.12638">"A Strategy-Proof Mechanism for Ownership Restructuring in Privately Owned Assets"</a>.
-          Accepted to the <em>Journal of Economics & Management Strategy</em>.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> We develop a practical, strategy-proof mechanism for resolving ownership deadlocks in contexts like joint ventures or supply chain partnerships, ensuring efficient and fair outcomes.</p>
-            <p><strong>Tools & Methodologies:</strong> Mechanism Design, Game Theory, Corporate Finance.</p>
-          </div>
-        </li>
-        <li class="jmp">
-          Koren, M. (2024).
-          <a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2021.03918" target="_blank" rel="noopener">"The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes"</a>.
-          <em>Management Science</em>, (E-pub ahead of print).
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This paper analyzes how pre-screening stages ("gatekeepers") in hiring can paradoxically lower the average quality of the applicant pool by altering candidates' self-selection incentives and perpetuating historical biases.</p>
-            <p><strong>Tools & Methodologies:</strong> Game Theory, Algorithmic Screening, Information Design, Self-Selection Models.</p>
-          </div>
-        </li>
-        <li>
-          Arieli, I., Koren, M., & Smorodinsky, R. (2024).
-          <a href="https://link.springer.com/article/10.1007/s00199-023-01525-w" target="_blank" rel="noopener">"Information Aggregation in Large Collective Purchases"</a>.
-          <em>Economic Theory</em>, 78(1), 295–345.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This work examines how information from individual consumers is aggregated in settings like group buying or crowdfunding, analyzing the efficiency of collective decision-making under uncertainty.</p>
-            <p><strong>Tools & Methodologies:</strong> Information Aggregation, Game Theory, Collective Action.</p>
-          </div>
-        </li>
-        <li>
-          Cohen, A., Deligkas, A., & Koren, M. (2023).
-          <a href="https://doi.org/10.1016/j.tcs.2023.114219" target="_blank" rel="noopener">"Learning Approximately Optimal Contracts"</a>.
-          <em>Theoretical Computer Science</em>, 980, 114219.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This research connects contract theory with machine learning by introducing algorithms that enable a principal to learn the optimal contract to offer an agent whose cost structure is initially unknown.</p>
-            <p><strong>Tools & Methodologies:</strong> Algorithmic Mechanism Design, Contract Theory, Machine Learning, Online Learning.</p>
-          </div>
-        </li>
-        <li>
-          Arieli, I., Koren, M., & Smorodinsky, R. (2022).
-          <a href="https://econtheory.org/ojs/index.php/te/article/view/3842" target="_blank" rel="noopener">"The Implication of Pricing on Social Learning"</a>.
-          <em>Theoretical Economics</em>, 17(4), 1761-1802.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This paper investigates how a manager can use dynamic pricing as an operational lever to learn consumer demand, identifying conditions under which a firm can overcome informational herds and guarantee long-run learning.</p>
-            <p><strong>Tools & Methodologies:</strong> Social Learning, Game Theory, Dynamic Pricing, Information Design.</p>
-          </div>
-        </li>
-        <li>
-          Koren, M., & Mueller-Frank, M. (2022).
-          <a href="https://doi.org/10.1016/j.geb.2021.11.014" target="_blank" rel="noopener">"The Welfare Costs of Informationally Efficient Prices"</a>.
-          <em>Games and Economic Behavior</em>, 131, 186-196.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> We demonstrate a critical managerial tradeoff by showing that operational policies designed to be "informationally efficient" can paradoxically reduce short-term profitability and overall welfare.</p>
-            <p><strong>Tools & Methodologies:</strong> Information Economics, Game Theory, Market Efficiency.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
+  <!-- ===== Main ===== -->
+  <div class="site-main-wrap">
+    <main class="site-main wrap">
 
-    <!-- Working / Submitted -->
-    <section id="panel-working" role="tabpanel" aria-labelledby="tab-working" tabindex="0" hidden>
-      <ul data-group="working">
-        <li>
-          Kang, J., Koren, M., Monachou, F., & Ashlagi, I.
-          <a href="https://arxiv.org/abs/2110.14865" target="_blank" rel="noopener">"Counterbalancing Learning and Strategic Incentives in Allocation Markets"</a>.
-          (Major Revision at <em>Manufacturing & Service Operations Management</em>).
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This work designs mechanisms that balance information acquisition and strategic incentives in dynamic allocation markets (e.g., organ/platform markets). It proposes a novel batch-based voting mechanism to mitigate herd behavior and improve allocation efficiency.</p>
-            <p><strong>Tools & Methodologies:</strong> Mechanism Design, Game Theory, Social Learning, Market Design, Simulations.</p>
-          </div>
-        </li>
-        <li>
-          Ban, A., & Koren, M.
-          <a href="https://arxiv.org/abs/2005.10711" target="_blank" rel="noopener">"Sequential Fundraising and Mutual Insurance"</a>.
-          (Revise & Resubmit at <em>JPE-Micro</em>).
-          <div class="publication-details">
-            <p><strong>Summary:</strong> Characterizes when sequential fundraising with risk-sharing generates inefficiency and provides implementable design fixes; delivers testable comparative statics.</p>
-            <p><strong>Tools & Methodologies:</strong> Game Theory, Mechanism Design, Crowdfunding, Social Learning.</p>
-          </div>
-        </li>
-        <li>
-          Berkovich, E., Koren, M., Nitzan, D., Shapira, S., & Talmon, N.
-          "Reimagining Israel's Food System...".
-          (Revise & Resubmit at <em>Israel Journal of Health Policy Research</em>).
-          <div class="publication-details">
-            <p><strong>Summary:</strong> A paper at the interface of operations management and policy, providing mechanism-based recommendations for enhancing the resilience of the national food-system.</p>
-            <p><strong>Tools & Methodologies:</strong> System Design, Operations Management, Public Policy, Resilience.</p>
-          </div>
-        </li>
-        <li>
-          Yuval, D., & Koren M. "Socially-Aware Allocation on Networks". (Working paper).
-        </li>
-      </ul>
-    </section>
+      <!-- Journals -->
+      <section id="panel-journals" role="tabpanel" aria-labelledby="tab-journals" tabindex="0">
+        <ul class="spaced-list" data-group="journals">
+          <li>
+            Danino, G., Koren, M., &amp; Madmon, O.
+            <a href="https://onlinelibrary.wiley.com/doi/10.1111/jems.12638">"A Strategy-Proof Mechanism for Ownership Restructuring in Privately Owned Assets"</a>.
+            Accepted to the <em>Journal of Economics &amp; Management Strategy</em>.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> We develop a practical, strategy-proof mechanism for resolving ownership deadlocks in contexts like joint ventures or supply chain partnerships, ensuring efficient and fair outcomes.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Mechanism Design, Game Theory, Corporate Finance.</p>
+            </div>
+          </li>
+          <li class="highlight">
+            Koren, M. (2024).
+            <a href="https://pubsonline.informs.org/doi/10.1287/mnsc.2021.03918" target="_blank" rel="noopener">"The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes"</a>.
+            <em>Management Science</em>, (E-pub ahead of print).
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This paper analyzes how pre-screening stages ("gatekeepers") in hiring can paradoxically lower the average quality of the applicant pool by altering candidates' self-selection incentives and perpetuating historical biases.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Game Theory, Algorithmic Screening, Information Design, Self-Selection Models.</p>
+            </div>
+          </li>
+          <li>
+            Arieli, I., Koren, M., &amp; Smorodinsky, R. (2024).
+            <a href="https://link.springer.com/article/10.1007/s00199-023-01525-w" target="_blank" rel="noopener">"Information Aggregation in Large Collective Purchases"</a>.
+            <em>Economic Theory</em>, 78(1), 295–345.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This work examines how information from individual consumers is aggregated in settings like group buying or crowdfunding, analyzing the efficiency of collective decision-making under uncertainty.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Information Aggregation, Game Theory, Collective Action.</p>
+            </div>
+          </li>
+          <li>
+            Cohen, A., Deligkas, A., &amp; Koren, M. (2023).
+            <a href="https://doi.org/10.1016/j.tcs.2023.114219" target="_blank" rel="noopener">"Learning Approximately Optimal Contracts"</a>.
+            <em>Theoretical Computer Science</em>, 980, 114219.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This research connects contract theory with machine learning by introducing algorithms that enable a principal to learn the optimal contract to offer an agent whose cost structure is initially unknown.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Algorithmic Mechanism Design, Contract Theory, Machine Learning, Online Learning.</p>
+            </div>
+          </li>
+          <li>
+            Arieli, I., Koren, M., &amp; Smorodinsky, R. (2022).
+            <a href="https://econtheory.org/ojs/index.php/te/article/view/3842" target="_blank" rel="noopener">"The Implication of Pricing on Social Learning"</a>.
+            <em>Theoretical Economics</em>, 17(4), 1761-1802.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This paper investigates how a manager can use dynamic pricing as an operational lever to learn consumer demand, identifying conditions under which a firm can overcome informational herds and guarantee long-run learning.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Social Learning, Game Theory, Dynamic Pricing, Information Design.</p>
+            </div>
+          </li>
+          <li>
+            Koren, M., &amp; Mueller-Frank, M. (2022).
+            <a href="https://doi.org/10.1016/j.geb.2021.11.014" target="_blank" rel="noopener">"The Welfare Costs of Informationally Efficient Prices"</a>.
+            <em>Games and Economic Behavior</em>, 131, 186-196.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> We demonstrate a critical managerial tradeoff by showing that operational policies designed to be "informationally efficient" can paradoxically reduce short-term profitability and overall welfare.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Information Economics, Game Theory, Market Efficiency.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
 
-    <!-- Conferences -->
-    <section id="panel-conferences" role="tabpanel" aria-labelledby="tab-conferences" tabindex="0" hidden>
-      <ul data-group="conferences">
-        <li>
-          Amir, D., Hoter, B., <strong>Koren, M.</strong> (2025).
-          <a href="https://arxiv.org/abs/2510.14872">"Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment".</a>
-          <em>WINE 2025</em>.
-          <strong>[Acceptance: 29.8%]</strong>
-          <div class="publication-details">
-            <p><strong>Summary:</strong> This student-led publication serves as a proof-of-concept for translating a core research agenda into a productive, student-driven research program. It directly validates theoretical predictions from earlier work.</p>
-            <p><strong>Tools & Methodologies:</strong> Online Experiments, Behavioral Economics, Game Theory, Crowdfunding Platforms.</p>
-          </div>
-        </li>
-        <li>Havin, M., Kleinman, T.W., Koren, M., Goldstein, A., & Dover, Y. (2025).
-          <a href="https://arxiv.org/abs/2503.01844" target="_blank" rel="noopener">"Can (A)I Change Your Mind?"</a>.
-          <em>CogSci 2025</em>.
-        </li>
-        <li>Hoter, B., Koren, M., Nitzan, D., Shapira, S., & Talmon, N. (2025).
-          "Enhancing Food Security with Blockchain...".
-          <em>IEEE ISCC 2025</em>.
-        </li>
-        <li>
-          Horowitz, G., Sommer, Y., Koren, M., & Rosenfeld, N. (2024).
-          <a href="https://proceedings.mlr.press/v235/horowitz24a.html" target="_blank" rel="noopener">"Classification Under Strategic Self-Selection"</a>.
-          <em>ICML 2024</em>.
-          <div class="publication-details">
-            <p><strong>Summary:</strong> Develops entry-aware classification under endogenous applicant pools and proposes screening rules that are robust to self-selection.</p>
-            <p><strong>Tools & Methodologies:</strong> Machine Learning, Algorithmic Game Theory, Causal Inference, Fairness in AI.</p>
-          </div>
-        </li>
-        <li>
-          Cohen, A., Deligkas, A., & Koren, M. (2022).
-          <a href="https://link.springer.com/chapter/10.1007/978-3-031-15714-1_19" target="_blank" rel="noopener">"Learning Approximately Optimal Contracts"</a>.
-          <em>SAGT 2022</em>.
-        </li>
-        <li>
-          Kang, J., Koren, M., Monachou, F., & Ashlagi, I. (2021).
-          <a href="https://proceedings.neurips.cc/paper/2021/hash/5cc3749a6e56ef6d656735dff9176074-Abstract.html" target="_blank" rel="noopener">"Counterbalancing Learning and Strategic Incentives in Allocation Markets"</a>.
-          <em>NeurIPS 2021</em>.
-        </li>
-        <li>
-          Ban, A., & Koren, M. (2020).
-          <a href="https://dl.acm.org/doi/abs/10.1145/3391403.3399479" target="_blank" rel="noopener">"Sequential Fundraising and Social Insurance"</a>.
-          <em>ACM EC '20</em>.
-        </li>
-        <li>
-          Jakesch, M., Koren, M., Evtushenko, A., & Naaman, M. (2020).
-          <a href="https://truthandtrustonline.com/wp-content/uploads/2020/10/TTO01.pdf" target="_blank" rel="noopener">"How Partisan Crowds Affect News Evaluation"</a>.
-          <em>TTO 2020</em>.
-        </li>
-        <li>
-          Arieli, I., Koren, M., & Smorodinsky, R. (2019).
-          <a href="https://dl.acm.org/doi/10.1145/3328526.3329554" target="_blank" rel="noopener">"The Implication of Pricing on Social Learning"</a>.
-          <em>ACM EC '19</em>.
-        </li>
-        <li>
-          Arieli, I., Koren, M., & Smorodinsky, R. (2018).
-          <a href="https://dl.acm.org/doi/10.1145/3219166.3219215" target="_blank" rel="noopener">"The One-Shot Crowdfunding Game"</a>.
-          <em>ACM EC '18</em>.
-        </li>
-        <li>
-          Arieli, I., Koren, M., & Smorodinsky, R. (2017).
-          <a href="https://arxiv.org/abs/1710.00319" target="_blank" rel="noopener">"The Crowdfunding Game"</a>.
-          <em>WINE 2017</em>.
-        </li>
-      </ul>
-    </section>
-  </main>
+      <!-- Working / Submitted -->
+      <section id="panel-working" role="tabpanel" aria-labelledby="tab-working" tabindex="0" hidden>
+        <ul class="spaced-list" data-group="working">
+          <li>
+            Kang, J., Koren, M., Monachou, F., &amp; Ashlagi, I.
+            <a href="https://arxiv.org/abs/2110.14865" target="_blank" rel="noopener">"Counterbalancing Learning and Strategic Incentives in Allocation Markets"</a>.
+            (Major Revision at <em>Manufacturing &amp; Service Operations Management</em>).
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This work designs mechanisms that balance information acquisition and strategic incentives in dynamic allocation markets (e.g., organ/platform markets). It proposes a novel batch-based voting mechanism to mitigate herd behavior and improve allocation efficiency.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Mechanism Design, Game Theory, Social Learning, Market Design, Simulations.</p>
+            </div>
+          </li>
+          <li>
+            Ban, A., &amp; Koren, M.
+            <a href="https://arxiv.org/abs/2005.10711" target="_blank" rel="noopener">"Sequential Fundraising and Mutual Insurance"</a>.
+            (Revise &amp; Resubmit at <em>JPE-Micro</em>).
+            <div class="pub-details">
+              <p><strong>Summary:</strong> Characterizes when sequential fundraising with risk-sharing generates inefficiency and provides implementable design fixes; delivers testable comparative statics.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Game Theory, Mechanism Design, Crowdfunding, Social Learning.</p>
+            </div>
+          </li>
+          <li>
+            Berkovich, E., Koren, M., Nitzan, D., Shapira, S., &amp; Talmon, N.
+            "Reimagining Israel's Food System...".
+            (Revise &amp; Resubmit at <em>Israel Journal of Health Policy Research</em>).
+            <div class="pub-details">
+              <p><strong>Summary:</strong> A paper at the interface of operations management and policy, providing mechanism-based recommendations for enhancing the resilience of the national food-system.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> System Design, Operations Management, Public Policy, Resilience.</p>
+            </div>
+          </li>
+          <li>
+            Yuval, D., &amp; Koren M. "Socially-Aware Allocation on Networks". (Working paper).
+          </li>
+        </ul>
+      </section>
 
-  <footer>
-    <p>&copy; 2025 Moran Koren</p>
-  </footer>
+      <!-- Conferences -->
+      <section id="panel-conferences" role="tabpanel" aria-labelledby="tab-conferences" tabindex="0" hidden>
+        <ul class="spaced-list" data-group="conferences">
+          <li>
+            Amir, D., Hoter, B., <strong>Koren, M.</strong> (2025).
+            <a href="https://arxiv.org/abs/2510.14872">"Strategic Behavior in Crowdfunding: Insights from a Large-Scale Online Experiment".</a>
+            <em>WINE 2025</em>.
+            <strong>[Acceptance: 29.8%]</strong>
+            <div class="pub-details">
+              <p><strong>Summary:</strong> This student-led publication serves as a proof-of-concept for translating a core research agenda into a productive, student-driven research program. It directly validates theoretical predictions from earlier work.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Online Experiments, Behavioral Economics, Game Theory, Crowdfunding Platforms.</p>
+            </div>
+          </li>
+          <li>Havin, M., Kleinman, T.W., Koren, M., Goldstein, A., &amp; Dover, Y. (2025).
+            <a href="https://arxiv.org/abs/2503.01844" target="_blank" rel="noopener">"Can (A)I Change Your Mind?"</a>.
+            <em>CogSci 2025</em>.
+          </li>
+          <li>Hoter, B., Koren, M., Nitzan, D., Shapira, S., &amp; Talmon, N. (2025).
+            "Enhancing Food Security with Blockchain...".
+            <em>IEEE ISCC 2025</em>.
+          </li>
+          <li>
+            Horowitz, G., Sommer, Y., Koren, M., &amp; Rosenfeld, N. (2024).
+            <a href="https://proceedings.mlr.press/v235/horowitz24a.html" target="_blank" rel="noopener">"Classification Under Strategic Self-Selection"</a>.
+            <em>ICML 2024</em>.
+            <div class="pub-details">
+              <p><strong>Summary:</strong> Develops entry-aware classification under endogenous applicant pools and proposes screening rules that are robust to self-selection.</p>
+              <p><strong>Tools &amp; Methodologies:</strong> Machine Learning, Algorithmic Game Theory, Causal Inference, Fairness in AI.</p>
+            </div>
+          </li>
+          <li>
+            Cohen, A., Deligkas, A., &amp; Koren, M. (2022).
+            <a href="https://link.springer.com/chapter/10.1007/978-3-031-15714-1_19" target="_blank" rel="noopener">"Learning Approximately Optimal Contracts"</a>.
+            <em>SAGT 2022</em>.
+          </li>
+          <li>
+            Kang, J., Koren, M., Monachou, F., &amp; Ashlagi, I. (2021).
+            <a href="https://proceedings.neurips.cc/paper/2021/hash/5cc3749a6e56ef6d656735dff9176074-Abstract.html" target="_blank" rel="noopener">"Counterbalancing Learning and Strategic Incentives in Allocation Markets"</a>.
+            <em>NeurIPS 2021</em>.
+          </li>
+          <li>
+            Ban, A., &amp; Koren, M. (2020).
+            <a href="https://dl.acm.org/doi/abs/10.1145/3391403.3399479" target="_blank" rel="noopener">"Sequential Fundraising and Social Insurance"</a>.
+            <em>ACM EC '20</em>.
+          </li>
+          <li>
+            Jakesch, M., Koren, M., Evtushenko, A., &amp; Naaman, M. (2020).
+            <a href="https://truthandtrustonline.com/wp-content/uploads/2020/10/TTO01.pdf" target="_blank" rel="noopener">"How Partisan Crowds Affect News Evaluation"</a>.
+            <em>TTO 2020</em>.
+          </li>
+          <li>
+            Arieli, I., Koren, M., &amp; Smorodinsky, R. (2019).
+            <a href="https://dl.acm.org/doi/10.1145/3328526.3329554" target="_blank" rel="noopener">"The Implication of Pricing on Social Learning"</a>.
+            <em>ACM EC '19</em>.
+          </li>
+          <li>
+            Arieli, I., Koren, M., &amp; Smorodinsky, R. (2018).
+            <a href="https://dl.acm.org/doi/10.1145/3219166.3219215" target="_blank" rel="noopener">"The One-Shot Crowdfunding Game"</a>.
+            <em>ACM EC '18</em>.
+          </li>
+          <li>
+            Arieli, I., Koren, M., &amp; Smorodinsky, R. (2017).
+            <a href="https://arxiv.org/abs/1710.00319" target="_blank" rel="noopener">"The Crowdfunding Game"</a>.
+            <em>WINE 2017</em>.
+          </li>
+        </ul>
+      </section>
+    </main>
+  </div>
 
+  <!-- ===== Footer ===== -->
+  <div class="site-footer-wrap">
+    <footer class="site-footer wrap">
+      <span>&copy; 2026 Moran Koren</span>
+      <span>Ben-Gurion University of the Negev</span>
+    </footer>
+  </div>
+
+  <!-- ===== Tab JS ===== -->
   <script>
-    // Accessible Tabs (manual activation + counts)
     (function () {
       const tablist = document.querySelector('.tablist');
       const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
@@ -349,30 +240,29 @@
         if (t) activate(t, false); else activate(tabs[0], false);
       } else activate(tabs[0], false);
 
-      // badge counts
       document.querySelectorAll('.tab-badge').forEach(b => {
         const group = b.getAttribute('data-count');
-        const list = document.querySelector(`[data-group="${group}"]`);
+        const list = document.querySelector('[data-group="' + group + '"]');
         if (list) b.textContent = list.querySelectorAll(':scope > li').length;
       });
 
       tabs.forEach(tab => {
         tab.addEventListener('click', () => activate(tab, true));
         tab.addEventListener('keydown', e => {
-          if (e.keyCode === keys.left) { e.preventDefault(); focusPrev(tab); }
-          if (e.keyCode === keys.right){ e.preventDefault(); focusNext(tab); }
-          if (e.keyCode === keys.home){ e.preventDefault(); tabs[0].focus(); }
-          if (e.keyCode === keys.end) { e.preventDefault(); tabs[tabs.length-1].focus(); }
+          if (e.keyCode === keys.left)  { e.preventDefault(); focusPrev(tab); }
+          if (e.keyCode === keys.right) { e.preventDefault(); focusNext(tab); }
+          if (e.keyCode === keys.home)  { e.preventDefault(); tabs[0].focus(); }
+          if (e.keyCode === keys.end)   { e.preventDefault(); tabs[tabs.length - 1].focus(); }
         });
       });
 
-      function activate(selected, pushHash){
+      function activate(selected, pushHash) {
         tabs.forEach((t, i) => {
           const on = t === selected;
           t.setAttribute('aria-selected', on ? 'true' : 'false');
           t.tabIndex = on ? 0 : -1;
           panels[i].hidden = !on;
-          if (on){
+          if (on) {
             panels[i].setAttribute('tabindex', '0');
             if (pushHash) history.replaceState(null, '', '#' + panels[i].id);
             localStorage.setItem('pubsActiveTab', t.id.replace('tab', 'panel'));
@@ -380,8 +270,8 @@
         });
         selected.focus();
       }
-      function focusPrev(cur){ const i = tabs.indexOf(cur); const p = tabs[(i-1+tabs.length)%tabs.length]; p.focus(); activate(p, true); }
-      function focusNext(cur){ const i = tabs.indexOf(cur); const n = tabs[(i+1)%tabs.length]; n.focus(); activate(n, true); }
+      function focusPrev(cur) { const i = tabs.indexOf(cur); const p = tabs[(i - 1 + tabs.length) % tabs.length]; p.focus(); activate(p, true); }
+      function focusNext(cur) { const i = tabs.indexOf(cur); const n = tabs[(i + 1) % tabs.length]; n.focus(); activate(n, true); }
     })();
   </script>
 </body>
