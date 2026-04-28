@@ -163,8 +163,8 @@ strong { font-weight: 650; }
   top: 0;
   z-index: 100;
   background: var(--glass);
-  backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border-light);
   box-shadow: var(--shadow-xs);
 }
@@ -564,8 +564,8 @@ strong { font-weight: 650; }
 
 @supports (mask-image: linear-gradient(to right, black, black)) or (-webkit-mask-image: linear-gradient(to right, black, black)) {
   .news-ticker {
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
   }
 }
 
@@ -666,8 +666,8 @@ strong { font-weight: 650; }
    ================================================================ */
 .tabs-wrap {
   background: var(--glass);
-  backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border-light);
   position: sticky;
   top: 0;
@@ -827,6 +827,10 @@ strong { font-weight: 650; }
 
 .student-card.alumni:hover {
   opacity: 1;
+}
+
+.section-title--alumni {
+  margin-top: 48px;
 }
 
 /* ================================================================
