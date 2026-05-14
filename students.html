@@ -40,162 +40,407 @@
   <!-- ===== Main ===== -->
   <div class="site-main-wrap">
     <main class="site-main wrap">
-      <div class="student-grid">
 
-        <!-- Din Amir -->
-        <article class="student-card">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name">Din Amir</div>
-              <div class="student-role">M.Sc. Student</div>
-            </div>
-            <span class="badge badge-brand">Ongoing</span>
-          </div>
-          <div class="student-project-title">Strategic Decision-Making: Crowdfunding vs. Voting Mechanisms</div>
-          <div class="student-meta">Supported by ISF 977/24 &nbsp;&middot;&nbsp; Initial results to appear at WINE 2025 (29.8% acceptance rate)</div>
-          <div class="student-tags">
-            <span class="tag">Game Theory</span>
-            <span class="tag">Behavioral Economics</span>
-            <span class="tag">Collective Decision-Making</span>
-          </div>
-          <div class="student-description">
-            Examines how individuals make strategic decisions under uncertainty, comparing crowdfunding and simple voting mechanisms. Using a custom experimental platform to analyze how risk, collective influence, and social trust affect participant choices and collective outcomes.
-          </div>
-        </article>
-
-        <!-- Gal Ram -->
-        <article class="student-card">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name">Gal Ram</div>
-              <div class="student-role">M.Sc. Student</div>
-            </div>
-            <span class="badge badge-brand">Ongoing</span>
-          </div>
-          <div class="student-project-title">Multi-Agent Reinforcement Learning for Urban Traffic Control</div>
-          <div class="student-meta">Joint with Ayal Taitler &nbsp;&middot;&nbsp; Supported by the Paul Ivanir Center</div>
-          <div class="student-tags">
-            <span class="tag">MARL</span>
-            <span class="tag">Game Theory</span>
-            <span class="tag">Smart Transportation</span>
-          </div>
-          <div class="student-description">
-            Develops an intelligent traffic control system where each traffic light functions as an autonomous agent learning to make real-time decisions. Applies game-theoretic principles to enable cooperation and competition among agents for optimizing traffic flow and reducing congestion.
-          </div>
-        </article>
-
-        <!-- Oriya Sheetrit -->
-        <article class="student-card">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name">Oriya Sheetrit</div>
-              <div class="student-role">M.Sc. Student</div>
-            </div>
-            <span class="badge badge-brand">Ongoing</span>
-          </div>
-          <div class="student-project-title">Fairness-Aware Multi-Agent Reinforcement Learning</div>
-          <div class="student-meta">Joint with S. Shperberg &nbsp;&middot;&nbsp; Supported by ISF 977/24</div>
-          <div class="student-tags">
-            <span class="tag">MARL</span>
-            <span class="tag">Fairness</span>
-            <span class="tag">Cooperative AI</span>
-          </div>
-          <div class="student-description">
-            Develops MARL mechanisms for fair decisions in asymmetric environments. Introduces a novel optimization framework with real-time performance gap measurement and dual update mechanisms that guide agents toward balanced, cooperative strategies. Applications in robotics, resource allocation, and collaborative AI.
-          </div>
-        </article>
-
-        <!-- Yuval Doron -->
-        <article class="student-card">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name">Yuval Doron</div>
-              <div class="student-role">M.Sc. Student</div>
-            </div>
-            <span class="badge badge-brand">Ongoing</span>
-          </div>
-          <div class="student-project-title">Graph-Based Social Matching for Displaced Populations</div>
-          <div class="student-meta">Initial results presented at Stony Brook GT Festival 2025 &nbsp;&middot;&nbsp; Supported by IDSAI</div>
-          <div class="student-tags">
-            <span class="tag">Graph Theory</span>
-            <span class="tag">Mechanism Design</span>
-            <span class="tag">Social Networks</span>
-          </div>
-          <div class="student-description">
-            Develops a graph-based allocation mechanism for displaced populations that preserves social networks. Proves that minimum graph cut solutions are game-theoretically stable and introduces an efficient Cycle-Based Improvement algorithm. Combines computational efficiency with social sensitivity for humanitarian housing allocation.
-          </div>
-        </article>
-
-        <!-- Yuval Peled -->
-        <article class="student-card">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name">Yuval Peled</div>
-              <div class="student-role">Ph.D. Candidate (starting Oct 2026)</div>
-            </div>
-            <span class="badge badge-brand">Ongoing</span>
-          </div>
-          <div class="student-project-title">Strategic Decision-Making under Competition in Common Value Markets</div>
-          <div class="student-meta">Supported by ISF 977/24</div>
-          <div class="student-tags">
-            <span class="tag">Game Theory</span>
-            <span class="tag">Experimental Economics</span>
-            <span class="tag">Healthcare Operations</span>
-          </div>
-          <div class="student-description">
-            Examines how strategic decisions are made under conditions of competition and pressure using a controlled experiment. Measures decision speed under different competitive settings and compares it to the ex-post quality and accuracy of the decisions. At a broader level, the study aims to inform a more efficient model for allocating organs for transplantation, in which decisions are made faster while maintaining decision quality and safeguarding transplant recipients.
-          </div>
-        </article>
-
+      <!-- Filter Bar -->
+      <div class="filter-bar" role="toolbar" aria-label="Filter projects by topic">
+        <span class="filter-label">Filter by tag</span>
+        <button type="button" class="filter-chip filter-all active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="game-theory">Game Theory</button>
+        <button type="button" class="filter-chip" data-filter="behavioral-economics">Behavioral Economics</button>
+        <button type="button" class="filter-chip" data-filter="experiment">Experiment</button>
+        <button type="button" class="filter-chip" data-filter="mechanism-design">Mechanism Design</button>
+        <button type="button" class="filter-chip" data-filter="multi-agent">Multi-Agent / RL</button>
+        <button type="button" class="filter-chip" data-filter="ai-agents">AI / LLM Agents</button>
+        <button type="button" class="filter-chip" data-filter="crowdfunding">Crowdfunding</button>
+        <button type="button" class="filter-chip" data-filter="social-influence">Social Influence</button>
+        <button type="button" class="filter-chip" data-filter="healthcare">Healthcare</button>
+        <button type="button" class="filter-chip" data-filter="matching">Matching</button>
+        <button type="button" class="filter-chip" data-filter="industry">Industry</button>
+        <button type="button" class="filter-chip" data-filter="social-impact">Social Impact</button>
+        <span class="filter-count" id="filterCount"></span>
       </div>
+
+      <!-- Ongoing M.Sc. / Pre-Doc -->
+      <section class="student-section" data-section="ongoing">
+        <div class="student-grid">
+
+          <!-- Din Amir -->
+          <article class="student-card" data-tags="game-theory behavioral-economics crowdfunding">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name">Din Amir</div>
+                <div class="student-role">M.Sc. Student</div>
+              </div>
+              <span class="badge badge-brand">Ongoing</span>
+            </div>
+            <div class="student-project-title">Strategic Decision-Making: Crowdfunding vs. Voting Mechanisms</div>
+            <div class="student-meta">Supported by ISF 977/24 &nbsp;&middot;&nbsp; Initial results to appear at WINE 2025 (29.8% acceptance rate)</div>
+            <div class="student-tags">
+              <span class="tag">Game Theory</span>
+              <span class="tag">Behavioral Economics</span>
+              <span class="tag">Crowdfunding</span>
+            </div>
+            <div class="student-description">
+              Examines how individuals make strategic decisions under uncertainty, comparing crowdfunding and simple voting mechanisms. Using a custom experimental platform to analyze how risk, collective influence, and social trust affect participant choices and collective outcomes.
+            </div>
+          </article>
+
+          <!-- Gal Ram -->
+          <article class="student-card" data-tags="game-theory multi-agent">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name">Gal Ram</div>
+                <div class="student-role">M.Sc. Student</div>
+              </div>
+              <span class="badge badge-brand">Ongoing</span>
+            </div>
+            <div class="student-project-title">Multi-Agent Reinforcement Learning for Urban Traffic Control</div>
+            <div class="student-meta">Joint with Ayal Taitler &nbsp;&middot;&nbsp; Supported by the Paul Ivanir Center</div>
+            <div class="student-tags">
+              <span class="tag">Multi-Agent / RL</span>
+              <span class="tag">Game Theory</span>
+              <span class="tag">Smart Transportation</span>
+            </div>
+            <div class="student-description">
+              Develops an intelligent traffic control system where each traffic light functions as an autonomous agent learning to make real-time decisions. Applies game-theoretic principles to enable cooperation and competition among agents for optimizing traffic flow and reducing congestion.
+            </div>
+          </article>
+
+          <!-- Oriya Sheetrit -->
+          <article class="student-card" data-tags="multi-agent mechanism-design">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name">Oriya Sheetrit</div>
+                <div class="student-role">M.Sc. Student</div>
+              </div>
+              <span class="badge badge-brand">Ongoing</span>
+            </div>
+            <div class="student-project-title">Fairness-Aware Multi-Agent Reinforcement Learning</div>
+            <div class="student-meta">Joint with S. Shperberg &nbsp;&middot;&nbsp; Supported by ISF 977/24</div>
+            <div class="student-tags">
+              <span class="tag">Multi-Agent / RL</span>
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Cooperative AI</span>
+            </div>
+            <div class="student-description">
+              Develops MARL mechanisms for fair decisions in asymmetric environments. Introduces a novel optimization framework with real-time performance gap measurement and dual update mechanisms that guide agents toward balanced, cooperative strategies. Applications in robotics, resource allocation, and collaborative AI.
+            </div>
+          </article>
+
+          <!-- Yuval Doron -->
+          <article class="student-card" data-tags="mechanism-design matching social-influence social-impact">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name">Yuval Doron</div>
+                <div class="student-role">M.Sc. Student</div>
+              </div>
+              <span class="badge badge-brand">Ongoing</span>
+            </div>
+            <div class="student-project-title">Graph-Based Social Matching for Displaced Populations</div>
+            <div class="student-meta">Initial results presented at Stony Brook GT Festival 2025 &nbsp;&middot;&nbsp; Supported by IDSAI</div>
+            <div class="student-tags">
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Matching</span>
+              <span class="tag">Social Influence</span>
+              <span class="tag">Social Impact</span>
+            </div>
+            <div class="student-description">
+              Develops a graph-based allocation mechanism for displaced populations that preserves social networks. Proves that minimum graph cut solutions are game-theoretically stable and introduces an efficient Cycle-Based Improvement algorithm. Combines computational efficiency with social sensitivity for humanitarian housing allocation.
+            </div>
+          </article>
+
+          <!-- Yuval Peled -->
+          <article class="student-card" data-tags="game-theory experiment healthcare">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name">Yuval Peled</div>
+                <div class="student-role">Ph.D. Candidate (starting Oct 2026)</div>
+              </div>
+              <span class="badge badge-brand">Ongoing</span>
+            </div>
+            <div class="student-project-title">Strategic Decision-Making under Competition in Common Value Markets</div>
+            <div class="student-meta">Supported by ISF 977/24</div>
+            <div class="student-tags">
+              <span class="tag">Game Theory</span>
+              <span class="tag">Experiment</span>
+              <span class="tag">Healthcare</span>
+            </div>
+            <div class="student-description">
+              Examines how strategic decisions are made under conditions of competition and pressure using a controlled experiment. Measures decision speed under different competitive settings and compares it to the ex-post quality and accuracy of the decisions. At a broader level, the study aims to inform a more efficient model for allocating organs for transplantation, in which decisions are made faster while maintaining decision quality and safeguarding transplant recipients.
+            </div>
+          </article>
+
+        </div>
+      </section>
 
       <!-- Previous Students -->
-      <h2 class="section-title section-title--alumni">Previous Students</h2>
-      <div class="student-grid">
+      <section class="student-section" data-section="alumni">
+        <h2 class="section-title section-title--alumni">Previous Students</h2>
+        <div class="student-grid">
 
-        <!-- Bar Hoter -->
-        <article class="student-card alumni">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name"><a href="https://www.linkedin.com/in/barhoter/" target="_blank" rel="noopener">Bar Hoter</a></div>
-              <div class="student-role">M.Sc. (completed 2025) &nbsp;&middot;&nbsp; Now: Data Analyst @ Vi</div>
+          <!-- Bar Hoter -->
+          <article class="student-card alumni" data-tags="mechanism-design social-impact">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name"><a href="https://www.linkedin.com/in/barhoter/" target="_blank" rel="noopener">Bar Hoter</a></div>
+                <div class="student-role">M.Sc. (completed 2025) &nbsp;&middot;&nbsp; Now: Data Analyst @ Vi</div>
+              </div>
+              <span class="badge badge-success">Completed</span>
             </div>
-            <span class="badge badge-success">Completed</span>
-          </div>
-          <div class="student-project-title">Blockchain-Based Food Security Management System</div>
-          <div class="student-meta">Supported by MOST &amp; KKL &nbsp;&middot;&nbsp; Publication at ISCC 2025</div>
-          <div class="student-tags">
-            <span class="tag">Blockchain</span>
-            <span class="tag">Resource Management</span>
-            <span class="tag">Social Impact</span>
-          </div>
-          <div class="student-description">
-            Developed a blockchain platform for food security management in Israel, where 23% of the population faces food insecurity. The system provides disaster preparedness simulation and food waste reduction strategies. Key finding: recovering 20% of current food waste could eliminate national food insecurity.
-          </div>
-        </article>
-
-        <!-- Ohad Kiperman -->
-        <article class="student-card alumni">
-          <div class="student-card-header">
-            <div>
-              <div class="student-name"><a href="https://www.linkedin.com/in/ohad-kiperman-540942164/" target="_blank" rel="noopener">Ohad Kiperman</a></div>
-              <div class="student-role">M.Sc. (completed 2025) &nbsp;&middot;&nbsp; Now: Data Scientist @ Zefr</div>
+            <div class="student-project-title">Blockchain-Based Food Security Management System</div>
+            <div class="student-meta">Supported by MOST &amp; KKL &nbsp;&middot;&nbsp; Publication at ISCC 2025</div>
+            <div class="student-tags">
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Blockchain</span>
+              <span class="tag">Social Impact</span>
             </div>
-            <span class="badge badge-success">Completed</span>
-          </div>
-          <div class="student-project-title">Impact of OPO Mergers on Kidney Transplant Allocation</div>
-          <div class="student-meta">Joint with I. Shurtz and N. Gershoni &nbsp;&middot;&nbsp; Supported by ISF 977/24 and BGU-CHER</div>
-          <div class="student-tags">
-            <span class="tag">Healthcare Economics</span>
-            <span class="tag">Market Design</span>
-            <span class="tag">OPTN Data Analysis</span>
-          </div>
-          <div class="student-description">
-            Analyzed how the merger of two major Organ Procurement Organizations affected the organ allocation landscape. Used OPTN database and Difference-in-Differences methodology to assess whether consolidation enhanced organ-patient matching efficiency or introduced new market distortions.
-          </div>
-        </article>
+            <div class="student-description">
+              Developed a blockchain platform for food security management in Israel, where 23% of the population faces food insecurity. The system provides disaster preparedness simulation and food waste reduction strategies. Key finding: recovering 20% of current food waste could eliminate national food insecurity.
+            </div>
+          </article>
 
-      </div>
+          <!-- Ohad Kiperman -->
+          <article class="student-card alumni" data-tags="healthcare mechanism-design matching">
+            <div class="student-card-header">
+              <div>
+                <div class="student-name"><a href="https://www.linkedin.com/in/ohad-kiperman-540942164/" target="_blank" rel="noopener">Ohad Kiperman</a></div>
+                <div class="student-role">M.Sc. (completed 2025) &nbsp;&middot;&nbsp; Now: Data Scientist @ Zefr</div>
+              </div>
+              <span class="badge badge-success">Completed</span>
+            </div>
+            <div class="student-project-title">Impact of OPO Mergers on Kidney Transplant Allocation</div>
+            <div class="student-meta">Joint with I. Shurtz and N. Gershoni &nbsp;&middot;&nbsp; Supported by ISF 977/24 and BGU-CHER</div>
+            <div class="student-tags">
+              <span class="tag">Healthcare</span>
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Matching</span>
+            </div>
+            <div class="student-description">
+              Analyzed how the merger of two major Organ Procurement Organizations affected the organ allocation landscape. Used OPTN database and Difference-in-Differences methodology to assess whether consolidation enhanced organ-patient matching efficiency or introduced new market distortions.
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- B.Sc. Capstone Projects -->
+      <section class="student-section" data-section="bsc">
+        <h2 class="section-title section-title--bsc">Undergraduate Final Projects (B.Sc.)</h2>
+        <p class="bsc-lede">Industrial Engineering &amp; Management capstone projects supervised at Ben-Gurion University. Many are paired with M.Sc. students or industry partners.</p>
+
+        <div class="bsc-grid">
+
+          <div class="bsc-card active" data-tags="experiment behavioral-economics ai-agents">
+            <div class="bsc-students">Amit Walach, Vered Simchovitz &amp; Yair Neuman</div>
+            <div class="bsc-title">Replicating and comparing behavioral experiments with human participants vs. AI agents</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Behavioral Economics</span>
+              <span class="tag">AI Agents</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="multi-agent mechanism-design matching">
+            <div class="bsc-students">Shir Horowitz</div>
+            <div class="bsc-title">Decision-making in groups of learning algorithms (Graph Resettlement Problem)</div>
+            <div class="bsc-tags">
+              <span class="tag">Multi-Agent / RL</span>
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Matching</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+              <span class="bsc-collab">w/ Yuval Doron</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="healthcare mechanism-design">
+            <div class="bsc-students">Sivan Tsidkulov</div>
+            <div class="bsc-title">Decision-making in resource allocation &mdash; kidney transplant geographic data analysis</div>
+            <div class="bsc-tags">
+              <span class="tag">Healthcare</span>
+              <span class="tag">Mechanism Design</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="ai-agents game-theory">
+            <div class="bsc-students">Shon-Abraham Levin</div>
+            <div class="bsc-title">Strategic behavior and cooperation of LLM agents in multi-player board games (Catan)</div>
+            <div class="bsc-tags">
+              <span class="tag">AI Agents</span>
+              <span class="tag">Game Theory</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="experiment behavioral-economics">
+            <div class="bsc-students">Noam Rozali &amp; Lior Segal</div>
+            <div class="bsc-title">Decision-making in information-overloaded environments</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="crowdfunding experiment behavioral-economics">
+            <div class="bsc-students">Sapir Insaz Bruchim &amp; Ofek Bar Yosef</div>
+            <div class="bsc-title">Granularity of information display in crowdfunding and its effect on investment decisions</div>
+            <div class="bsc-tags">
+              <span class="tag">Crowdfunding</span>
+              <span class="tag">Experiment</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+              <span class="bsc-collab">w/ Din Amir</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="experiment multi-agent behavioral-economics">
+            <div class="bsc-students">Roni Helen Hajaj &amp; Sheli Levi</div>
+            <div class="bsc-title">Decision-making experiment (algorithmic learning)</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Multi-Agent / RL</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+              <span class="bsc-collab">w/ Din Amir</span>
+            </div>
+          </div>
+
+          <div class="bsc-card active" data-tags="experiment social-influence behavioral-economics">
+            <div class="bsc-students">Amit Carmeli &amp; Shelly Sarizada</div>
+            <div class="bsc-title">How group influence shapes dating decisions (experiment)</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Social Influence</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '26</span>
+              <span class="bsc-status-active">Active</span>
+              <span class="bsc-collab">w/ Din Amir</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="industry mechanism-design social-impact">
+            <div class="bsc-students">Shani Klein, Barel Furman &amp; Alexandra Hvostenko</div>
+            <div class="bsc-title">Improving the donation-matching process at the call center</div>
+            <div class="bsc-tags">
+              <span class="tag">Industry</span>
+              <span class="tag">Mechanism Design</span>
+              <span class="tag">Social Impact</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem B '25</span>
+              <span class="bsc-status-completed">Completed</span>
+              <span class="bsc-collab">w/ Patachon Lev NGO</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="matching social-impact">
+            <div class="bsc-students">Shani Rozenblum Lev &amp; Noa Eloya</div>
+            <div class="bsc-title">Matching excellent students to Mitar/Kashat tracks &mdash; survey &amp; system design</div>
+            <div class="bsc-tags">
+              <span class="tag">Matching</span>
+              <span class="tag">Social Impact</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem B '25</span>
+              <span class="bsc-status-completed">Completed</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="social-impact">
+            <div class="bsc-students">Noa Etesh &amp; Shir Biton</div>
+            <div class="bsc-title">Web platform for the elderly</div>
+            <div class="bsc-tags">
+              <span class="tag">Social Impact</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '25</span>
+              <span class="bsc-status-completed">Completed</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="experiment behavioral-economics">
+            <div class="bsc-students">Or Yehuda Gil &amp; Dotan Bersano</div>
+            <div class="bsc-title">Experiment in decision-making: risk attitude and gambling behavior</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '25</span>
+              <span class="bsc-status-completed">Completed</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="experiment social-influence behavioral-economics">
+            <div class="bsc-students">Inbar Nesia Solomiani &amp; Shenhav Tanami</div>
+            <div class="bsc-title">Information cascades and social influence on decision-making (experiment)</div>
+            <div class="bsc-tags">
+              <span class="tag">Experiment</span>
+              <span class="tag">Social Influence</span>
+              <span class="tag">Behavioral Economics</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '25</span>
+              <span class="bsc-status-completed">Completed</span>
+              <span class="bsc-collab">w/ Din Amir</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="industry">
+            <div class="bsc-students">Oriya Sheetrit</div>
+            <div class="bsc-title">Decision support system design in the mining industry</div>
+            <div class="bsc-tags">
+              <span class="tag">Industry</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem A '24</span>
+              <span class="bsc-status-completed">Completed</span>
+              <span class="bsc-collab">Industry collaboration</span>
+            </div>
+          </div>
+
+          <div class="bsc-card" data-tags="crowdfunding experiment">
+            <div class="bsc-students">Gal Eitach &amp; Shani Gueta</div>
+            <div class="bsc-title">Online crowdfunding experiment</div>
+            <div class="bsc-tags">
+              <span class="tag">Crowdfunding</span>
+              <span class="tag">Experiment</span>
+            </div>
+            <div class="bsc-meta">
+              <span>Sem B '23 &rarr; A '24</span>
+              <span class="bsc-status-completed">Completed</span>
+              <span class="bsc-collab">w/ Bar Hoter</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -206,5 +451,62 @@
       <span>Ben-Gurion University of the Negev</span>
     </footer>
   </div>
+
+  <!-- ===== Filter logic ===== -->
+  <script>
+    (function () {
+      const chips    = document.querySelectorAll('.filter-chip');
+      const cards    = document.querySelectorAll('[data-tags]');
+      const sections = document.querySelectorAll('.student-section');
+      const countEl  = document.getElementById('filterCount');
+      const allChip  = document.querySelector('.filter-chip.filter-all');
+      const totalCards = cards.length;
+
+      function applyFilter(tag) {
+        let visible = 0;
+        cards.forEach(card => {
+          const tags = (card.dataset.tags || '').split(/\s+/);
+          const match = (tag === 'all') || tags.includes(tag);
+          card.classList.toggle('hidden', !match);
+          if (match) visible++;
+        });
+        sections.forEach(section => {
+          const anyVisible = section.querySelector('[data-tags]:not(.hidden)');
+          section.classList.toggle('hidden', !anyVisible);
+        });
+        if (countEl) {
+          countEl.textContent = (tag === 'all')
+            ? `${totalCards} projects`
+            : `${visible} of ${totalCards} projects`;
+        }
+      }
+
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const tag = chip.dataset.filter;
+          const wasActive = chip.classList.contains('active');
+          chips.forEach(c => c.classList.remove('active'));
+          if (tag === 'all' || wasActive) {
+            allChip.classList.add('active');
+            applyFilter('all');
+          } else {
+            chip.classList.add('active');
+            applyFilter(tag);
+          }
+        });
+      });
+
+      // Make tag chips on the cards themselves clickable as filter triggers
+      document.querySelectorAll('.tag').forEach(t => {
+        t.addEventListener('click', () => {
+          const label = t.textContent.trim();
+          const target = Array.from(chips).find(c => c.textContent.trim() === label);
+          if (target) target.click();
+        });
+      });
+
+      applyFilter('all');
+    })();
+  </script>
 </body>
 </html>

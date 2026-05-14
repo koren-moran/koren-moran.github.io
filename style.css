@@ -834,6 +834,185 @@ strong { font-weight: 650; }
 }
 
 /* ================================================================
+   B.Sc. CAPSTONE PROJECTS — compact, secondary tier
+   ================================================================ */
+.section-title--bsc {
+  margin-top: 56px;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.section-title--bsc::after {
+  background: linear-gradient(90deg, var(--text-dim), var(--border));
+  width: 36px;
+  height: 2px;
+}
+
+.bsc-lede {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: -8px 0 18px;
+  max-width: 720px;
+}
+
+.bsc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.bsc-card {
+  background: var(--panel);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-left-color .2s, box-shadow .2s, transform .2s;
+}
+
+.bsc-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+  border-left-color: var(--text-dim);
+}
+
+.bsc-card.active {
+  border-left-color: var(--brand);
+}
+
+.bsc-card .bsc-students {
+  font-size: 0.88rem;
+  font-weight: 660;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+
+.bsc-card .bsc-title {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.bsc-card .bsc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: 0.7rem;
+}
+
+.bsc-card .bsc-meta span {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--bg-alt);
+  color: var(--text-dim);
+  font-weight: 540;
+}
+
+.bsc-card .bsc-meta .bsc-status-active {
+  background: var(--brand-light);
+  color: var(--brand);
+}
+
+.bsc-card .bsc-meta .bsc-status-completed {
+  background: #e8f7f0;
+  color: #0f7a4f;
+}
+
+.bsc-card .bsc-meta .bsc-collab {
+  background: var(--accent-light);
+  color: #8a6a18;
+}
+
+.bsc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.bsc-tags .tag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+/* ================================================================
+   FILTER BAR (interest chips)
+   ================================================================ */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 28px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.filter-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 680;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-right: 6px;
+}
+
+.filter-chip {
+  display: inline-block;
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-alt);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 560;
+  cursor: pointer;
+  transition: all .18s;
+  user-select: none;
+  font-family: inherit;
+}
+
+.filter-chip:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.filter-chip.active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  box-shadow: 0 1px 4px var(--brand-glow);
+}
+
+.filter-chip.filter-all.active {
+  background: var(--text);
+  border-color: var(--text);
+  box-shadow: 0 1px 4px rgba(10,20,40,.15);
+}
+
+.filter-count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 540;
+}
+
+.student-card.hidden,
+.bsc-card.hidden,
+.student-section.hidden {
+  display: none;
+}
+
+/* ================================================================
    UTILITIES
    ================================================================ */
 .sr-only {
@@ -893,6 +1072,7 @@ strong { font-weight: 650; }
   .site-nav { gap: 1px; }
   .site-nav a { padding: 6px 10px; font-size: 0.8rem; }
   .student-grid { grid-template-columns: 1fr; }
+  .bsc-grid { grid-template-columns: 1fr; }
   .modern-table .date-cell { display: block; width: auto; margin-bottom: 4px; }
   .tablist { gap: 3px; padding: 6px; }
   [role="tab"] { padding: 7px 10px; font-size: 0.8rem; }
