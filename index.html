@@ -3,8 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Moran Koren – Assistant Professor at Ben-Gurion University. Research in game theory, mechanism design, operations management, and AI economics." />
+  <meta name="description" content="Moran Koren — Senior Lecturer (≈ Assistant Professor, US) at Ben-Gurion University. Game theory, mechanism design, market design, operations management, and the economics of AI." />
   <title>Moran Koren – Academic Website</title>
+  <link rel="canonical" href="https://koren-moran.github.io/" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+  <!-- Open Graph / Twitter: without these, every shared link renders as a bare URL -->
+  <meta property="og:type" content="profile" />
+  <meta property="og:site_name" content="Moran Koren" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Moran Koren – Academic Website" />
+  <meta property="og:description" content="Moran Koren — Senior Lecturer (≈ Assistant Professor, US) at Ben-Gurion University. Game theory, mechanism design, market design, operations management, and the economics of AI." />
+  <meta property="og:url" content="https://koren-moran.github.io/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Moran Koren – Academic Website" />
+  <meta name="twitter:description" content="Moran Koren — Senior Lecturer (≈ Assistant Professor, US) at Ben-Gurion University. Game theory, mechanism design, market design, operations management, and the economics of AI." />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Moran Koren",
+    "givenName": "Moran",
+    "familyName": "Koren",
+    "url": "https://koren-moran.github.io/",
+    "email": "mailto:korenmor@bgu.ac.il",
+    "jobTitle": "Senior Lecturer (Tenure Track)",
+    "identifier": "https://orcid.org/0000-0003-0012-0208",
+    "affiliation": {
+      "@type": "CollegeOrUniversity",
+      "name": "Ben-Gurion University of the Negev",
+      "department": "Department of Industrial Engineering and Management",
+      "address": { "@type": "PostalAddress", "addressLocality": "Beer-Sheva", "addressCountry": "IL" }
+    },
+    "knowsAbout": [
+      "Game Theory", "Mechanism Design", "Market Design", "Information Economics",
+      "Operations Management", "Economics of Artificial Intelligence", "Strategic Machine Learning"
+    ],
+    "alumniOf": [
+      { "@type": "CollegeOrUniversity", "name": "Technion \u2014 Israel Institute of Technology" },
+      { "@type": "CollegeOrUniversity", "name": "Hebrew University of Jerusalem" }
+    ],
+    "sameAs": [
+      "https://orcid.org/0000-0003-0012-0208",
+      "https://github.com/morankor",
+      "https://agenticdesigneconai.substack.com/"
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Google tag (gtag.js) -->
@@ -22,11 +67,17 @@
   <div class="site-header-wrap">
     <header class="site-header wrap">
       <h1>Moran Koren</h1>
-      <p class="tagline">Assistant Professor (Tenure Track), Dept. of Industrial Engineering &amp; Management, Ben-Gurion University of the Negev</p>
+      <p class="tagline">Senior Lecturer (≈ Assistant Professor, US), Dept. of Industrial Engineering &amp; Management, Ben-Gurion University of the Negev</p>
       <p class="contact-info">
         <a href="mailto:korenmor@bgu.ac.il">korenmor@bgu.ac.il</a>
         &nbsp;&middot;&nbsp;
         ORCID: <a href="https://orcid.org/0000-0003-0012-0208" target="_blank" rel="noopener">0000-0003-0012-0208</a>
+      </p>
+      <p class="hero-links">
+        <a class="hero-link hero-link-primary" href="Moran_Koren_CV.pdf">CV (PDF)</a>
+        <a class="hero-link" href="publications.html">Publications</a>
+        <a class="hero-link" href="https://github.com/morankor" target="_blank" rel="noopener">GitHub</a>
+        <a class="hero-link" href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">Substack</a>
       </p>
     </header>
   </div>
@@ -46,7 +97,7 @@
   <!-- ===== News ticker ===== -->
   <div class="news-reel-wrap">
     <div class="news-reel wrap">
-      <h3 class="label"><span class="badge badge-accent">News</span> Lab &amp; Student Updates</h3>
+      <p class="label"><span class="badge badge-accent">News</span> Lab &amp; Student Updates</p>
       <div class="news-ticker" aria-live="polite" aria-label="Latest news items auto-scrolling. Hover to pause.">
         <div class="news-track"></div>
       </div>
@@ -61,7 +112,7 @@
       <!-- Featured paper -->
       <section class="section">
         <div class="card card-featured">
-          <h3>Featured: Representing Paper</h3>
+          <h2>Featured Paper</h2>
           <p><strong>Title:</strong> The Gatekeeper Effect: The Implications of Pre-Screening, Self-Selection, and Bias for Hiring Processes</p>
           <p><strong>One-line pitch:</strong> Gatekeepers can alter who applies; under common conditions this lowers applicant quality and accuracy — this paper characterizes when, and how to fix it.</p>
           <div class="card-links">
@@ -243,6 +294,11 @@ Address: Dept. of Industrial Engineering and Management, Ben-Gurion University o
           </tr>
         </tbody>
       </table>
+      <p class="news-more-wrap">
+        <button type="button" id="news-more" class="news-more" aria-expanded="false" aria-controls="news-table">
+          Show all updates
+        </button>
+      </p>
       <div class="back-to-top">
         <a href="#top">&uarr; Back to Top</a>
       </div>
@@ -264,24 +320,70 @@ Address: Dept. of Industrial Engineering and Management, Ben-Gurion University o
       const TRACK_SEL  = '.news-track';
       const TABLE_SEL  = '#news-table';
 
+      // The ticker previously repeated every news paragraph verbatim, so the
+      // same content appeared twice on the page and the marquee truncated
+      // mid-word. It now carries headlines only: first sentence, capped, with
+      // links and markup stripped. Deriving this from the table means new
+      // rows need no extra markup.
+      const TICKER_MAX = 96;
+      const TICKER_ITEMS = 6;
+
+      function headlineFrom(contentCell) {
+        const text = (contentCell.textContent || '').replace(/\s+/g, ' ').trim();
+        const stop = text.search(/[.!?](\s|$)/);
+        let out = stop > 20 ? text.slice(0, stop + 1) : text;
+        if (out.length > TICKER_MAX) {
+          out = out.slice(0, TICKER_MAX);
+          out = out.slice(0, Math.max(out.lastIndexOf(' '), 40)).trimEnd() + '…';
+        }
+        return out;
+      }
+
       function populateTickerFromTable() {
         const track = document.querySelector(TRACK_SEL);
         const table = document.querySelector(TABLE_SEL);
         if (!track || !table) return;
         track.innerHTML = '';
-        const rows = table.querySelectorAll('tbody tr');
+        const rows = Array.from(table.querySelectorAll('tbody tr')).slice(0, TICKER_ITEMS);
         rows.forEach(row => {
           const dateCell = row.querySelector('.date-cell');
           const contentCell = row.querySelector('.content-cell');
           if (dateCell && contentCell) {
             const newsItem = document.createElement('span');
             newsItem.className = 'news-item';
-            const dateTime = dateCell.getAttribute('data-datetime') || '';
-            const dateText = dateCell.textContent.trim();
-            const contentHTML = contentCell.innerHTML;
-            newsItem.innerHTML = '<time datetime="' + dateTime + '">' + dateText + '</time> ' + contentHTML;
+            const time = document.createElement('time');
+            time.setAttribute('datetime', dateCell.getAttribute('data-datetime') || '');
+            time.textContent = dateCell.textContent.trim();
+            newsItem.appendChild(time);
+            newsItem.appendChild(document.createTextNode(' ' + headlineFrom(contentCell)));
             track.appendChild(newsItem);
           }
+        });
+      }
+
+      // 15 full paragraphs made the newest item the least prominent thing in
+      // the section. Show the recent ones; the rest stay one click away.
+      const NEWS_VISIBLE = 5;
+
+      function initNewsCollapse() {
+        const table = document.querySelector(TABLE_SEL);
+        const btn = document.getElementById('news-more');
+        if (!table || !btn) return;
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        if (rows.length <= NEWS_VISIBLE) { btn.parentElement.hidden = true; return; }
+        const hidden = rows.slice(NEWS_VISIBLE);
+        const apply = collapsed => {
+          hidden.forEach(r => { r.hidden = collapsed; });
+          btn.setAttribute('aria-expanded', String(!collapsed));
+          btn.textContent = collapsed
+            ? 'Show all updates (' + rows.length + ')'
+            : 'Show fewer updates';
+        };
+        apply(true);
+        btn.addEventListener('click', () => {
+          const collapsed = btn.getAttribute('aria-expanded') === 'false';
+          apply(!collapsed);
+          if (!collapsed) table.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       }
 
@@ -323,10 +425,14 @@ Address: Dept. of Industrial Engineering and Management, Ben-Gurion University o
         setTimeout(() => setDuration(track), 2000);
       }
 
+      // initTicker also runs on resize/visibilitychange; the collapse must be
+      // wired exactly once or each resize would stack another click listener.
+      function initAll() { initTicker(); initNewsCollapse(); }
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTicker, { once: true });
+        document.addEventListener('DOMContentLoaded', initAll, { once: true });
       } else {
-        initTicker();
+        initAll();
       }
 
       document.addEventListener('visibilitychange', () => { if (!document.hidden) initTicker(); });

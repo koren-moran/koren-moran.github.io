@@ -25,8 +25,8 @@
   --brand-glow:    rgba(79, 94, 229, .12);
 
   /* Accents */
-  --accent:        #e8a820;
-  --accent-light:  #fef9ec;
+  /* Retired: amber and cyan competed with --brand for the same job.
+     --emerald is kept: it is semantic (completed status), not decorative. */
   --cyan:          #0ea5c8;
   --cyan-light:    #ecfbff;
   --emerald:       #10b981;
@@ -240,7 +240,7 @@ strong { font-weight: 650; }
   width: 48px;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  background: linear-gradient(90deg, var(--brand), var(--brand-hover));
 }
 
 .section-subtitle {
@@ -269,9 +269,9 @@ strong { font-weight: 650; }
 }
 
 .card-featured {
-  background: linear-gradient(135deg, #fefcf3 0%, #fef9ec 100%);
-  border-color: #f5dfa0;
-  border-left: 4px solid var(--accent);
+  background: linear-gradient(135deg, #fbfcff 0%, var(--brand-light) 100%);
+  border-color: #d9defa;
+  border-left: 4px solid var(--brand);
   position: relative;
 }
 
@@ -282,15 +282,15 @@ strong { font-weight: 650; }
   right: 0;
   width: 120px;
   height: 120px;
-  background: radial-gradient(circle at top right, rgba(232,168,32,.08), transparent 70%);
+  background: radial-gradient(circle at top right, var(--brand-glow), transparent 70%);
   pointer-events: none;
 }
 
-.card-featured h3 {
+.card-featured h2 {
   font-size: 1.02rem;
   font-weight: 700;
   margin-bottom: 10px;
-  color: #7a5c10;
+  color: var(--brand-hover);
 }
 
 .card-links {
@@ -337,9 +337,9 @@ strong { font-weight: 650; }
 }
 
 .badge-accent {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #422006;
-  box-shadow: 0 1px 4px rgba(245,158,11,.25);
+  background: linear-gradient(135deg, var(--brand), var(--brand-hover));
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(79,94,229,.28);
 }
 
 .badge-brand {
@@ -419,9 +419,9 @@ strong { font-weight: 650; }
 }
 
 .spaced-list > li.highlight {
-  background: linear-gradient(135deg, #fefcf3 0%, #fef9ec 100%);
-  border-left: 4px solid var(--accent);
-  border-color: #f5dfa0;
+  background: linear-gradient(135deg, #fbfcff 0%, var(--brand-light) 100%);
+  border-left: 4px solid var(--brand);
+  border-color: #d9defa;
 }
 
 /* nested lists */
@@ -635,7 +635,7 @@ strong { font-weight: 650; }
   width: 48px;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  background: linear-gradient(90deg, var(--brand), var(--brand-hover));
 }
 
 .back-to-top {
@@ -715,8 +715,8 @@ strong { font-weight: 650; }
 .tab-badge {
   font-size: 0.7em;
   font-weight: 750;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #422006;
+  background: linear-gradient(135deg, var(--brand), var(--brand-hover));
+  color: #fff;
   padding: 2px 8px;
   border-radius: 999px;
   margin-left: 8px;
@@ -755,7 +755,7 @@ strong { font-weight: 650; }
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  background: linear-gradient(90deg, var(--brand), var(--brand-hover));
   opacity: 0;
   transition: opacity .3s;
 }
@@ -1086,4 +1086,76 @@ strong { font-weight: 650; }
 
 @media (min-width: 1400px) {
   .wrap { max-width: 1140px; }
+}
+
+/* ================================================================
+   HERO PRIMARY LINKS
+   The header band carried three lines of text and a large dead
+   area; these are the destinations visitors actually want.
+   ================================================================ */
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hero-link {
+  display: inline-block;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  background: rgba(255, 255, 255, .06);
+  color: var(--text-light);
+  font-size: .875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.hero-link:hover,
+.hero-link:focus-visible {
+  background: rgba(255, 255, 255, .14);
+  border-color: rgba(255, 255, 255, .40);
+  transform: translateY(-1px);
+}
+
+/* One primary action, not four competing ones. */
+.hero-link-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.hero-link-primary:hover,
+.hero-link-primary:focus-visible {
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
+}
+
+/* ================================================================
+   NEWS: REVEAL CONTROL
+   ================================================================ */
+.news-more-wrap {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.news-more {
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--brand);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 9px 22px;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.news-more:hover,
+.news-more:focus-visible {
+  background: var(--brand-light);
+  border-color: var(--brand);
 }
