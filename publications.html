@@ -18,6 +18,12 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Publications – Moran Koren" />
   <meta name="twitter:description" content="Publications by Moran Koren — journal articles, working papers, and refereed conference proceedings." />
+  <!-- Font Configuration -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+
+  <!-- Master Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 
   <!-- Google tag (gtag.js) -->
@@ -31,39 +37,39 @@
 </head>
 <body>
 
-  <!-- ===== Header ===== -->
-  <div class="site-header-wrap">
-    <header class="site-header wrap">
-      <h1>Publications</h1>
-      <p class="tagline">Moran Koren — Ben-Gurion University of the Negev</p>
-    </header>
-  </div>
+  <div class="editorial-card">
 
-  <!-- ===== Nav ===== -->
-  <div class="site-nav-wrap">
-    <nav class="site-nav wrap" aria-label="Primary">
-      <a href="index.html">Home</a>
-      <a href="cv.html">CV</a>
-      <a href="publications.html" aria-current="page">Publications</a>
-      <a href="students.html">Students</a>
-      <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener" class="nav-external">AI Economics Substack</a>
-    </nav>
-  </div>
+  <!-- Persistent Header Block -->
+  <header class="masthead">
+    <h1 class="title-heavy">Moran Koren</h1>
+    <div class="subtitle">Ben-Gurion University of the Negev</div>
+  </header>
+
+  <!-- Persistent Navigation -->
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="cv.html">CV</a>
+    <a href="Moran_Koren_CV.pdf">CV (PDF)</a>
+    <a href="publications.html" aria-current="page">Publications</a>
+    <a href="index.html#news-table-section">News</a>
+    <a href="students.html">Students</a>
+    <a href="https://agenticdesigneconai.substack.com/?utm_campaign=homepage" target="_blank" rel="noopener">Substack</a>
+  </nav>
+
+
 
   <!-- ===== Tabs ===== -->
+  <div class="page-kicker">Publications</div>
   <div class="tabs-wrap">
-    <div class="wrap">
       <div class="tablist" role="tablist" aria-label="Publications">
         <button role="tab" id="tab-journals" aria-selected="true" aria-controls="panel-journals">Journal Articles <span class="tab-badge" data-count="journals"></span></button>
         <button role="tab" id="tab-working" aria-selected="false" aria-controls="panel-working">Submitted &amp; Working Papers <span class="tab-badge" data-count="working"></span></button>
         <button role="tab" id="tab-conferences" aria-selected="false" aria-controls="panel-conferences">Refereed Conference Papers <span class="tab-badge" data-count="conferences"></span></button>
       </div>
-    </div>
   </div>
 
   <!-- ===== Main ===== -->
-  <div class="site-main-wrap">
-    <main class="site-main wrap">
+  <main>
 
       <!-- Journals -->
       <section id="panel-journals" role="tabpanel" aria-labelledby="tab-journals" tabindex="0">
@@ -276,15 +282,14 @@
           </li>
         </ul>
       </section>
-    </main>
-  </div>
+  </main>
 
   <!-- ===== Footer ===== -->
-  <div class="site-footer-wrap">
-    <footer class="site-footer wrap">
-      <span>&copy; 2026 Moran Koren</span>
-      <span>Ben-Gurion University of the Negev</span>
-    </footer>
+  <footer class="site-footer">
+    <span>&copy; 2026 Moran Koren</span>
+    <span>Ben-Gurion University of the Negev</span>
+  </footer>
+
   </div>
 
   <!-- ===== Tab JS ===== -->
