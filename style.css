@@ -194,8 +194,7 @@ em { font-style: italic; }
   margin: 0 0 1.25rem;
 }
 
-/* Portrait: a flat printed photograph beside the masthead. Square corners
-   and no frame, like a halftone on the card itself. */
+/* Portrait: a flat circular photograph beside the masthead, no frame. */
 .masthead--portrait {
   display: flex;
   align-items: flex-start;
@@ -205,15 +204,16 @@ em { font-style: italic; }
 .masthead-text { flex: 1 1 0; min-width: 0; }
 .portrait {
   flex: 0 0 auto;
-  width: 200px;
-  height: 250px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
   object-fit: cover;
   display: block;
   order: 2;
 }
 @media (max-width: 700px) {
   .masthead--portrait { flex-direction: column; gap: 1.4rem; }
-  .portrait { order: 0; width: 160px; height: 200px; }
+  .portrait { order: 0; width: 160px; height: 160px; }
 }
 
 .masthead-meta {
