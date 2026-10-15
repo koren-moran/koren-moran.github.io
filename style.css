@@ -616,3 +616,212 @@ em { font-style: italic; }
   .student-card-header { flex-direction: column; }
   .filter-count { margin-left: 0; width: 100%; }
 }
+
+/* ================================================================
+   ONE-PAGE LAYOUT (index.html)
+   Sticky section bar, hero, timeline, research expanders, year grid,
+   reveal-on-scroll. Same two colours; everything stays flat.
+   ================================================================ */
+html { scroll-padding-top: 4.2rem; }
+.page-section { scroll-margin-top: 4.2rem; }
+.section-lede {
+  font-style: italic;
+  color: var(--ink-muted);
+  margin: -0.6rem 0 1.4rem;
+}
+
+/* --- Sticky top bar: full-bleed, same ground as the page ------- */
+body.onepage { display: block; padding: 0 0 4rem; }
+body.onepage .editorial-card { margin: 0 auto; padding: 0 2rem; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--text-main);
+}
+.topbar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.monogram {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+.topbar-links {
+  display: flex;
+  gap: 1.3rem;
+  margin-left: auto;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  scrollbar-width: none;
+}
+.topbar-links::-webkit-scrollbar { display: none; }
+.topbar-links a {
+  text-decoration: none;
+  padding: 0.3rem 0;
+  border-bottom: 2px solid transparent;
+  transition: opacity 0.2s ease;
+}
+.topbar-links a:hover { opacity: 0.6; }
+.topbar-links a[aria-current="true"] { border-bottom-color: var(--text-main); }
+.topbar-pdf::after { content: ' \2193'; }
+
+/* --- Hero ------------------------------------------------------ */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  padding: 3.5rem 0 2.5rem;
+}
+.hero-text { flex: 1 1 0; min-width: 0; }
+.hero-name { font-size: 5.2rem; line-height: 0.95; }
+.hero .subtitle { margin-bottom: 1.2rem; }
+.hero .masthead-meta { margin: 0 0 1.4rem; }
+.hero .hero-links { margin: 0; }
+.portrait-hero { width: 240px; height: 240px; order: 2; }
+
+/* --- Timeline: centred rule, cards alternate sides ------------- */
+.timeline {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  position: relative;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0.6rem;
+  bottom: 1.6rem;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-main);
+}
+.tl-item {
+  position: relative;
+  width: 50%;
+  padding: 0 2.2rem 1.6rem 0;
+}
+.tl-item::before {
+  content: '';
+  position: absolute;
+  top: 0.55rem;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-primary);
+  border: 2px solid var(--text-main);
+  border-radius: 50%;
+}
+.tl-left { left: 0; text-align: right; }
+.tl-left::before { right: -7px; }
+.tl-left .clean-list li { padding-left: 0; padding-right: 1.4rem; }
+.tl-left .clean-list li::before { left: auto; right: 0.3rem; }
+.tl-right { left: 50%; padding: 0 0 1.6rem 2.2rem; }
+.tl-right::before { left: -7px; }
+.tl-title { font-weight: 700; font-size: 1.08rem; }
+.tl-inst { font-style: italic; color: var(--ink-muted); }
+.tl-more { margin-top: 0.3rem; }
+.tl-more .clean-list { margin: 0.4rem 0 0; }
+.tl-more .clean-list li { font-size: 0.95rem; color: var(--ink-muted); }
+
+/* --- Expanders: native details, styled as tracked-out links ---- */
+details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--ink-hair);
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::after { content: ' \002B'; }
+details[open] > summary::after { content: ' \2212'; }
+details > summary:hover { opacity: 0.6; }
+.more-block { margin: 1rem 0; }
+.more-block > summary { font-size: 0.78rem; }
+.more-block[open] > summary { margin-bottom: 0.6rem; }
+
+/* --- Research entries: citation left, tag right ---------------- */
+.paper {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+.paper-main { flex: 1 1 0; min-width: 0; }
+.paper-cite { margin: 0 0 0.4rem; font-size: 1.05rem; }
+.paper-more .pub-details { margin-top: 0.6rem; }
+.paper-tag {
+  flex: 0 0 auto;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  padding-top: 0.35rem;
+  max-width: 7rem;
+  text-align: right;
+}
+.research-group[hidden] { display: none; }
+.research-group .section-subtitle { margin-top: 2.2rem; }
+
+/* --- Talks: year grid ------------------------------------------ */
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6rem 3rem;
+}
+.year-label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--text-main);
+  margin-bottom: 0.6rem;
+}
+.year-cell .clean-list li { font-size: 0.98rem; margin-bottom: 0.35rem; }
+
+/* --- Reveal on scroll (opt-in via .js-reveal on <html>) -------- */
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.js-reveal .reveal.is-visible { opacity: 1; transform: none; }
+
+body.onepage .site-footer { align-items: center; }
+body.onepage .site-footer a { text-decoration: none; }
+
+@media (max-width: 700px) {
+  body.onepage .editorial-card { padding: 0 1.25rem; }
+  .topbar-inner { padding: 0.6rem 1.25rem; gap: 1rem; }
+  .hero { flex-direction: column; align-items: flex-start; gap: 1.6rem; padding-top: 2rem; }
+  .portrait-hero { order: 0; width: 160px; height: 160px; }
+  .hero-name { font-size: 3.2rem; }
+  .timeline::before { left: 7px; }
+  .tl-item, .tl-right { width: 100%; left: 0; padding: 0 0 1.4rem 1.8rem; text-align: left; }
+  .tl-left::before, .tl-right::before { left: 1px; right: auto; }
+  .tl-left .clean-list li { padding-left: 1.4rem; padding-right: 0; }
+  .tl-left .clean-list li::before { left: 0.3rem; right: auto; }
+  .year-grid { grid-template-columns: 1fr; }
+  .paper { flex-direction: column; gap: 0.3rem; }
+  .paper-tag { text-align: left; max-width: none; padding-top: 0; }
+}
