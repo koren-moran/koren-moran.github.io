@@ -825,3 +825,22 @@ body.onepage .site-footer a { text-decoration: none; }
   .paper { flex-direction: column; gap: 0.3rem; }
   .paper-tag { text-align: left; max-width: none; padding-top: 0; }
 }
+
+/* --- Research: the paper's question, then two expanders ---------- */
+.paper-q {
+  font-style: italic;
+  font-size: 1.08rem;
+  margin: 0.2rem 0 0.5rem;
+}
+.paper-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.6rem;
+}
+.paper-toggles details { flex: 1 1 100%; }
+.paper-toggles details > summary { flex: 0 0 auto; }
+.paper-toggles details:not([open]) { flex: 0 0 auto; }
+.paper-answer > p {
+  margin: 0.6rem 0 0.4rem;
+  font-size: 1.02rem;
+}
